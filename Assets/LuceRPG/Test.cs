@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using FSharp;
+using FSNetStandard20Lib;
 
 public class Test : MonoBehaviour
 {
     // Start is called before the first frame update
     private void Start()
     {
-        Say.hello("Hi");
+        Debug.Log("Starting");
+        Debug.Log(Say.aString);
     }
 
     // Update is called once per frame
