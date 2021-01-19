@@ -12,13 +12,12 @@ namespace LuceRPGServer.Controllers
     {
         private static WorldModule.Model CreateSampleWorld()
         {
-            var bound = RectModule.create(1, -1, 20, 18);
+            var bound = RectModule.create(1, -1, 10, 9);
             var bounds = new FSharpList<RectModule.Model>(bound, FSharpList<RectModule.Model>.Empty);
 
             var emptyWorld = WorldModule.empty(bounds);
 
-            var wallPosition = PointModule.create(8, 6);
-            var wall = WorldObjectModule.create(WorldObjectModule.TypeModule.Model.Wall, wallPosition);
+            var wall = WorldObjectModule.create(WorldObjectModule.TypeModule.Model.Wall, PointModule.create(8, 6));
 
             var world = WorldModule.addObject(wall, emptyWorld);
 
@@ -26,13 +25,13 @@ namespace LuceRPGServer.Controllers
         }
 
         [HttpGet]
-        public byte[] Get()
+        public ActionResult Get()
         {
             var w = CreateSampleWorld();
 
             var serialised = WorldSrl.serialise(w);
 
-            return serialised;
+            return File(serialised, "application/octet-stream");
         }
     }
 }
