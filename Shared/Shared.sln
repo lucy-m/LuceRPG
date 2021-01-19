@@ -7,6 +7,10 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Models", "LuceRPG.M
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Models.Test", "LuceRPG.Models.Test\LuceRPG.Models.Test.fsproj", "{C73121C4-1765-4580-8A66-1FAABEDE3262}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Serialisation", "LuceRPG.Serialisation\LuceRPG.Serialisation.fsproj", "{9BFE61CC-9DBD-4453-9114-C08D5A3A4D58}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Serialisation.Test", "LuceRPG.Serialisation.Test\LuceRPG.Serialisation.Test.fsproj", "{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C73121C4-1765-4580-8A66-1FAABEDE3262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C73121C4-1765-4580-8A66-1FAABEDE3262}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C73121C4-1765-4580-8A66-1FAABEDE3262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BFE61CC-9DBD-4453-9114-C08D5A3A4D58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BFE61CC-9DBD-4453-9114-C08D5A3A4D58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BFE61CC-9DBD-4453-9114-C08D5A3A4D58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BFE61CC-9DBD-4453-9114-C08D5A3A4D58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

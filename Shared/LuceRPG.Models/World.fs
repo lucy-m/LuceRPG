@@ -3,15 +3,15 @@
 module World =
     type Model =
         {
-            bounds: Rect List
-            objects: WorldObject List
+            bounds: Rect Set
+            objects: WorldObject Set
             blocked: Map<Point, WorldObject>
         }
 
     let empty (bounds: Rect List): Model =
         {
-            bounds = bounds
-            objects = []
+            bounds = bounds |> Set.ofList
+            objects = Set.empty
             blocked = Map.empty
         }
 
@@ -22,6 +22,7 @@ module World =
     let pointInBounds (p: Point) (world: Model): bool =
         let containingRect =
             world.bounds
+            |> Set.toList
             |> List.tryFind (Rect.contains p)
 
         Option.isSome containingRect
@@ -35,6 +36,7 @@ module World =
 
     /// Adds an object to the map
     /// Fails if the object is blocked or out of bounds
+    /// Blocking objects can be placed on top of non-blocking objects
     let addObject (obj: WorldObject) (world: Model): Model Option =
         let points = WorldObject.getPoints obj
         let isBlocked =
@@ -60,7 +62,7 @@ module World =
                 else
                     world.blocked
 
-            let objects = obj :: world.objects
+            let objects = Set.add obj world.objects
 
             {
                 world with
@@ -68,5 +70,26 @@ module World =
                     objects = objects
             }
             |> Option.Some
+
+    /// Adds many objects
+    /// Blocking objects will be added first
+    /// Invalid objects will be ignored
+    let addObjects (objs: WorldObject List) (world: Model): Model Option =
+        let blocking, nonBlocking =
+            objs
+            |> List.partition WorldObject.isBlocking
+
+        let withItems =
+            (blocking @ nonBlocking)
+            |> List.fold (fun tAcc o ->
+                    tAcc
+                    |> Option.map (fun acc -> addObject o acc |> Option.defaultValue acc)
+            ) (Option.Some world)
+
+        withItems
+
+    let createWithObjs (bounds: Rect List) (objs: WorldObject List): Model =
+        let emptyWorld = empty bounds
+        addObjects objs emptyWorld |> Option.defaultValue emptyWorld
 
 type World = World.Model

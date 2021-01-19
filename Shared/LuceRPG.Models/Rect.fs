@@ -17,6 +17,12 @@ module Rect =
             size = size
         }
 
+    let pointCreate (topLeft: Point) (size: Point): Model =
+        {
+            topLeft = topLeft
+            size = size
+        }
+
     /// inclusive left bound
     let leftBound (rect: Model): int =
         rect.topLeft.x

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Util.fs" />
+    <Compile Include="DesrlResult.fs" />
+    <Compile Include="DesrlUtil.fs" />
+    <Compile Include="IntSrl.fs" />
+    <Compile Include="ListSrl.fs" />
+    <Compile Include="PointSrl.fs" />
+    <Compile Include="RectSrl.fs" />
+    <Compile Include="WorldObjectSrl.fs" />
+    <Compile Include="WorldSrl.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LuceRPG.Models\LuceRPG.Models.fsproj" />
+  </ItemGroup>
+
+</Project>
