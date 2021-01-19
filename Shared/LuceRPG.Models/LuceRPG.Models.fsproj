@@ -5,7 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="Point.fs" />
+    <Compile Include="Rect.fs" />
+    <Compile Include="WorldObject.fs" />
+    <Compile Include="World.fs" />
   </ItemGroup>
 
 </Project>

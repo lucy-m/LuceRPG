@@ -35,5 +35,11 @@ namespace LuceRPGServer.Controllers
             })
             .ToArray();
         }
+
+        [HttpGet("helloWorld")]
+        public string HelloWorld()
+        {
+            return "Hello World";
+        }
     }
 }
