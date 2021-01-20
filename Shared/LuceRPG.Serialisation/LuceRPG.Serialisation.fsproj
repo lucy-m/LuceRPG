@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="DesrlResult.fs" />
+    <Compile Include="ByteSrl.fs" />
     <Compile Include="DesrlUtil.fs" />
     <Compile Include="IntSrl.fs" />
     <Compile Include="ListSrl.fs" />

@@ -20,24 +20,21 @@ module WorldObjectSrl =
         Array.append [|label|] addtInfo
 
     let deserialiseType (bytes: byte[]): WorldObject.Type DesrlResult =
-        let result =
-            Array.tryHead bytes
-            |> Option.bind (fun b ->
-                match b with
-                | 1uy -> DesrlResult.create WorldObject.Type.Wall 1
-                | 2uy ->
-                    let item =
-                        DesrlUtil.getTwo
-                            IntSrl.deserialise
-                            IntSrl.deserialise
-                            (fun w h -> WorldObject.Type.Path (w,h))
-                            (Util.safeSkip 1 bytes)
-                    DesrlResult.addBytes 1 item
-                | 3uy -> DesrlResult.create WorldObject.Type.Player 1
-                | _ -> Option.None
-            )
+        let loadObj (tag: byte) (objectBytes: byte[]): WorldObject.Type DesrlResult =
+            match tag with
+            | 1uy -> DesrlResult.create WorldObject.Type.Wall 0
+            | 2uy ->
+                DesrlUtil.getTwo
+                    IntSrl.deserialise
+                    IntSrl.deserialise
+                    (fun w h -> WorldObject.Type.Path (w,h))
+                    objectBytes
+            | 3uy -> DesrlResult.create WorldObject.Type.Player 0
+            | _ ->
+                printfn "Unknown tag %u" tag
+                Option.None
 
-        result
+        DesrlUtil.getTagged loadObj bytes
 
     let serialise (obj: WorldObject): byte[] =
         let t = serialiseType (obj.t)

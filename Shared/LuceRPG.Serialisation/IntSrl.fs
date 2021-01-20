@@ -13,6 +13,5 @@ module IntSrl =
         then Option.None
         else
             let value = BitConverter.ToInt32(bytes, 0)
-            let bytesRead = 4
 
-            DesrlResult.create value bytesRead
+            DesrlResult.create value size
