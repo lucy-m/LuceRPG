@@ -1,11 +1,11 @@
 ﻿namespace LuceRPG.Serialisation
 
 module DesrlUtil =
-    let dsrlAndSkip
-        (dsrl: byte[] -> 'T DesrlResult)
+    let desrlAndSkip
+        (desrlFn: byte[] -> 'T DesrlResult)
         (bytes: byte[])
         :'T DesrlResult * byte[] =
-            let tDesrl = dsrl bytes
+            let tDesrl = desrlFn bytes
 
             let remaining =
                 match tDesrl with
@@ -21,8 +21,8 @@ module DesrlUtil =
         (map: 'T1 -> 'T2 -> 'T3)
         (bytes: byte[])
         : 'T3 DesrlResult =
-            let tt1, bytes1 = dsrlAndSkip fn1 bytes
-            let tt2, _ = dsrlAndSkip fn2 bytes1
+            let tt1, bytes1 = desrlAndSkip fn1 bytes
+            let tt2, _ = desrlAndSkip fn2 bytes1
 
             match tt1, tt2 with
             | Option.Some t1, Option.Some t2 ->
@@ -30,3 +30,15 @@ module DesrlUtil =
                 let bytesRead = t1.bytesRead + t2.bytesRead
                 DesrlResult.create value bytesRead
             | _ -> Option.None
+
+    let getTagged
+        (fn: byte -> byte[] -> 'T DesrlResult)
+        (bytes: byte[])
+        : 'T DesrlResult =
+            let tTag, itemBytes = desrlAndSkip ByteSrl.deserialise bytes
+
+            tTag
+            |> Option.bind (fun tag ->
+                let value = fn tag.value itemBytes
+                DesrlResult.addBytes tag.bytesRead value
+            )

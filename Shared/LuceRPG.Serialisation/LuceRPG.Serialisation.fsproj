@@ -7,12 +7,15 @@
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="DesrlResult.fs" />
+    <Compile Include="ByteSrl.fs" />
     <Compile Include="DesrlUtil.fs" />
     <Compile Include="IntSrl.fs" />
     <Compile Include="ListSrl.fs" />
     <Compile Include="PointSrl.fs" />
     <Compile Include="RectSrl.fs" />
+    <Compile Include="DirectionSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
+    <Compile Include="IntentionSrl.fs" />
     <Compile Include="WorldSrl.fs" />
   </ItemGroup>
 

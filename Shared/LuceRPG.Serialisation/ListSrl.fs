@@ -25,7 +25,7 @@ module ListSrl =
         (fn: byte[] -> 'T DesrlResult)
         (bytes: byte[])
         : ('T List) DesrlResult =
-            let tSize, itemBytes = DesrlUtil.dsrlAndSkip IntSrl.deserialise bytes
+            let tSize, itemBytes = DesrlUtil.desrlAndSkip IntSrl.deserialise bytes
 
             let initial (bytesRead: int): 'T GetListAcc =
                 {
@@ -40,7 +40,7 @@ module ListSrl =
                 : 'T GetListAcc Option =
                     tAcc
                     |> Option.bind (fun acc ->
-                        let tDsrlResult, nextBytes = DesrlUtil.dsrlAndSkip fn acc.nextBytes
+                        let tDsrlResult, nextBytes = DesrlUtil.desrlAndSkip fn acc.nextBytes
 
                         let nextAcc =
                             tDsrlResult
