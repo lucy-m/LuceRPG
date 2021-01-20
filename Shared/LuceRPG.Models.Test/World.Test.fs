@@ -17,32 +17,27 @@ module World =
             [<TestFixture>]
             module ``with a wall`` =
                 let topLeft = Point.create 1 0
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let wall = WorldObject.create  1 WorldObject.Type.Wall topLeft
 
                 let world =
                    emptyWorld
                     |> World.addObject wall
-                    |> fun w -> w.Value
-
-                [<Test>]
-                let ``adding the same wall fails`` () =
-                    let tAdded = World.addObject wall world
-                    tAdded.IsNone |> should equal true
 
                 [<TestFixture>]
                 module ``adding an unblocked wall`` =
                     let newTopLeft = Point.create 5 4
-                    let newWall = WorldObject.create WorldObject.Type.Wall newTopLeft
+                    let newWall = WorldObject.create 2 WorldObject.Type.Wall newTopLeft
 
-                    let tAdded = World.addObject newWall world
+                    let added = World.addObject newWall world
 
                     [<Test>]
                     let ``wall is added successfully`` () =
-                        tAdded.IsSome |> should equal true
+                        added
+                        |> World.containsObject newWall.id
+                        |> should equal true
 
                     [<Test>]
                     let ``points for new wall are blocked`` () =
-                        let added = tAdded.Value
                         let blockedPoints =
                             WorldObject.getPoints newWall
                             |> List.map (fun p -> World.pointBlocked p added)
@@ -50,20 +45,50 @@ module World =
 
                         blockedPoints.Length |> should equal 4
 
-                    [<Test>]
-                    let ``wall is added to objects list`` () =
-                        let added = tAdded.Value;
+                [<TestFixture>]
+                module ``adding a new wall to a different point with the same id`` =
+                    let newWall = WorldObject.create wall.id wall.t (Point.create 3 1)
+                    let newWorld = World.addObject newWall world
 
-                        added.objects |> should contain newWall
+                    [<Test>]
+                    let ``wall is added successfully`` () =
+                        World.objectList newWorld
+                        |> should contain newWall
+
+                    [<Test>]
+                    let ``removes the old wall`` () =
+                        World.objectList newWorld
+                        |> should not' (contain wall)
+
+                    [<Test>]
+                    let ``updates the blocking map correctly`` () =
+                        let blockedPoints =
+                            newWorld.blocked
+                            |> Map.toList
+                            |> List.map fst
+                            |> Set.ofList
+
+                        let expected =
+                            [
+                                Point.create 3 1
+                                Point.create 3 2
+                                Point.create 4 1
+                                Point.create 4 2
+                            ]
+                            |> Set.ofList
+
+                        blockedPoints |> should be (equivalent expected)
 
             [<Test>]
             let ``adding a wall out of bounds fails`` () =
                 let topLeft = Point.create 100 100
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
-                let tAdded = World.addObject wall emptyWorld
+                let added = World.addObject wall emptyWorld
 
-                tAdded.IsNone |> should equal true
+                added
+                |> World.containsObject 1
+                |> should equal false
 
             [<Test>]
             let ``contains correct points`` () =
@@ -92,36 +117,44 @@ module World =
             [<Test>]
             let ``wall can be placed in first rect`` () =
                 let topLeft = Point.create 1 0
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
-                let tAdded = World.addObject wall emptyWorld
+                let added = World.addObject wall emptyWorld
 
-                tAdded.IsSome |> should equal true
+                added
+                |> World.containsObject wall.id
+                |> should equal true
 
             [<Test>]
             let ``wall can be placed in second rect`` () =
                 let topLeft = Point.create 4 3
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
-                let tAdded = World.addObject wall emptyWorld
+                let added = World.addObject wall emptyWorld
 
-                tAdded.IsSome |> should equal true
+                added
+                |> World.containsObject wall.id
+                |> should equal true
 
             [<Test>]
             let ``wall can be placed on boundary between rects`` () =
                 let topLeft = Point.create 3 1
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
-                let tAdded = World.addObject wall emptyWorld
+                let added = World.addObject wall emptyWorld
 
-                tAdded.IsSome |> should equal true
+                added
+                |> World.containsObject wall.id
+                |> should equal true
 
             [<Test>]
             let ``wall cannot be placed partially in world`` () =
                 // top right square is out of bounds
-                let topLeft = Point.create 4 2
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft
+                let topLeft = Point.create 4 1
+                let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
-                let tAdded = World.addObject wall emptyWorld
+                let added = World.addObject wall emptyWorld
 
-                tAdded.IsSome |> should equal true
+                added
+                |> World.containsObject wall.id
+                |> should equal false

@@ -12,7 +12,7 @@ module WorldSrl =
         let objects =
             ListSrl.serialise
                 WorldObjectSrl.serialise
-                (Set.toList w.objects)
+                (World.objectList w)
 
         Array.append bounds objects
 
@@ -22,7 +22,7 @@ module WorldSrl =
 
         let toWorld (bounds: Rect List) (objects: WorldObject List): World =
             let empty = World.empty bounds
-            World.addObjects objects empty |> Option.defaultValue empty
+            World.addObjects objects empty
 
         DesrlUtil.getTwo
             getBounds

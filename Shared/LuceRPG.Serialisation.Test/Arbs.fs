@@ -19,6 +19,8 @@ type SerialisationArbs() =
         |> Gen.map (fun (t, s) -> Rect.pointCreate t s)
 
     static member genWorldObject: Gen<WorldObject> =
+        let id = Gen.choose (-1000, 1000)
+
         let topLeft =
             Gen.choose (-100,100)
             |> Gen.two
@@ -27,8 +29,8 @@ type SerialisationArbs() =
         let objType =
             Arb.generate<WorldObject.Type>
 
-        Gen.zip objType topLeft
-        |> Gen.map (fun (t, p) -> WorldObject.create t p)
+        Gen.zip3 id objType topLeft
+        |> Gen.map (fun (id, t, p) -> WorldObject.create id t p)
 
     static member genWorld: Gen<World> =
         let bounds = Gen.listOf Arb.generate<Rect>

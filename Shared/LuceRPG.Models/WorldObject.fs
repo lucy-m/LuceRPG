@@ -11,12 +11,14 @@ module WorldObject =
 
     type Model =
         {
+            id: Id.WorldObject
             t: Type
             topLeft: Point
         }
 
-    let create (t: Type) (topLeft: Point): Model =
+    let create (id: int) (t: Type) (topLeft: Point): Model =
         {
+            id = id
             t = t
             topLeft = topLeft
         }

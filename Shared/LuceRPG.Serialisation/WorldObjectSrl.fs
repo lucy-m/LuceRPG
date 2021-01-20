@@ -37,13 +37,15 @@ module WorldObjectSrl =
         DesrlUtil.getTagged loadObj bytes
 
     let serialise (obj: WorldObject): byte[] =
-        let t = serialiseType (obj.t)
+        let id = IntSrl.serialise obj.id
+        let t = serialiseType obj.t
         let topLeft = PointSrl.serialise obj.topLeft
 
-        Array.append t topLeft
+        Array.concat  [id; t; topLeft]
 
     let deserialise (bytes: byte[]): WorldObject DesrlResult =
-        DesrlUtil.getTwo
+        DesrlUtil.getThree
+            IntSrl.deserialise
             deserialiseType
             PointSrl.deserialise
             WorldObject.create

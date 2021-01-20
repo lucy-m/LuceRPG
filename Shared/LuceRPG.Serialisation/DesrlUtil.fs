@@ -18,9 +18,9 @@ module DesrlUtil =
     let getTwo
         (fn1: byte[] -> 'T1 DesrlResult)
         (fn2: byte[] -> 'T2 DesrlResult)
-        (map: 'T1 -> 'T2 -> 'T3)
+        (map: 'T1 -> 'T2 -> 'TR)
         (bytes: byte[])
-        : 'T3 DesrlResult =
+        : 'TR DesrlResult =
             let tt1, bytes1 = desrlAndSkip fn1 bytes
             let tt2, _ = desrlAndSkip fn2 bytes1
 
@@ -30,6 +30,21 @@ module DesrlUtil =
                 let bytesRead = t1.bytesRead + t2.bytesRead
                 DesrlResult.create value bytesRead
             | _ -> Option.None
+
+    let getThree
+        (fn1: byte[] -> 'T1 DesrlResult)
+        (fn2: byte[] -> 'T2 DesrlResult)
+        (fn3: byte[] -> 'T3 DesrlResult)
+        (map: 'T1 -> 'T2 -> 'T3 -> 'TR)
+        (bytes: byte[])
+        : 'TR DesrlResult =
+            let fn12 = getTwo fn1 fn2 (fun v1 v2 -> (v1, v2))
+
+            getTwo
+                fn12
+                fn3
+                (fun (v1,v2) v3 -> map v1 v2 v3)
+                bytes
 
     let getTagged
         (fn: byte -> byte[] -> 'T DesrlResult)
