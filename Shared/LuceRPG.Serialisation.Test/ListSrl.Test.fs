@@ -26,18 +26,6 @@ module ListSrl =
         list.Value.value |> should be (equivalent [8;1;2])
 
     [<Test>]
-    let ``serialises and deserialises correctly`` () =
-        let checkFn (ns: int List): bool =
-            let srl = ListSrl.serialise IntSrl.serialise ns
-            let desrl =
-                ListSrl.deserialise IntSrl.deserialise srl
-                |> DesrlResult.value
-
-            desrl = Option.Some ns
-
-        Check.QuickThrowOnFailure checkFn
-
-    [<Test>]
     let ``returns None when not given enough data`` () =
         let fn = IntSrl.deserialise
         let bytes = Array.concat([
