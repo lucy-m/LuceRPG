@@ -51,4 +51,12 @@ module WorldObject =
 
         blocked
 
+    let moveObject (direction: Direction) (amount: int) (obj: Model): Model =
+        let newTopLeft = Direction.movePoint direction amount obj.topLeft
+
+        {
+            obj with
+                topLeft = newTopLeft
+        }
+
 type WorldObject = WorldObject.Model

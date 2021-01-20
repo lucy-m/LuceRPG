@@ -24,6 +24,9 @@ module World =
         world.blocked
         |> Map.containsKey p
 
+    let getBlocker (p: Point) (world: Model): WorldObject Option =
+        world.blocked |> Map.tryFind p
+
     let pointInBounds (p: Point) (world: Model): bool =
         let containingRect =
             world.bounds
@@ -60,6 +63,19 @@ module World =
                 blocked = newBlocked
         }
 
+    let canPlace (obj: WorldObject) (world: Model): bool =
+        let points = WorldObject.getPoints obj
+        let blockedPoints =
+            points
+            |> List.choose (fun p -> getBlocker p world)
+            |> List.filter (fun wo -> wo.id <> obj.id)
+
+        let isNotBlocked = blockedPoints |> List.isEmpty
+
+        let inBounds = objInBounds obj world
+
+        isNotBlocked && inBounds
+
     /// Adds an object to the map
     /// Object will not be added if it is blocked or out of bounds
     /// An object with the same id that already exists will be removed
@@ -67,15 +83,11 @@ module World =
     let addObject (obj: WorldObject) (world: Model): Model =
         let existingIdRemoved = removeObject obj.id world
 
+        let canPlaceObject = canPlace obj existingIdRemoved
+
         let points = WorldObject.getPoints obj
-        let isBlocked =
-            points
-            |> List.map (fun p -> pointBlocked p existingIdRemoved)
-            |> List.fold (||) false
 
-        let inBounds = objInBounds obj existingIdRemoved
-
-        if isBlocked || not inBounds
+        if not canPlaceObject
         then existingIdRemoved
         else
             let isBlocking = WorldObject.isBlocking obj
