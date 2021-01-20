@@ -15,6 +15,8 @@ module SrlAndDesrl =
             let srl = srlFn value
             let desrl = desrlFn srl |> DesrlResult.value
 
+            let v = desrl = Option.Some value
+
             desrl = Option.Some value
 
     let doCheck = Check.QuickThrowOnFailure
@@ -90,3 +92,25 @@ module SrlAndDesrl =
                 srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
 
             doCheck checkFn
+
+        [<Test>]
+        let ``manual test`` () =
+            let srlAndDesrl
+                (srlFn: World -> byte[])
+                (desrlFn: byte[] -> World DesrlResult)
+                (value: World)
+                : bool =
+                    let srl = srlFn value
+                    let desrl = desrlFn srl |> DesrlResult.value
+
+                    let v = desrl = Option.Some value
+                    let boundMatch = (Option.get desrl).bounds = value.bounds
+                    let objectsMatch = (Option.get desrl).objects = value.objects
+                    let blockedMatch = (Option.get desrl).blocked = value.blocked
+
+                    desrl = Option.Some value
+
+            let checkFn =
+                srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
+
+            Check.QuickThrowOnFailure checkFn

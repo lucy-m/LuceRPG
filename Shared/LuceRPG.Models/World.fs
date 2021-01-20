@@ -4,14 +4,19 @@ module World =
     type Model =
         {
             bounds: Rect Set
-            objects: WorldObject Set
+            objects: Map<Id.WorldObject, WorldObject>
             blocked: Map<Point, WorldObject>
         }
+
+    let objectList (world: Model): WorldObject List =
+        world.objects
+        |> Map.toList
+        |> List.map snd
 
     let empty (bounds: Rect List): Model =
         {
             bounds = bounds |> Set.ofList
-            objects = Set.empty
+            objects = Map.empty
             blocked = Map.empty
         }
 
@@ -34,20 +39,44 @@ module World =
         |> List.map (fun p -> pointInBounds p world)
         |> List.fold (&&) true
 
+    let containsObject (id: Id.WorldObject) (world: Model): bool =
+        world.objects
+        |> Map.containsKey id
+
+    let removeObject (id: Id.WorldObject) (world: Model): Model =
+        let newObjects =
+            world.objects
+            |> Map.remove id
+
+        let newBlocked =
+            world.blocked
+            |> Map.filter (fun _ wo ->
+                wo.id <> id
+            )
+
+        {
+            world with
+                objects = newObjects
+                blocked = newBlocked
+        }
+
     /// Adds an object to the map
-    /// Fails if the object is blocked or out of bounds
+    /// Object will not be added if it is blocked or out of bounds
+    /// An object with the same id that already exists will be removed
     /// Blocking objects can be placed on top of non-blocking objects
-    let addObject (obj: WorldObject) (world: Model): Model Option =
+    let addObject (obj: WorldObject) (world: Model): Model =
+        let existingIdRemoved = removeObject obj.id world
+
         let points = WorldObject.getPoints obj
         let isBlocked =
             points
-            |> List.map (fun p -> pointBlocked p world)
+            |> List.map (fun p -> pointBlocked p existingIdRemoved)
             |> List.fold (||) false
 
-        let inBounds = objInBounds obj world
+        let inBounds = objInBounds obj existingIdRemoved
 
         if isBlocked || not inBounds
-        then Option.None
+        then existingIdRemoved
         else
             let isBlocking = WorldObject.isBlocking obj
 
@@ -58,38 +87,34 @@ module World =
                     points
                     |> List.fold
                         (fun acc p -> Map.add p obj acc)
-                        world.blocked
+                        existingIdRemoved.blocked
                 else
-                    world.blocked
+                    existingIdRemoved.blocked
 
-            let objects = Set.add obj world.objects
+            let objects = Map.add obj.id obj existingIdRemoved.objects
 
             {
                 world with
                     blocked = blocked
                     objects = objects
             }
-            |> Option.Some
 
     /// Adds many objects
     /// Blocking objects will be added first
     /// Invalid objects will be ignored
-    let addObjects (objs: WorldObject List) (world: Model): Model Option =
+    let addObjects (objs: WorldObject List) (world: Model): Model =
         let blocking, nonBlocking =
             objs
             |> List.partition WorldObject.isBlocking
 
         let withItems =
             (blocking @ nonBlocking)
-            |> List.fold (fun tAcc o ->
-                    tAcc
-                    |> Option.map (fun acc -> addObject o acc |> Option.defaultValue acc)
-            ) (Option.Some world)
+            |> List.fold (fun acc o -> addObject o acc) world
 
         withItems
 
     let createWithObjs (bounds: Rect List) (objs: WorldObject List): Model =
         let emptyWorld = empty bounds
-        addObjects objs emptyWorld |> Option.defaultValue emptyWorld
+        addObjects objs emptyWorld
 
 type World = World.Model
