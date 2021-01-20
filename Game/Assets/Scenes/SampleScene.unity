@@ -263,4 +263,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   WallPrefab: {fileID: 1043136130290738900, guid: 716fdbb9a817f3744907912a8df15f2a, type: 3}
+  PathPrefab: {fileID: 8145506027414206273, guid: f23905c806685a34ab6772670663faba, type: 3}
   BackgroundPrefab: {fileID: 6923479140103614182, guid: c18f7e926c3647a4e850d1b0fcceb43c, type: 3}

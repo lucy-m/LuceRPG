@@ -4,23 +4,40 @@ open LuceRPG.Models
 
 module WorldObjectSrl =
     let serialiseType (t: WorldObject.Type): byte[] =
-        let byte =
+        let label =
             match t with
             | WorldObject.Type.Wall -> 1uy
-            | WorldObject.Type.Path -> 2uy
+            | WorldObject.Type.Path _ -> 2uy
+            | WorldObject.Type.Player -> 3uy
 
-        [|byte|]
+        let addtInfo =
+            match t with
+            | WorldObject.Type.Wall -> [||]
+            | WorldObject.Type.Path (w,h) ->
+                Array.append (IntSrl.serialise w) (IntSrl.serialise h)
+            | WorldObject.Type.Player -> [||]
+
+        Array.append [|label|] addtInfo
 
     let deserialiseType (bytes: byte[]): WorldObject.Type DesrlResult =
-        let value =
+        let result =
             Array.tryHead bytes
             |> Option.bind (fun b ->
                 match b with
-                | 1uy -> Option.Some WorldObject.Type.Wall
-                | 2uy -> Option.Some WorldObject.Type.Path
+                | 1uy -> DesrlResult.create WorldObject.Type.Wall 1
+                | 2uy ->
+                    let item =
+                        DesrlUtil.getTwo
+                            IntSrl.deserialise
+                            IntSrl.deserialise
+                            (fun w h -> WorldObject.Type.Path (w,h))
+                            (Util.safeSkip 1 bytes)
+                    DesrlResult.addBytes 1 item
+                | 3uy -> DesrlResult.create WorldObject.Type.Player 1
                 | _ -> Option.None
             )
-        DesrlResult.bind value 1
+
+        result
 
     let serialise (obj: WorldObject): byte[] =
         let t = serialiseType (obj.t)

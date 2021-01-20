@@ -4,7 +4,8 @@ module WorldObject =
     module Type =
         type Model =
             | Wall
-            | Path
+            | Path of int * int
+            | Player
 
     type Type = Type.Model
 
@@ -23,12 +24,14 @@ module WorldObject =
     let isBlocking (obj: Model): bool =
         match obj.t with
         | Type.Wall -> true
-        | Type.Path -> false
+        | Type.Path _ -> false
+        | Type.Player -> true
 
     let size (obj: Model): Point =
         match obj.t with
         | Type.Wall -> Point.create 2 2
-        | Type.Path -> Point.create 1 1
+        | Type.Path (w,h) -> Point.create w h
+        | Type.Player -> Point.create 2 2
 
     let getPoints (obj: Model): Point List =
         let objSize = size obj
