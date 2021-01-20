@@ -11,6 +11,7 @@
     <Compile Include="Direction.fs" />
     <Compile Include="WorldObject.fs" />
     <Compile Include="Intention.fs" />
+    <Compile Include="WorldEvent.fs" />
     <Compile Include="World.fs" />
   </ItemGroup>
 

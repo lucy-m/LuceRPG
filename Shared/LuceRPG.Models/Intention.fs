@@ -2,6 +2,6 @@
 
 module Intention =
     type Model =
-        | Move of Direction * byte
+        | Move of Id.WorldObject * Direction * byte
 
 type Intention = Intention.Model

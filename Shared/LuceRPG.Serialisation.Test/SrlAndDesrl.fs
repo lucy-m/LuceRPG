@@ -85,6 +85,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let worldEventSrl () =
+            let checkFn =
+                srlAndDesrl WorldEventSrl.serialise WorldEventSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let worldSrl () =
             let checkFn =
                 srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
