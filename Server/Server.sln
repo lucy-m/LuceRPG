@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuceRPGServer", "LuceRPGServer\LuceRPGServer.csproj", "{7DDCABF4-B3E8-45DD-A6B0-A3437276ED59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LuceRPGServer", "LuceRPGServer\LuceRPGServer.csproj", "{7DDCABF4-B3E8-45DD-A6B0-A3437276ED59}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Samples", "LuceRPG.SampleWorlds\LuceRPG.Samples.fsproj", "{EACD2B1F-AACD-4DA6-9265-389C27F5B375}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7DDCABF4-B3E8-45DD-A6B0-A3437276ED59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DDCABF4-B3E8-45DD-A6B0-A3437276ED59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DDCABF4-B3E8-45DD-A6B0-A3437276ED59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EACD2B1F-AACD-4DA6-9265-389C27F5B375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EACD2B1F-AACD-4DA6-9265-389C27F5B375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EACD2B1F-AACD-4DA6-9265-389C27F5B375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EACD2B1F-AACD-4DA6-9265-389C27F5B375}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,6 +8,7 @@ public class WorldLoader : MonoBehaviour
 {
     public static WorldLoader Instance = null;
     public GameObject WallPrefab = null;
+    public GameObject PathPrefab = null;
     public GameObject BackgroundPrefab = null;
 
     private void Awake()
@@ -26,19 +27,18 @@ public class WorldLoader : MonoBehaviour
     {
         foreach (var obj in world.objects)
         {
-            var location = new Vector3(obj.topLeft.x, obj.topLeft.y);
-            var prefab = obj.t.IsWall ? WallPrefab : null;
+            var location = obj.GetGameLocation();
+            var prefab = obj.t.IsWall ? WallPrefab : PathPrefab;
 
             if (prefab != null)
             {
-                Debug.Log("Populating wall at " + location);
                 Instantiate(prefab, location, Quaternion.identity);
             }
         }
 
         foreach (var bound in world.bounds)
         {
-            var location = new Vector3(bound.topLeft.x, bound.topLeft.y);
+            var location = bound.GetGameLocation();
 
             if (BackgroundPrefab != null)
             {

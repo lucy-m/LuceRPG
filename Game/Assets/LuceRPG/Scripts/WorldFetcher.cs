@@ -5,14 +5,14 @@ using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using Microsoft.FSharp.Core;
 
-public class Overlord : MonoBehaviour
+public class WorldFetcher : MonoBehaviour
 {
     private void Start()
     {
-        StartCoroutine(LoadWorld());
+        StartCoroutine(FetchWorld());
     }
 
-    private IEnumerator LoadWorld()
+    private IEnumerator FetchWorld()
     {
         Debug.Log("Attempting to load world");
         var webRequest = UnityWebRequest.Get("https://localhost:5001/World");
