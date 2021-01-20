@@ -57,6 +57,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let directionSrl () =
+            let checkFn =
+                srlAndDesrl DirectionSrl.serialise DirectionSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let worldObjectTypeSrl () =
             let checkFn =
                 srlAndDesrl WorldObjectSrl.serialiseType WorldObjectSrl.deserialiseType
@@ -67,6 +74,13 @@ module SrlAndDesrl =
         let worldObjectSrl () =
             let checkFn =
                 srlAndDesrl WorldObjectSrl.serialise WorldObjectSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let intentionSrl () =
+            let checkFn =
+                srlAndDesrl IntentionSrl.serialise IntentionSrl.deserialise
 
             doCheck checkFn
 

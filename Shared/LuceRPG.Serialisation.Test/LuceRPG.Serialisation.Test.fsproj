@@ -19,8 +19,8 @@
     <Compile Include="Arbs.fs" />
     <Compile Include="TestUtil.fs" />
     <Compile Include="SrlAndDesrl.fs" />
+    <Compile Include="UnknownTag.fs" />
     <Compile Include="ListSrl.Test.fs" />
-    <Compile Include="WorldObjectSrl.Test.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

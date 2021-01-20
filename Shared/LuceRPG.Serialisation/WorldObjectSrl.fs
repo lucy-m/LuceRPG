@@ -31,7 +31,7 @@ module WorldObjectSrl =
                     objectBytes
             | 3uy -> DesrlResult.create WorldObject.Type.Player 0
             | _ ->
-                printfn "Unknown tag %u" tag
+                printfn "Unknown WorldObject Type tag %u" tag
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
