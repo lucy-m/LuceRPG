@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Id.fs" />
     <Compile Include="Point.fs" />
     <Compile Include="Rect.fs" />
     <Compile Include="Direction.fs" />
