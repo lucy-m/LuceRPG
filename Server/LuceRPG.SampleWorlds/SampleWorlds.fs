@@ -17,13 +17,9 @@ module SampleWorlds =
             WorldObject.create WorldObject.Type.Wall (Point.create 9 3)
             WorldObject.create WorldObject.Type.Wall (Point.create -4 -1)
 
-            WorldObject.create WorldObject.Type.Path (Point.create 1 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 2 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 3 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 4 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 5 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 6 1)
-            WorldObject.create WorldObject.Type.Path (Point.create 7 1)
+            WorldObject.create WorldObject.Type.Player (Point.create 2 5)
+
+            WorldObject.create (WorldObject.Type.Path (8,1)) (Point.create 1 1)
         ]
 
         World.createWithObjs bounds walls

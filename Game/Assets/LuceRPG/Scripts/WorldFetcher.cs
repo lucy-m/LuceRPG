@@ -25,7 +25,7 @@ public class WorldFetcher : MonoBehaviour
 
             var tWorld = WorldSrl.deserialise(bytes);
 
-            if (FSharpOption<DesrlResult.Model<WorldModule.Model>>.get_IsSome(tWorld))
+            if (FSharpOption<DesrlResult.Payload<WorldModule.Model>>.get_IsSome(tWorld))
             {
                 var world = tWorld.Value.value;
                 Debug.Log(world);

@@ -9,6 +9,7 @@ public class WorldLoader : MonoBehaviour
     public static WorldLoader Instance = null;
     public GameObject WallPrefab = null;
     public GameObject PathPrefab = null;
+    public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
 
     private void Awake()
@@ -23,16 +24,41 @@ public class WorldLoader : MonoBehaviour
         }
     }
 
+    private GameObject GetPrefab(WorldObjectModule.Model obj)
+    {
+        if (obj.t.IsWall)
+        {
+            return WallPrefab;
+        }
+        else if (obj.t.IsPath)
+        {
+            return PathPrefab;
+        }
+        else if (obj.t.IsPlayer)
+        {
+            return PlayerPrefab;
+        }
+
+        return null;
+    }
+
     public void LoadWorld(WorldModule.Model world)
     {
         foreach (var obj in world.objects)
         {
             var location = obj.GetGameLocation();
-            var prefab = obj.t.IsWall ? WallPrefab : PathPrefab;
+            var prefab = GetPrefab(obj);
 
             if (prefab != null)
             {
-                Instantiate(prefab, location, Quaternion.identity);
+                var go = Instantiate(prefab, location, Quaternion.identity);
+
+                if (obj.t.IsPath)
+                {
+                    var size = WorldObjectModule.size(obj);
+                    var spriteRenderer = go.GetComponent<SpriteRenderer>();
+                    spriteRenderer.size = new Vector2(size.x, size.y);
+                }
             }
         }
 
