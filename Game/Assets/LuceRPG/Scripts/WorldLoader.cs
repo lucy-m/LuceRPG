@@ -1,7 +1,4 @@
 using LuceRPG.Models;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class WorldLoader : MonoBehaviour
@@ -44,8 +41,10 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(WorldModule.Model world)
     {
-        foreach (var obj in world.objects)
+        foreach (var kvp in world.objects)
         {
+            var obj = kvp.Value;
+
             var location = obj.GetGameLocation();
             var prefab = GetPrefab(obj);
 
