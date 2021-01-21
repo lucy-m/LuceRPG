@@ -9,16 +9,16 @@ open System
 module WorldEventsStore =
 
     [<TestFixture>]
-    module ``store with two events`` =
+    module ``unculled store with two events`` =
         let firstEvent: WorldEventsStore.StoredEvent =
             {
-                timestamp = new DateTime(1000L)
+                timestamp = 1000L
                 worldEvent = WorldEvent.Moved (1, Direction.North, 1uy)
             }
 
         let secondEvent: WorldEventsStore.StoredEvent =
             {
-                timestamp = new DateTime(1200L)
+                timestamp = 1200L
                 worldEvent = WorldEvent.Moved (1, Direction.East, 1uy)
             }
 
@@ -27,34 +27,48 @@ module WorldEventsStore =
 
         let store: WorldEventsStore =
             {
+                lastCull = 0L
                 recentEvents = events
                 world = world
             }
 
-        [<Test>]
-        let ``getting before both events returns both events`` () =
-            let dt = new DateTime(800L)
-            let fetchedEvents = WorldEventsStore.getSince dt store
+        [<TestFixture>]
+        module ``getResult`` =
+            [<Test>]
+            let ``getting before both events returns both events`` () =
+                let dt = 800L
+                let result = WorldEventsStore.getSince dt store
 
-            fetchedEvents
-            |> should be (equivalent [firstEvent; secondEvent])
+                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
 
-        [<Test>]
-        let ``getting between first and second events returns second event only`` () =
-            let dt = new DateTime(1100L)
-            let fetchedEvents = WorldEventsStore.getSince dt store
+                match result with
+                | WorldEventsStore.GetSinceResult.Events es ->
+                        es |> should be (equivalent [firstEvent; secondEvent])
+                | _ -> failwith "Incorrect case"
 
-            fetchedEvents
-            |> should be (equivalent [secondEvent])
+            [<Test>]
+            let ``getting between first and second events returns second event only`` () =
+                let dt = 1100L
+                let result = WorldEventsStore.getSince dt store
 
-        [<Test>]
-        let ``getting after second event returns empty`` () =
-            let dt = new DateTime(1400L)
-            let fetchedEvents = WorldEventsStore.getSince dt store
+                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
 
-            fetchedEvents
-            |> List.isEmpty
-            |> should equal true
+                match result with
+                | WorldEventsStore.GetSinceResult.Events es ->
+                        es |> should be (equivalent [secondEvent])
+                | _ -> failwith "Incorrect case"
+
+            [<Test>]
+            let ``getting after second event returns empty`` () =
+                let dt = 1400L
+                let result = WorldEventsStore.getSince dt store
+
+                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+
+                match result with
+                | WorldEventsStore.GetSinceResult.Events es ->
+                        es |> should be (equivalent [])
+                | _ -> failwith "Incorrect case"
 
         [<TestFixture>]
         module ``adding a process result`` =
@@ -67,7 +81,7 @@ module WorldEventsStore =
                     world = newWorld
                 }
 
-            let now = new DateTime(1400L)
+            let now = 1400L
 
             let newStore = WorldEventsStore.addResult processResult now store
 
@@ -84,3 +98,62 @@ module WorldEventsStore =
             let ``world is updated`` () =
                 newStore.world |> should equal newWorld
 
+        [<TestFixture>]
+        module ``culling`` =
+            let cullTimestamp = 1100L
+            let culledStore = WorldEventsStore.cull cullTimestamp store
+
+            [<Test>]
+            let ``removes old events`` =
+                culledStore.recentEvents
+                |> should be (equivalent [secondEvent])
+
+            [<Test>]
+            let ``updates lastCull`` =
+                culledStore.lastCull
+                |> should equal cullTimestamp
+
+            [<Test>]
+            let ``world is unchanged`` =
+                culledStore.world
+                |> should equal store.world
+
+    [<TestFixture>]
+    module ``culled store`` =
+        let world = World.empty []
+        let event: WorldEventsStore.StoredEvent =
+            {
+                timestamp = 1000L
+                worldEvent = WorldEvent.Moved (1, Direction.North, 1uy)
+            }
+
+        let cullTime = 800L
+
+        let store: WorldEventsStore =
+            {
+                lastCull = cullTime
+                recentEvents = [event]
+                world = world
+            }
+
+        [<Test>]
+        let ``getting before cull returns world`` () =
+            let result = WorldEventsStore.getSince 500L store
+
+            result |> should be (ofCase <@WorldEventsStore.GetSinceResult.World@>)
+
+            match result with
+            | WorldEventsStore.GetSinceResult.World w ->
+                w |> should equal world
+            | _ -> failwith "Incorrect case"
+
+        [<Test>]
+        let ``getting after cull returns events`` () =
+            let result = WorldEventsStore.getSince 900L store
+
+            result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+
+            match result with
+            | WorldEventsStore.GetSinceResult.Events es ->
+                es |> should be (equivalent [event])
+            | _ -> failwith "Incorrect case"
