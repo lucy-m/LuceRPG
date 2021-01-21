@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsUnit" Version="4.0.4" />
+    <PackageReference Include="NUnit" Version="3.13.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="WorldEventsStore.Test.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LuceRPG.Models">
+      <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

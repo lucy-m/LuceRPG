@@ -9,6 +9,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Samples", "LuceRPG.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Server.Core", "LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj", "{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Server.Core.Test", "LuceRPG.Server.Core.Test\LuceRPG.Server.Core.Test.fsproj", "{122A5B52-8581-4BD6-9F1D-60606C628847}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{122A5B52-8581-4BD6-9F1D-60606C628847}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{122A5B52-8581-4BD6-9F1D-60606C628847}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{122A5B52-8581-4BD6-9F1D-60606C628847}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{122A5B52-8581-4BD6-9F1D-60606C628847}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
