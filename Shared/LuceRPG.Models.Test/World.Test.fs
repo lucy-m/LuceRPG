@@ -71,9 +71,9 @@ module World =
                         let expected =
                             [
                                 Point.create 3 1
-                                Point.create 3 2
+                                Point.create 3 0
                                 Point.create 4 1
-                                Point.create 4 2
+                                Point.create 4 0
                             ]
                             |> Set.ofList
 
@@ -116,7 +116,7 @@ module World =
 
             [<Test>]
             let ``wall can be placed in first rect`` () =
-                let topLeft = Point.create 1 0
+                let topLeft = Point.create 1 1
                 let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
                 let added = World.addObject wall emptyWorld

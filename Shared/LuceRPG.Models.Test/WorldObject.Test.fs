@@ -39,9 +39,9 @@ module WorldObject =
             let ``has expected points`` () =
                 let expected = [
                     topLeft
-                    Point.add topLeft (Point.create 0 1)
+                    Point.add topLeft (Point.create 0 -1)
                     Point.add topLeft (Point.create 1 0)
-                    Point.add topLeft (Point.create 1 1)
+                    Point.add topLeft (Point.create 1 -1)
                 ]
 
                 points |> should be (equivalent expected)

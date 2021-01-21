@@ -42,7 +42,7 @@ module WorldObject =
             ([0 .. (objSize.x - 1)], [0 .. (objSize.y - 1)])
             |> (fun (xs, ys) ->
                 xs
-                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x y))
+                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x -y))
             )
 
         let blocked =
