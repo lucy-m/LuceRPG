@@ -1,26 +1,53 @@
 using LuceRPG.Models;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(UniversalController))]
 public class PlayerController : MonoBehaviour
 {
-    public int Id = 0;
+    private UniversalController _uc;
+    public float InputDelay = 0.3f;
 
     // Start is called before the first frame update
     private void Start()
     {
+        _uc = GetComponent<UniversalController>();
+        StartCoroutine(PollInput());
     }
 
-    // Update is called once per frame
-    private void Update()
+    private IEnumerator PollInput()
     {
-        var vertIn = Input.GetAxis("Vertical");
-
-        if (vertIn > 0)
+        while (true)
         {
-            var intention = IntentionModule.Model.NewMove(Id, DirectionModule.Model.North, 1);
-            IntentionDispatcher.Instance.Dispatch(intention);
+            var vertIn = Input.GetAxis("Vertical");
+            var horzIn = Input.GetAxis("Horizontal");
+
+            if (vertIn > 0)
+            {
+                var intention = IntentionModule.Model.NewMove(_uc.Id, DirectionModule.Model.North, 1);
+                IntentionDispatcher.Instance.Dispatch(intention);
+                yield return new WaitForSeconds(InputDelay);
+            }
+            else if (vertIn < 0)
+            {
+                var intention = IntentionModule.Model.NewMove(_uc.Id, DirectionModule.Model.South, 1);
+                IntentionDispatcher.Instance.Dispatch(intention);
+                yield return new WaitForSeconds(InputDelay);
+            }
+            else if (horzIn > 0)
+            {
+                var intention = IntentionModule.Model.NewMove(_uc.Id, DirectionModule.Model.East, 1);
+                IntentionDispatcher.Instance.Dispatch(intention);
+                yield return new WaitForSeconds(InputDelay);
+            }
+            else if (horzIn < 0)
+            {
+                var intention = IntentionModule.Model.NewMove(_uc.Id, DirectionModule.Model.West, 1);
+                IntentionDispatcher.Instance.Dispatch(intention);
+                yield return new WaitForSeconds(InputDelay);
+            }
+
+            yield return null;
         }
     }
 }

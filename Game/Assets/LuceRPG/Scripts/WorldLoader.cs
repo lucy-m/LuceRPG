@@ -1,4 +1,5 @@
 using LuceRPG.Models;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class WorldLoader : MonoBehaviour
@@ -8,6 +9,8 @@ public class WorldLoader : MonoBehaviour
     public GameObject PathPrefab = null;
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
+
+    private Dictionary<int, UniversalController> _controllers;
 
     private void Awake()
     {
@@ -41,6 +44,8 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(WorldModule.Model world)
     {
+        _controllers = new Dictionary<int, UniversalController>();
+
         foreach (var kvp in world.objects)
         {
             var obj = kvp.Value;
@@ -52,12 +57,13 @@ public class WorldLoader : MonoBehaviour
             {
                 var go = Instantiate(prefab, location, Quaternion.identity);
 
-                var pc = go.GetComponent<PlayerController>();
+                var uc = go.GetComponent<UniversalController>();
 
-                if (pc != null)
+                if (uc != null)
                 {
-                    Debug.Log("Setting player ID");
-                    pc.Id = obj.id;
+                    Debug.Log("Setting UC ID");
+                    uc.Id = obj.id;
+                    _controllers[obj.id] = uc;
                 }
 
                 if (obj.t.IsPath)
@@ -83,6 +89,21 @@ public class WorldLoader : MonoBehaviour
                     var size = new Vector2(bound.size.x, bound.size.y);
                     spriteRenderer.size = size;
                 }
+            }
+        }
+    }
+
+    public void ApplyUpdate(IEnumerable<WorldEventModule.Model> worldEvents)
+    {
+        foreach (var worldEvent in worldEvents)
+        {
+            if (_controllers.TryGetValue(worldEvent.Item1, out var uc))
+            {
+                uc.Apply(worldEvent);
+            }
+            else
+            {
+                Debug.LogError($"Could not process update for unknown object {worldEvent.Item1}");
             }
         }
     }

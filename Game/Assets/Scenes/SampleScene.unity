@@ -237,6 +237,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78a03db8726e0a14eb558154b71b9c93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PollPeriod: 0.1
+  BaseUrl: https://localhost:5001/World/
 --- !u!4 &909970317
 Transform:
   m_ObjectHideFlags: 0
@@ -279,3 +281,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac66cb50f4db2c04f9225e5cb0ba4edd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PollPeriod: 0.2

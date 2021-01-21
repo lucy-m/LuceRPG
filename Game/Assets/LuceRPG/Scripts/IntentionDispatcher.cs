@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 public class IntentionDispatcher : MonoBehaviour
 {
     public static IntentionDispatcher Instance = null;
-    public float PollPeriod = 1;
+    public float PollPeriod = 0.5f;
 
     private IntentionModule.Model _intention = null;
 
@@ -21,13 +21,14 @@ public class IntentionDispatcher : MonoBehaviour
         else
         {
             Instance = this;
-            StartCoroutine(IntentionDispatcherLoop());
+            //StartCoroutine(IntentionDispatcherLoop());
         }
     }
 
     public void Dispatch(IntentionModule.Model intention)
     {
-        _intention = intention;
+        //_intention = intention;
+        StartCoroutine(SendIntention(intention));
     }
 
     private IEnumerator IntentionDispatcherLoop()
@@ -39,15 +40,15 @@ public class IntentionDispatcher : MonoBehaviour
                 var intention = _intention;
                 _intention = null;
                 yield return SendIntention(intention);
+                yield return new WaitForSeconds(PollPeriod);
             }
 
-            yield return new WaitForSeconds(PollPeriod);
+            yield return null;
         }
     }
 
     private IEnumerator SendIntention(IntentionModule.Model intention)
     {
-        Debug.Log("Attempting to send intention");
         var bytes = IntentionSrl.serialise(intention);
         var webRequest = UnityWebRequest.Put("https://localhost:5001/World/Intention", bytes);
         yield return webRequest.SendWebRequest();

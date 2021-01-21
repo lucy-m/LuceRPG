@@ -34,7 +34,7 @@ namespace LuceRPG.Server
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Intention processor starting");
-            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
 
             return Task.CompletedTask;
         }

@@ -5,17 +5,17 @@ using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using Microsoft.FSharp.Core;
 using LuceRPG.Utility;
+using System.Linq;
 
 public class WorldFetcher : MonoBehaviour
 {
     private long _lastTimestamp = 0;
-    public float PollPeriod = 1;
+    public float PollPeriod = 0.1f;
     public string BaseUrl = "https://localhost:5001/World/";
 
     private void Start()
     {
         StartCoroutine(FetchWorld());
-        StartCoroutine(FetchUpdates());
     }
 
     private IEnumerator FetchWorld()
@@ -44,6 +44,8 @@ public class WorldFetcher : MonoBehaviour
                 {
                     Debug.Log("Loading world");
                     WorldLoader.Instance.LoadWorld(world);
+
+                    yield return FetchUpdates();
                 }
             }
             else
@@ -62,7 +64,6 @@ public class WorldFetcher : MonoBehaviour
         while (true)
         {
             var url = BaseUrl + "since?timestamp=" + _lastTimestamp;
-            Debug.Log("Polling for updates since " + _lastTimestamp);
 
             var webRequest = UnityWebRequest.Get(url);
             yield return webRequest.SendWebRequest();
@@ -70,7 +71,6 @@ public class WorldFetcher : MonoBehaviour
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
                 var bytes = webRequest.downloadHandler.data;
-                Debug.Log("Received bytes " + bytes.Length);
 
                 var tUpdate = GetSinceResultSrl.deserialise(bytes);
 
@@ -78,7 +78,21 @@ public class WorldFetcher : MonoBehaviour
                 {
                     var update = tUpdate.Value.value;
                     _lastTimestamp = update.timestamp;
-                    Debug.Log("Got update " + update);
+
+                    if (update.value.IsEvents)
+                    {
+                        var events =
+                            ((GetSinceResultModule.Payload.Events)update.value)
+                            .Item
+                            .Select(e => e.value)
+                            .ToArray();
+
+                        if (events.Any())
+                        {
+                            Debug.Log($"Updating world with {events.Length} events");
+                            WorldLoader.Instance.ApplyUpdate(events);
+                        }
+                    }
                 }
                 else
                 {
