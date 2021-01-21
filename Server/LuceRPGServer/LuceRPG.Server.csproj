@@ -21,6 +21,9 @@
     <Reference Include="LuceRPG.Serialisation">
       <HintPath>..\..\Shared\LuceRPG.Serialisation\bin\Release\netstandard2.0\LuceRPG.Serialisation.dll</HintPath>
     </Reference>
+    <Reference Include="LuceRPG.Utility">
+      <HintPath>..\..\Shared\LuceRPG.Extensions\bin\Release\netstandard2.0\LuceRPG.Utility.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

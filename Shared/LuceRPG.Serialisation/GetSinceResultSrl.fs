@@ -11,7 +11,7 @@ module GetSinceResultSrl =
         let deserialiseOne = WithTimestampSrl.deserialise WorldEventSrl.deserialise
         ListSrl.deserialise deserialiseOne bytes
 
-    let serialise (result: GetSinceResult): byte[] =
+    let serialisePayload (result: GetSinceResult.Payload): byte[] =
         let label =
             match result with
             | GetSinceResult.Events _ -> 1uy
@@ -24,8 +24,8 @@ module GetSinceResultSrl =
 
         Array.append [|label|] addtInfo
 
-    let deserialise (bytes: byte[]): GetSinceResult DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): GetSinceResult DesrlResult =
+    let deserialisePayload (bytes: byte[]): GetSinceResult.Payload DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): GetSinceResult.Payload DesrlResult =
             match tag with
             | 1uy ->
                 deserialiseEvents objectBytes
@@ -38,3 +38,9 @@ module GetSinceResultSrl =
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
+
+    let serialise (result: GetSinceResult): byte[] =
+        WithTimestampSrl.serialise serialisePayload result
+
+    let deserialise (bytes: byte[]): GetSinceResult DesrlResult =
+        WithTimestampSrl.deserialise deserialisePayload bytes

@@ -1,8 +1,11 @@
-﻿using LuceRPG.Samples;
+﻿using LuceRPG.Models;
+using LuceRPG.Samples;
 using LuceRPG.Serialisation;
 using LuceRPG.Server;
+using LuceRPG.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.FSharp.Core;
 using System;
 using System.Threading.Tasks;
 
@@ -12,6 +15,8 @@ namespace LuceRPGServer.Controllers
     [Route("[controller]")]
     public class WorldController : ControllerBase
     {
+        private const string RawBytesContentType = "application/octet-stream";
+
         private readonly ILogger<WorldController> _logger;
         private readonly IntentionQueue _queue;
         private readonly WorldEventsStorer _store;
@@ -31,8 +36,28 @@ namespace LuceRPGServer.Controllers
         public ActionResult Get()
         {
             var world = _store.CurrentWorld;
-            var serialised = WorldSrl.serialise(world);
-            return File(serialised, "application/octet-stream");
+            var timestamp = TimestampProvider.Now;
+
+            var timestampedWorld = new WithTimestamp.Model<WorldModule.Model>(timestamp, world);
+
+            var serialised = WithTimestampSrl.serialise(
+                new Func<WorldModule.Model, byte[]>(WorldSrl.serialise).ToFSharpFunc(),
+                timestampedWorld
+            );
+            return File(serialised, RawBytesContentType);
+        }
+
+        [HttpGet("since")]
+        public ActionResult GetSince(long timestamp)
+        {
+            var result = _store.GetSince(timestamp);
+            var newTimestamp = TimestampProvider.Now;
+
+            var timestampedResult = new WithTimestamp.Model<GetSinceResultModule.Payload>(newTimestamp, result);
+
+            var serialised = GetSinceResultSrl.serialise(timestampedResult);
+
+            return File(serialised, RawBytesContentType);
         }
 
         [HttpPut("Intention")]

@@ -19,5 +19,10 @@ namespace LuceRPG.Server
             var newStore = WorldEventsStoreModule.addResult(result, TimestampProvider.Now, _store);
             _store = newStore;
         }
+
+        public GetSinceResultModule.Payload GetSince(long timestamp)
+        {
+            return WorldEventsStoreModule.getSince(timestamp, _store);
+        }
     }
 }

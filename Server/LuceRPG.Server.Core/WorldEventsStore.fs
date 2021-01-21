@@ -42,7 +42,7 @@ module WorldEventsStore =
 
     /// Returns recent events if available
     /// Returns whole world if events have been culled
-    let getSince (timestamp: int64) (state: Model): GetSinceResult =
+    let getSince (timestamp: int64) (state: Model): GetSinceResult.Payload =
         if timestamp >= state.lastCull
         then
             state.recentEvents
