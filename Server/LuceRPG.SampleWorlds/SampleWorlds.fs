@@ -17,7 +17,7 @@ module SampleWorlds =
             WorldObject.create 4 WorldObject.Type.Wall (Point.create 9 3)
             WorldObject.create 5 WorldObject.Type.Wall (Point.create -4 -1)
 
-            WorldObject.create 6 WorldObject.Type.Player (Point.create 2 5)
+            WorldObject.create 6 WorldObject.Type.Player (Point.create 2 6)
 
             WorldObject.create 7 (WorldObject.Type.Path (8,1)) (Point.create 1 1)
         ]

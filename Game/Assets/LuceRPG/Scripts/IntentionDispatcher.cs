@@ -34,7 +34,6 @@ public class IntentionDispatcher : MonoBehaviour
     {
         while (true)
         {
-            Debug.Log("Checking intention");
             if (_intention != null)
             {
                 var intention = _intention;
