@@ -7,16 +7,10 @@ open LuceRPG.Models
 ///   requests for before earlier events will return
 ///   world state
 module WorldEventsStore =
-    type StoredEvent =
-        {
-            timestamp: int64
-            worldEvent: WorldEvent
-        }
-
     type Model =
         {
             lastCull: int64
-            recentEvents: StoredEvent List
+            recentEvents: WorldEvent WithTimestamp List
             world: World
         }
 
@@ -32,8 +26,8 @@ module WorldEventsStore =
             result.events
             |> List.map (fun e ->
                 {
-                    timestamp = now
-                    worldEvent = e
+                    WithTimestamp.timestamp = now
+                    WithTimestamp.value = e
                 }
             )
 
@@ -44,10 +38,6 @@ module WorldEventsStore =
             recentEvents = recentEvents
             world = result.world
         }
-
-    type GetSinceResult =
-        | Events of StoredEvent List
-        | World of World
 
     /// Returns recent events if available
     /// Returns whole world if events have been culled

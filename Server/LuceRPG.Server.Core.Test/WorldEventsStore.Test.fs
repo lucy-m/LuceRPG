@@ -10,16 +10,16 @@ module WorldEventsStore =
 
     [<TestFixture>]
     module ``unculled store with two events`` =
-        let firstEvent: WorldEventsStore.StoredEvent =
+        let firstEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                worldEvent = WorldEvent.Moved (1, Direction.North, 1uy)
+                value = WorldEvent.Moved (1, Direction.North, 1uy)
             }
 
-        let secondEvent: WorldEventsStore.StoredEvent =
+        let secondEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1200L
-                worldEvent = WorldEvent.Moved (1, Direction.East, 1uy)
+                value = WorldEvent.Moved (1, Direction.East, 1uy)
             }
 
         let events = [firstEvent; secondEvent]
@@ -39,10 +39,10 @@ module WorldEventsStore =
                 let dt = 800L
                 let result = WorldEventsStore.getSince dt store
 
-                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+                result |> should be (ofCase <@GetSinceResult.Events@>)
 
                 match result with
-                | WorldEventsStore.GetSinceResult.Events es ->
+                | GetSinceResult.Events es ->
                         es |> should be (equivalent [firstEvent; secondEvent])
                 | _ -> failwith "Incorrect case"
 
@@ -51,10 +51,10 @@ module WorldEventsStore =
                 let dt = 1100L
                 let result = WorldEventsStore.getSince dt store
 
-                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+                result |> should be (ofCase <@GetSinceResult.Events@>)
 
                 match result with
-                | WorldEventsStore.GetSinceResult.Events es ->
+                | GetSinceResult.Events es ->
                         es |> should be (equivalent [secondEvent])
                 | _ -> failwith "Incorrect case"
 
@@ -63,10 +63,10 @@ module WorldEventsStore =
                 let dt = 1400L
                 let result = WorldEventsStore.getSince dt store
 
-                result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+                result |> should be (ofCase <@GetSinceResult.Events@>)
 
                 match result with
-                | WorldEventsStore.GetSinceResult.Events es ->
+                | GetSinceResult.Events es ->
                         es |> should be (equivalent [])
                 | _ -> failwith "Incorrect case"
 
@@ -89,7 +89,7 @@ module WorldEventsStore =
             let ``new event is added to the store`` () =
                 let matchingEvent =
                     newStore.recentEvents
-                    |> List.tryFind (fun e -> e.worldEvent = event)
+                    |> List.tryFind (fun e -> e.value = event)
 
                 matchingEvent.IsSome |> should equal true
                 matchingEvent.Value.timestamp |> should equal now
@@ -121,10 +121,10 @@ module WorldEventsStore =
     [<TestFixture>]
     module ``culled store`` =
         let world = World.empty []
-        let event: WorldEventsStore.StoredEvent =
+        let event: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                worldEvent = WorldEvent.Moved (1, Direction.North, 1uy)
+                value = WorldEvent.Moved (1, Direction.North, 1uy)
             }
 
         let cullTime = 800L
@@ -140,10 +140,10 @@ module WorldEventsStore =
         let ``getting before cull returns world`` () =
             let result = WorldEventsStore.getSince 500L store
 
-            result |> should be (ofCase <@WorldEventsStore.GetSinceResult.World@>)
+            result |> should be (ofCase <@GetSinceResult.World@>)
 
             match result with
-            | WorldEventsStore.GetSinceResult.World w ->
+            | GetSinceResult.World w ->
                 w |> should equal world
             | _ -> failwith "Incorrect case"
 
@@ -151,9 +151,9 @@ module WorldEventsStore =
         let ``getting after cull returns events`` () =
             let result = WorldEventsStore.getSince 900L store
 
-            result |> should be (ofCase <@WorldEventsStore.GetSinceResult.Events@>)
+            result |> should be (ofCase <@GetSinceResult.Events@>)
 
             match result with
-            | WorldEventsStore.GetSinceResult.Events es ->
+            | GetSinceResult.Events es ->
                 es |> should be (equivalent [event])
             | _ -> failwith "Incorrect case"
