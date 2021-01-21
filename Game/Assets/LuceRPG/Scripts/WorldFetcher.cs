@@ -35,13 +35,6 @@ public class WorldFetcher : MonoBehaviour
                     Debug.Log("Loading world");
                     WorldLoader.Instance.LoadWorld(world);
                 }
-
-                if (IntentionDispatcher.Instance != null)
-                {
-                    var intention = IntentionModule.Model.NewMove(6, DirectionModule.Model.North, 1);
-
-                    IntentionDispatcher.Instance.Dispatch(intention);
-                }
             }
         }
         else

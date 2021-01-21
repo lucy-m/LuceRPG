@@ -26,7 +26,7 @@ module IntentionProcessing =
 
             [<Test>]
             let ``a moved event is created`` () =
-                let worldEvents = result.events
+                let worldEvents = result.events |> List.ofSeq
                 worldEvents.Length |> should equal 1
 
                 let expected = WorldEvent.Moved (player.id, Direction.North, 1uy)
@@ -47,7 +47,7 @@ module IntentionProcessing =
 
             [<Test>]
             let ``a moved event is not created`` () =
-                let worldEvents = result.events
+                let worldEvents = result.events |> List.ofSeq
                 worldEvents.Length |> should equal 0
 
             [<Test>]
@@ -65,7 +65,7 @@ module IntentionProcessing =
 
             [<Test>]
             let ``a moved event is created`` () =
-                let worldEvents = result.events
+                let worldEvents = result.events |> List.ofSeq
                 worldEvents.Length |> should equal 1
 
                 let expected = WorldEvent.Moved (player.id, Direction.East, 4uy)
@@ -86,7 +86,7 @@ module IntentionProcessing =
 
             [<Test>]
             let ``a moved event is not created`` () =
-                let worldEvents = result.events
+                let worldEvents = result.events |> List.ofSeq
                 worldEvents.Length |> should equal 0
 
             [<Test>]

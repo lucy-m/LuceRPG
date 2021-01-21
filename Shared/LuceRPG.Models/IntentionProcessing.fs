@@ -3,7 +3,7 @@
 module IntentionProcessing =
     type ProcessResult =
         {
-            events: WorldEvent List
+            events: WorldEvent seq
             world: World
         }
 
@@ -35,3 +35,16 @@ module IntentionProcessing =
                         world = newWorld
                     }
                 else unchanged world
+
+    let processMany (intentions: Intention seq) (world: World): ProcessResult =
+        let initial = unchanged world
+
+        intentions
+        |> Seq.fold (fun acc i ->
+            let resultOne = processOne i acc.world
+
+            {
+                events = Seq.append resultOne.events acc.events
+                world = resultOne.world
+            }
+        ) initial

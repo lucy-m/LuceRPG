@@ -24,12 +24,13 @@ module WorldEventsStore =
     let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =
         let storedEvents =
             result.events
-            |> List.map (fun e ->
+            |> Seq.map (fun e ->
                 {
                     WithTimestamp.timestamp = now
                     WithTimestamp.value = e
                 }
             )
+            |> List.ofSeq
 
         let recentEvents = state.recentEvents @ storedEvents
 

@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LuceRPG.Samples;
 using LuceRPG.Serialisation;
-using LuceRPG.Samples;
-using Microsoft.Extensions.Logging;
 using LuceRPG.Server;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace LuceRPGServer.Controllers
 {
@@ -14,17 +14,23 @@ namespace LuceRPGServer.Controllers
     {
         private readonly ILogger<WorldController> _logger;
         private readonly IntentionQueue _queue;
+        private readonly WorldEventsStorer _store;
 
-        public WorldController(ILogger<WorldController> logger, IntentionQueue queue)
+        public WorldController(
+            ILogger<WorldController> logger,
+            IntentionQueue queue,
+            WorldEventsStorer store
+        )
         {
             _logger = logger;
             _queue = queue;
+            _store = store;
         }
 
         [HttpGet]
         public ActionResult Get()
         {
-            var world = SampleWorlds.world1;
+            var world = _store.CurrentWorld;
             var serialised = WorldSrl.serialise(world);
             return File(serialised, "application/octet-stream");
         }

@@ -1,3 +1,5 @@
+using LuceRPG.Models;
+using LuceRPG.Samples;
 using LuceRPG.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +30,8 @@ namespace LuceRPGServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IntentionQueue>();
+            services.AddSingleton(SampleWorlds.world1);
+            services.AddSingleton<WorldEventsStorer>();
             services.AddHostedService<IntentionProcessor>();
 
             services.AddControllers();

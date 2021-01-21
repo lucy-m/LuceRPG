@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using LuceRPG.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -10,13 +11,19 @@ namespace LuceRPG.Server
     public sealed class IntentionProcessor : IHostedService, IDisposable
     {
         private readonly ILogger<IntentionProcessor> _logger;
+        private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
         private Timer _timer;
 
-        public IntentionProcessor(ILogger<IntentionProcessor> logger, IntentionQueue queue)
+        public IntentionProcessor(
+            ILogger<IntentionProcessor> logger,
+            IntentionQueue queue,
+            WorldEventsStorer store
+        )
         {
             _logger = logger;
             _queue = queue;
+            _store = store;
         }
 
         public void Dispose()
@@ -47,6 +54,8 @@ namespace LuceRPG.Server
             if (intentions.Length > 0)
             {
                 _logger.LogDebug($"Processing {intentions.Length} intentions");
+                var processed = IntentionProcessing.processMany(intentions, _store.CurrentWorld);
+                _store.Update(processed);
             }
         }
     }

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LuceRPG.SampleWorlds\LuceRPG.Samples.fsproj" />
+    <ProjectReference Include="..\LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
