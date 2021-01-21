@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="Id.fs" />
+    <Compile Include="WithTimestamp.fs" />
     <Compile Include="Point.fs" />
     <Compile Include="Rect.fs" />
     <Compile Include="Direction.fs" />
@@ -14,6 +15,7 @@
     <Compile Include="WorldEvent.fs" />
     <Compile Include="World.fs" />
     <Compile Include="IntentionProcessing.fs" />
+    <Compile Include="GetSinceResult.fs" />
   </ItemGroup>
 
 </Project>

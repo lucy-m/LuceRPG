@@ -43,6 +43,15 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let withTimestampSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (WithTimestampSrl.serialise IntSrl.serialise)
+                    (WithTimestampSrl.deserialise IntSrl.deserialise)
+
+            doCheck checkFn
+
+        [<Test>]
         let pointSrl () =
             let checkFn =
                 srlAndDesrl PointSrl.serialise PointSrl.deserialise
@@ -95,5 +104,12 @@ module SrlAndDesrl =
         let worldSrl () =
             let checkFn =
                 srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let getSinceResultSrl () =
+            let checkFn =
+                srlAndDesrl GetSinceResultSrl.serialise GetSinceResultSrl.deserialise
 
             doCheck checkFn
