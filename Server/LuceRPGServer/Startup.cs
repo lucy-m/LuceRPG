@@ -28,6 +28,7 @@ namespace LuceRPGServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IntentionQueue>();
+            services.AddHostedService<IntentionProcessor>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

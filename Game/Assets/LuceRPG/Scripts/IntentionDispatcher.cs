@@ -8,6 +8,9 @@ using UnityEngine.Networking;
 public class IntentionDispatcher : MonoBehaviour
 {
     public static IntentionDispatcher Instance = null;
+    public float PollPeriod = 1;
+
+    private IntentionModule.Model _intention = null;
 
     private void Awake()
     {
@@ -18,12 +21,29 @@ public class IntentionDispatcher : MonoBehaviour
         else
         {
             Instance = this;
+            StartCoroutine(IntentionDispatcherLoop());
         }
     }
 
     public void Dispatch(IntentionModule.Model intention)
     {
-        StartCoroutine(SendIntention(intention));
+        _intention = intention;
+    }
+
+    private IEnumerator IntentionDispatcherLoop()
+    {
+        while (true)
+        {
+            Debug.Log("Checking intention");
+            if (_intention != null)
+            {
+                var intention = _intention;
+                _intention = null;
+                yield return SendIntention(intention);
+            }
+
+            yield return new WaitForSeconds(PollPeriod);
+        }
     }
 
     private IEnumerator SendIntention(IntentionModule.Model intention)

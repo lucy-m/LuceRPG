@@ -52,6 +52,14 @@ public class WorldLoader : MonoBehaviour
             {
                 var go = Instantiate(prefab, location, Quaternion.identity);
 
+                var pc = go.GetComponent<PlayerController>();
+
+                if (pc != null)
+                {
+                    Debug.Log("Setting player ID");
+                    pc.Id = obj.id;
+                }
+
                 if (obj.t.IsPath)
                 {
                     var size = WorldObjectModule.size(obj);
