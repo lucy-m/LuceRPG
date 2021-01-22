@@ -8,9 +8,9 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
-        let bound = Rect.create 0 0 10 10
-        let player = WorldObject.create 1 WorldObject.Type.Player (Point.create 1 1)
-        let wall = WorldObject.create 2 WorldObject.Type.Wall (Point.create 3 1)
+        let bound = Rect.create 0 10 10 10
+        let player = WorldObject.create 1 WorldObject.Type.Player (Point.create 1 3)
+        let wall = WorldObject.create 2 WorldObject.Type.Wall (Point.create 3 3)
 
         let world = World.createWithObjs [bound] [player; wall]
 
@@ -37,7 +37,7 @@ module IntentionProcessing =
                 let newPlayer = result.world.objects |> Map.tryFind player.id
                 newPlayer.IsSome |> should equal true
 
-                newPlayer.Value.topLeft |> should equal (Point.create 1 2)
+                newPlayer.Value.topLeft |> should equal (Point.create 1 4)
 
         [<TestFixture>]
         module ``when the player tries to move one square east`` =
@@ -55,7 +55,7 @@ module IntentionProcessing =
                 let newPlayer = result.world.objects |> Map.tryFind player.id
                 newPlayer.IsSome |> should equal true
 
-                newPlayer.Value.topLeft |> should equal (Point.create 1 1)
+                newPlayer.Value.topLeft |> should equal (Point.create 1 3)
 
         [<TestFixture>]
         module ``when the player tries to move four squares east`` =
@@ -76,7 +76,7 @@ module IntentionProcessing =
                 let newPlayer = result.world.objects |> Map.tryFind player.id
                 newPlayer.IsSome |> should equal true
 
-                newPlayer.Value.topLeft |> should equal (Point.create 5 1)
+                newPlayer.Value.topLeft |> should equal (Point.create 5 3)
 
         [<TestFixture>]
         module ``when the player tries to move two squares south `` =
@@ -94,4 +94,4 @@ module IntentionProcessing =
                 let newPlayer = result.world.objects |> Map.tryFind player.id
                 newPlayer.IsSome |> should equal true
 
-                newPlayer.Value.topLeft |> should equal (Point.create 1 1)
+                newPlayer.Value.topLeft |> should equal (Point.create 1 3)

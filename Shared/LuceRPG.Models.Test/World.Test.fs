@@ -11,12 +11,12 @@ module World =
 
         [<TestFixture>]
         module ``for a rect world`` =
-            let bounds = Rect.create 0 0 10 8
+            let bounds = Rect.create 0 8 10 8
             let emptyWorld = World.empty [bounds]
 
             [<TestFixture>]
             module ``with a wall`` =
-                let topLeft = Point.create 1 0
+                let topLeft = Point.create 1 3
                 let wall = WorldObject.create  1 WorldObject.Type.Wall topLeft
 
                 let world =
@@ -47,7 +47,7 @@ module World =
 
                 [<TestFixture>]
                 module ``adding a new wall to a different point with the same id`` =
-                    let newWall = WorldObject.create wall.id wall.t (Point.create 3 1)
+                    let newWall = WorldObject.create wall.id wall.t (Point.create 3 4)
                     let newWorld = World.addObject newWall world
 
                     [<Test>]
@@ -70,10 +70,10 @@ module World =
 
                         let expected =
                             [
-                                Point.create 3 1
-                                Point.create 3 0
-                                Point.create 4 1
-                                Point.create 4 0
+                                Point.create 3 4
+                                Point.create 3 3
+                                Point.create 4 4
+                                Point.create 4 3
                             ]
                             |> Set.ofList
 
@@ -94,7 +94,10 @@ module World =
             let ``contains correct points`` () =
                 let points =
                     [
-                        (Point.create 0 0, true)
+                        (Point.create 0 8, true)        // top left
+                        (Point.create 9 8, true)        // top right
+                        (Point.create 0 0, false)        // bottom left
+                        (Point.create 9 0, false)        // bottom right
                         (Point.create -1 0, false)
                         (Point.create 20 20, false)
                     ]
@@ -109,14 +112,14 @@ module World =
         module ``for a world made of two rects`` =
             let bounds =
                 [
-                    Rect.create 0 0 5 2
-                    Rect.create 3 2 4 4
+                    Rect.create 0 2 5 2
+                    Rect.create 3 0 4 4
                 ]
             let emptyWorld = World.empty bounds
 
             [<Test>]
             let ``wall can be placed in first rect`` () =
-                let topLeft = Point.create 1 1
+                let topLeft = Point.create 1 2
                 let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
                 let added = World.addObject wall emptyWorld
@@ -127,7 +130,7 @@ module World =
 
             [<Test>]
             let ``wall can be placed in second rect`` () =
-                let topLeft = Point.create 4 3
+                let topLeft = Point.create 4 -1
                 let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
                 let added = World.addObject wall emptyWorld
@@ -138,7 +141,7 @@ module World =
 
             [<Test>]
             let ``wall can be placed on boundary between rects`` () =
-                let topLeft = Point.create 3 1
+                let topLeft = Point.create 4 0
                 let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
                 let added = World.addObject wall emptyWorld
@@ -149,7 +152,7 @@ module World =
 
             [<Test>]
             let ``wall cannot be placed partially in world`` () =
-                // top right square is out of bounds
+                // top right point is out of bounds
                 let topLeft = Point.create 4 1
                 let wall = WorldObject.create 1 WorldObject.Type.Wall topLeft
 
