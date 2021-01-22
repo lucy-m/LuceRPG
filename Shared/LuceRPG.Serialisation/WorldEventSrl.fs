@@ -2,16 +2,16 @@
 
 open LuceRPG.Models
 
-module IntentionSrl =
-    let serialise (i: Intention): byte[] =
+module WorldEventSrl =
+    let serialise (i: WorldEvent): byte[] =
 
         let label =
             match i with
-            | Intention.Move  _-> 1uy
+            | WorldEvent.Moved  _-> 1uy
 
         let addtInfo =
             match i with
-            | Intention.Move (id, d,a) ->
+            | WorldEvent.Moved (id, d,a) ->
                 Array.concat [
                     (IntSrl.serialise id)
                     (DirectionSrl.serialise d)
@@ -20,18 +20,18 @@ module IntentionSrl =
 
         Array.append [|label|] addtInfo
 
-    let deserialise (bytes: byte[]): Intention DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): Intention DesrlResult =
+    let deserialise (bytes: byte[]): WorldEvent DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): WorldEvent DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
                     IntSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
-                    (fun id d a -> Intention.Move (id, d,a))
+                    (fun id d a -> WorldEvent.Moved (id, d,a))
                     objectBytes
             | _ ->
-                printfn "Unknown Intention tag %u" tag
+                printfn "Unknown WorldEvent tag %u" tag
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes

@@ -37,11 +37,11 @@ module Rect =
 
     /// exclusive bottom bound
     let bottomBound (rect: Model): int =
-        rect.topLeft.y + rect.size.y
+        rect.topLeft.y - rect.size.y
 
     let contains (p: Point) (rect: Model): bool =
         let inX = p.x >= (leftBound rect) && p.x < (rightBound rect)
-        let inY = p.y >= (topBound rect) && p.y < (bottomBound rect)
+        let inY = p.y <= (topBound rect) && p.y > (bottomBound rect)
 
         inX && inY
 

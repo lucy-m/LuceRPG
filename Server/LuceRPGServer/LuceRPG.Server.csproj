@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LuceRPG.SampleWorlds\LuceRPG.Samples.fsproj" />
+    <ProjectReference Include="..\LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,9 @@
     </Reference>
     <Reference Include="LuceRPG.Serialisation">
       <HintPath>..\..\Shared\LuceRPG.Serialisation\bin\Release\netstandard2.0\LuceRPG.Serialisation.dll</HintPath>
+    </Reference>
+    <Reference Include="LuceRPG.Utility">
+      <HintPath>..\..\Shared\LuceRPG.Extensions\bin\Release\netstandard2.0\LuceRPG.Utility.dll</HintPath>
     </Reference>
   </ItemGroup>
 

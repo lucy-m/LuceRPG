@@ -15,8 +15,6 @@ module SrlAndDesrl =
             let srl = srlFn value
             let desrl = desrlFn srl |> DesrlResult.value
 
-            let v = desrl = Option.Some value
-
             desrl = Option.Some value
 
     let doCheck = Check.QuickThrowOnFailure
@@ -41,6 +39,15 @@ module SrlAndDesrl =
                 srlAndDesrl
                     (ListSrl.serialise IntSrl.serialise)
                     (ListSrl.deserialise IntSrl.deserialise)
+
+            doCheck checkFn
+
+        [<Test>]
+        let withTimestampSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (WithTimestampSrl.serialise IntSrl.serialise)
+                    (WithTimestampSrl.deserialise IntSrl.deserialise)
 
             doCheck checkFn
 
@@ -87,6 +94,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let worldEventSrl () =
+            let checkFn =
+                srlAndDesrl WorldEventSrl.serialise WorldEventSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let worldSrl () =
             let checkFn =
                 srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
@@ -94,23 +108,8 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
-        let ``manual test`` () =
-            let srlAndDesrl
-                (srlFn: World -> byte[])
-                (desrlFn: byte[] -> World DesrlResult)
-                (value: World)
-                : bool =
-                    let srl = srlFn value
-                    let desrl = desrlFn srl |> DesrlResult.value
-
-                    let v = desrl = Option.Some value
-                    let boundMatch = (Option.get desrl).bounds = value.bounds
-                    let objectsMatch = (Option.get desrl).objects = value.objects
-                    let blockedMatch = (Option.get desrl).blocked = value.blocked
-
-                    desrl = Option.Some value
-
+        let getSinceResultSrl () =
             let checkFn =
-                srlAndDesrl WorldSrl.serialise WorldSrl.deserialise
+                srlAndDesrl GetSinceResultSrl.serialise GetSinceResultSrl.deserialise
 
-            Check.QuickThrowOnFailure checkFn
+            doCheck checkFn

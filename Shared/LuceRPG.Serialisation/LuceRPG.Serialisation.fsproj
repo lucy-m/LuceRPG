@@ -10,13 +10,17 @@
     <Compile Include="ByteSrl.fs" />
     <Compile Include="DesrlUtil.fs" />
     <Compile Include="IntSrl.fs" />
+    <Compile Include="LongSrl.fs" />
     <Compile Include="ListSrl.fs" />
+    <Compile Include="WithTimestampSrl.fs" />
     <Compile Include="PointSrl.fs" />
     <Compile Include="RectSrl.fs" />
     <Compile Include="DirectionSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
+    <Compile Include="WorldEventSrl.fs" />
     <Compile Include="WorldSrl.fs" />
+    <Compile Include="GetSinceResultSrl.fs" />
   </ItemGroup>
 
   <ItemGroup>

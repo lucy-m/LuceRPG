@@ -15,15 +15,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Rect.Test.fs" />
-    <Compile Include="WorldObject.Test.fs" />
-    <Compile Include="World.Test.fs" />
-    <Compile Include="IntentionProcessing.Test.fs" />
+    <Compile Include="WorldEventsStore.Test.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LuceRPG.Models\LuceRPG.Models.fsproj" />
+    <ProjectReference Include="..\LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LuceRPG.Models">
+      <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -27,6 +27,13 @@ module DesrlResult =
             bindOption newValue value.bytesRead
         )
 
+    let map (fn: 'T1 -> 'T2) (tValue: 'T1 Model): 'T2 Model =
+        tValue
+        |> Option.bind (fun value ->
+            let newValue = fn value.value
+            create newValue value.bytesRead
+        )
+
     let value (model: 'T Model): 'T Option =
         model
         |> Option.map (fun m -> m.value)

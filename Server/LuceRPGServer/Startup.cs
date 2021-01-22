@@ -1,3 +1,6 @@
+using LuceRPG.Models;
+using LuceRPG.Samples;
+using LuceRPG.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,6 +29,10 @@ namespace LuceRPGServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IntentionQueue>();
+            services.AddSingleton(SampleWorlds.world1);
+            services.AddSingleton<WorldEventsStorer>();
+            services.AddHostedService<IntentionProcessor>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

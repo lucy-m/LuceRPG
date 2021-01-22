@@ -42,7 +42,7 @@ module WorldObject =
             ([0 .. (objSize.x - 1)], [0 .. (objSize.y - 1)])
             |> (fun (xs, ys) ->
                 xs
-                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x y))
+                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x -y))
             )
 
         let blocked =
@@ -50,5 +50,13 @@ module WorldObject =
             |> List.map (fun p1 -> Point.add p1 obj.topLeft)
 
         blocked
+
+    let moveObject (direction: Direction) (amount: int) (obj: Model): Model =
+        let newTopLeft = Direction.movePoint direction amount obj.topLeft
+
+        {
+            obj with
+                topLeft = newTopLeft
+        }
 
 type WorldObject = WorldObject.Model
