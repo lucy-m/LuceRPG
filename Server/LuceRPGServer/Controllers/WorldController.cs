@@ -2,6 +2,7 @@
 using LuceRPG.Samples;
 using LuceRPG.Serialisation;
 using LuceRPG.Server;
+using LuceRPG.Server.Core;
 using LuceRPG.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -58,6 +59,17 @@ namespace LuceRPGServer.Controllers
             var serialised = GetSinceResultSrl.serialise(timestampedResult);
 
             return File(serialised, RawBytesContentType);
+        }
+
+        [HttpGet("dump")]
+        public string Dump()
+        {
+            var world = _store.CurrentWorld;
+            var dump = ASCIIWorld.dump(world);
+
+            Console.WriteLine(dump);
+
+            return dump;
         }
 
         [HttpPut("Intention")]
