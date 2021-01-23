@@ -2,7 +2,7 @@
 
 module Intention =
     type Payload =
-        | Move of Id.WorldObject * Direction * byte
+        | Move of System.Guid * Direction * byte
 
     type Model = Payload WithGuid
 

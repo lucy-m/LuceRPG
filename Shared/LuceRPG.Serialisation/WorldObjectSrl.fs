@@ -9,6 +9,7 @@ module WorldObjectSrl =
             | WorldObject.Type.Wall -> 1uy
             | WorldObject.Type.Path _ -> 2uy
             | WorldObject.Type.Player -> 3uy
+            | WorldObject.Type.PlayerSpawner -> 4uy
 
         let addtInfo =
             match t with
@@ -16,6 +17,7 @@ module WorldObjectSrl =
             | WorldObject.Type.Path (w,h) ->
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
             | WorldObject.Type.Player -> [||]
+            | WorldObject.Type.PlayerSpawner -> [||]
 
         Array.append [|label|] addtInfo
 
@@ -30,24 +32,28 @@ module WorldObjectSrl =
                     (fun w h -> WorldObject.Type.Path (w,h))
                     objectBytes
             | 3uy -> DesrlResult.create WorldObject.Type.Player 0
+            | 4uy -> DesrlResult.create WorldObject.Type.PlayerSpawner 0
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
 
-    let serialise (obj: WorldObject): byte[] =
-        let id = IntSrl.serialise obj.id
+    let serialisePayload (obj: WorldObject.Payload): byte[] =
         let t = serialiseType obj.t
         let topLeft = PointSrl.serialise obj.topLeft
 
-        Array.concat  [id; t; topLeft]
+        Array.concat  [t; topLeft]
 
-    let deserialise (bytes: byte[]): WorldObject DesrlResult =
-        DesrlUtil.getThree
-            IntSrl.deserialise
+    let deserialisePayload (bytes: byte[]): WorldObject.Payload DesrlResult =
+        DesrlUtil.getTwo
             deserialiseType
             PointSrl.deserialise
             WorldObject.create
             bytes
 
+    let serialise (obj: WorldObject): byte[] =
+        WithGuidSrl.serialise serialisePayload obj
+
+    let deserialise (bytes: byte[]): WorldObject DesrlResult =
+        WithGuidSrl.deserialise deserialisePayload bytes

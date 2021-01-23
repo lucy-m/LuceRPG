@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Id.fs" />
     <Compile Include="WithTimestamp.fs" />
     <Compile Include="WithGuid.fs" />
     <Compile Include="Point.fs" />

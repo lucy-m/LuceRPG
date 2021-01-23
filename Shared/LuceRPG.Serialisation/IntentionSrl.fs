@@ -12,7 +12,7 @@ module IntentionSrl =
             match i with
             | Intention.Move (id, d,a) ->
                 Array.concat [
-                    (IntSrl.serialise id)
+                    (GuidSrl.serialise id)
                     (DirectionSrl.serialise d)
                     (ByteSrl.serialise a)
                 ]
@@ -27,7 +27,7 @@ module IntentionSrl =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
-                    IntSrl.deserialise
+                    GuidSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
                     (fun id d a -> Intention.Move (id, d,a))

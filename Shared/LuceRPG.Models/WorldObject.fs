@@ -10,22 +10,25 @@ module WorldObject =
 
     type Type = Type.Model
 
-    type Model =
+    type Payload =
         {
-            id: Id.WorldObject
             t: Type
             topLeft: Point
         }
 
-    let create (id: int) (t: Type) (topLeft: Point): Model =
+    type Model = Payload WithGuid
+
+    let create (t: Type) (topLeft: Point): Payload =
         {
-            id = id
             t = t
             topLeft = topLeft
         }
 
+    let topLeft (wo: Model): Point = wo.value.topLeft
+    let t (wo: Model): Type = wo.value.t
+
     let isBlocking (obj: Model): bool =
-        match obj.t with
+        match obj.value.t with
         | Type.Wall -> true
         | Type.Path _ -> false
         | Type.Player -> false
@@ -34,7 +37,7 @@ module WorldObject =
     let size (obj: Model): Point =
         let p2x2 = Point.create 2 2
 
-        match obj.t with
+        match obj.value.t with
         | Type.Wall -> p2x2
         | Type.Path (w,h) -> Point.create w h
         | Type.Player -> p2x2
@@ -52,16 +55,19 @@ module WorldObject =
 
         let blocked =
             relPoints
-            |> List.map (fun p1 -> Point.add p1 obj.topLeft)
+            |> List.map (fun p1 -> Point.add p1 obj.value.topLeft)
 
         blocked
 
     let moveObject (direction: Direction) (amount: int) (obj: Model): Model =
-        let newTopLeft = Direction.movePoint direction amount obj.topLeft
+        let newTopLeft = Direction.movePoint direction amount obj.value.topLeft
 
         {
             obj with
-                topLeft = newTopLeft
+                value = {
+                    obj.value with
+                        topLeft = newTopLeft
+                }
         }
 
 type WorldObject = WorldObject.Model
