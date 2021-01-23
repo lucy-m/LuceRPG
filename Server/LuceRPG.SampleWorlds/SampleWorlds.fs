@@ -19,7 +19,7 @@ module SampleWorlds =
 
             WorldObject.create 6 WorldObject.Type.Player (Point.create 2 -5)
 
-            WorldObject.create 7 (WorldObject.Type.Path (8,1)) (Point.create 5 -6)
+            WorldObject.create 7 (WorldObject.Type.Path (15,1)) (Point.create -2 -6)
         ]
 
         World.createWithObjs bounds walls

@@ -65,12 +65,16 @@ module World =
 
     let canPlace (obj: WorldObject) (world: Model): bool =
         let points = WorldObject.getPoints obj
-        let blockedPoints =
-            points
-            |> List.choose (fun p -> getBlocker p world)
-            |> List.filter (fun wo -> wo.id <> obj.id)
 
-        let isNotBlocked = blockedPoints |> List.isEmpty
+        let isNotBlocked =
+            if WorldObject.isBlocking obj
+            then
+                let blockedPoints =
+                    points
+                    |> List.choose (fun p -> getBlocker p world)
+                    |> List.filter (fun wo -> wo.id <> obj.id)
+                blockedPoints |> List.isEmpty
+            else true
 
         let inBounds = objInBounds obj world
 
@@ -79,7 +83,6 @@ module World =
     /// Adds an object to the map
     /// Object will not be added if it is blocked or out of bounds
     /// An object with the same id that already exists will be removed
-    /// Blocking objects can be placed on top of non-blocking objects
     let addObject (obj: WorldObject) (world: Model): Model =
         let existingIdRemoved = removeObject obj.id world
 
