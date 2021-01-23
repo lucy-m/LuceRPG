@@ -6,7 +6,7 @@ module World =
             bounds: Rect Set
             objects: Map<Id.WorldObject, WorldObject>
             blocked: Map<Point, WorldObject>
-            playerSpawner: WorldObject Option
+            playerSpawner: Point
         }
 
     let objectList (world: Model): WorldObject List =
@@ -14,12 +14,12 @@ module World =
         |> Map.toList
         |> List.map snd
 
-    let empty (bounds: Rect List): Model =
+    let empty (bounds: Rect List) (playerSpawner: Point): Model =
         {
             bounds = bounds |> Set.ofList
             objects = Map.empty
             blocked = Map.empty
-            playerSpawner = Option.None
+            playerSpawner = playerSpawner
         }
 
     let pointBlocked (p: Point) (world: Model): bool =
@@ -38,7 +38,7 @@ module World =
         Option.isSome containingRect
 
     let objInBounds (obj: WorldObject) (world: Model): bool =
-        let points = WorldObject.getPoints obj
+        let points = WorldObject.getPoints obj.value
 
         points
         |> List.map (fun p -> pointInBounds p world)
@@ -47,6 +47,20 @@ module World =
     let containsObject (id: Id.WorldObject) (world: Model): bool =
         world.objects
         |> Map.containsKey id
+
+    let canPlace (obj: WorldObject) (world: Model): bool =
+        let points = WorldObject.getPoints obj.value
+
+        let isNotBlocked =
+            let blockedPoints =
+                points
+                |> List.choose (fun p -> getBlocker p world)
+                |> List.filter (fun wo -> wo.id <> obj.id)
+            blockedPoints |> List.isEmpty
+
+        let inBounds = objInBounds obj world
+
+        isNotBlocked && inBounds
 
     let removeObject (id: Id.WorldObject) (world: Model): Model =
         let newObjects =
@@ -65,19 +79,8 @@ module World =
                 blocked = newBlocked
         }
 
-    let canPlace (obj: WorldObject) (world: Model): bool =
-        let points = WorldObject.getPoints obj
-
-        let isNotBlocked =
-            let blockedPoints =
-                points
-                |> List.choose (fun p -> getBlocker p world)
-                |> List.filter (fun wo -> wo.id <> obj.id)
-            blockedPoints |> List.isEmpty
-
-        let inBounds = objInBounds obj world
-
-        isNotBlocked && inBounds
+    let spawnPoint (world: Model): Point =
+        world.playerSpawner
 
     /// Adds an object to the map
     /// Object will not be added if it is blocked or out of bounds
@@ -88,7 +91,7 @@ module World =
 
         let canPlaceObject = canPlace obj existingIdRemoved
 
-        let points = WorldObject.getPoints obj
+        let points = WorldObject.getPoints obj.value
 
         if not canPlaceObject
         then existingIdRemoved
@@ -107,25 +110,12 @@ module World =
                     existingIdRemoved.blocked
 
             let objects =
-                match WorldObject.t obj, existingIdRemoved.playerSpawner with
-                | WorldObject.Type.PlayerSpawner, Option.Some playerSpawner ->
-                    // need to remove the existing player spawner
-                    let removedPlayerSpawner = removeObject playerSpawner.id existingIdRemoved
-                    Map.add obj.id obj removedPlayerSpawner.objects
-
-                | _ ->
                     Map.add obj.id obj existingIdRemoved.objects
-
-            let spawner =
-                match WorldObject.t obj with
-                | WorldObject.Type.PlayerSpawner -> Option.Some obj
-                | _ -> existingIdRemoved.playerSpawner
 
             {
                 world with
                     blocked = blocked
                     objects = objects
-                    playerSpawner = spawner
             }
 
     /// Adds many objects
@@ -142,8 +132,8 @@ module World =
 
         withItems
 
-    let createWithObjs (bounds: Rect List) (objs: WorldObject List): Model =
-        let emptyWorld = empty bounds
+    let createWithObjs (bounds: Rect List) (spawn: Point) (objs: WorldObject List): Model =
+        let emptyWorld = empty bounds spawn
         addObjects objs emptyWorld
 
 type World = World.Model

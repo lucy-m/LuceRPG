@@ -40,12 +40,19 @@ type SerialisationArbs() =
 
     static member genWorld: Gen<World> =
         let bounds = Gen.listOf Arb.generate<Rect>
+        let point =
+            bounds
+            |> Gen.map (fun rects ->
+                List.tryHead rects
+                |> Option.map (fun r -> r.topLeft)
+                |> Option.defaultValue Point.zero
+            )
         let objects = Gen.listOf Arb.generate<WorldObject>
 
         let world =
-            Gen.zip bounds objects
-            |> Gen.map (fun (bs, os) ->
-                World.createWithObjs bs os
+            Gen.zip3 bounds point objects
+            |> Gen.map (fun (bs, p, os) ->
+                World.createWithObjs bs p os
             )
 
         world

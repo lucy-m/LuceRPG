@@ -9,23 +9,24 @@ module WorldSrl =
                 RectSrl.serialise
                 (Set.toList w.bounds)
 
+        let spawner =
+            PointSrl.serialise w.playerSpawner
+
         let objects =
             ListSrl.serialise
                 WorldObjectSrl.serialise
                 (World.objectList w)
 
-        Array.append bounds objects
+        Array.concat [bounds; spawner; objects]
 
     let deserialise (bytes: byte[]): World DesrlResult =
         let getBounds = ListSrl.deserialise RectSrl.deserialise
+        let getSpawner = PointSrl.deserialise
         let getObjects = ListSrl.deserialise WorldObjectSrl.deserialise
 
-        let toWorld (bounds: Rect List) (objects: WorldObject List): World =
-            let empty = World.empty bounds
-            World.addObjects objects empty
-
-        DesrlUtil.getTwo
+        DesrlUtil.getThree
             getBounds
+            getSpawner
             getObjects
-            toWorld
+            World.createWithObjs
             bytes

@@ -12,7 +12,7 @@ module IntentionProcessing =
         let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
 
-        let world = World.createWithObjs [bound] [player; wall]
+        let world = World.createWithObjs [bound] bound.topLeft [player; wall]
 
         [<Test>]
         let ``world created correctly`` () =

@@ -12,7 +12,7 @@ module World =
         [<TestFixture>]
         module ``for a rect world`` =
             let bounds = Rect.create 0 8 10 8
-            let emptyWorld = World.empty [bounds]
+            let emptyWorld = World.empty [bounds] bounds.topLeft
 
             [<TestFixture>]
             module ``with a wall`` =
@@ -39,7 +39,7 @@ module World =
                     [<Test>]
                     let ``points for new wall are blocked`` () =
                         let blockedPoints =
-                            WorldObject.getPoints newWall
+                            WorldObject.getPoints newWall.value
                             |> List.map (fun p -> World.pointBlocked p added)
                             |> List.filter id
 
@@ -111,54 +111,6 @@ module World =
                 )
                 |> ignore
 
-            [<TestFixture>]
-            module ``adding a spawner`` =
-                let spawner =
-                    WorldObject.create WorldObject.Type.PlayerSpawner (Point.create  2 6)
-                    |> TestUtil.withId
-                let withSpawner = World.addObject spawner emptyWorld
-
-                [<Test>]
-                let ``adds spawner correctly`` () =
-                    withSpawner.playerSpawner.IsSome |> should equal true
-
-                [<Test>]
-                let ``updates blocking map correctly`` () =
-                    let expected =
-                        [
-                            Point.create 2 6
-                            Point.create 2 5
-                            Point.create 3 6
-                            Point.create 3 5
-                        ]
-                        |> Set.ofList
-
-                    let blocked =
-                        withSpawner.blocked
-                        |> Map.toList
-                        |> List.map fst
-                        |> Set.ofList
-
-                    blocked |> should be (equivalent expected)
-
-                [<TestFixture>]
-                module ``adding a new spawner`` =
-                    let newSpawner =
-                        WorldObject.create WorldObject.Type.PlayerSpawner (Point.create 5 6)
-                        |> TestUtil.withId
-                    let withNewSpawner = World.addObject newSpawner withSpawner
-
-                    [<Test>]
-                    let ``updates player spawner`` () =
-                        withNewSpawner.playerSpawner.IsSome |> should equal true
-                        withNewSpawner.playerSpawner.Value |> should equal newSpawner
-
-                    [<Test>]
-                    let ``removes old spawner`` () =
-                        withNewSpawner
-                        |> World.containsObject spawner.id
-                        |> should equal false
-
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =
@@ -166,7 +118,7 @@ module World =
                     Rect.create 0 2 5 2
                     Rect.create 3 0 4 4
                 ]
-            let emptyWorld = World.empty bounds
+            let emptyWorld = World.empty bounds (Point.create 0 2)
 
             [<Test>]
             let ``wall can be placed in first rect`` () =

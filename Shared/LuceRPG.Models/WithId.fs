@@ -13,4 +13,11 @@ module WithId =
             value = value
         }
 
+    let make (value: 'T): 'T Model =
+        let id = Id.make()
+        {
+            id = id
+            value = value
+        }
+
 type 'T WithId = 'T WithId.Model
