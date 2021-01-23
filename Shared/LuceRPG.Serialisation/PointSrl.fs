@@ -5,8 +5,8 @@ open System
 
 module PointSrl =
     let serialise (p: Point): byte[] =
-        let x = BitConverter.GetBytes(p.x)
-        let y = BitConverter.GetBytes(p.y)
+        let x = IntSrl.serialise p.x
+        let y = IntSrl.serialise p.y
 
         Array.append x y
 

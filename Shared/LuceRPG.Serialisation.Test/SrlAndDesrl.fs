@@ -34,6 +34,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let guidSrl () =
+            let checkFn =
+                srlAndDesrl GuidSrl.serialise GuidSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let listSrl () =
             let checkFn =
                 srlAndDesrl
