@@ -6,6 +6,7 @@ module WorldObject =
             | Wall
             | Path of int * int
             | Player
+            | PlayerSpawner
 
     type Type = Type.Model
 
@@ -27,13 +28,17 @@ module WorldObject =
         match obj.t with
         | Type.Wall -> true
         | Type.Path _ -> false
-        | Type.Player -> true
+        | Type.Player -> false
+        | Type.PlayerSpawner -> true
 
     let size (obj: Model): Point =
+        let p2x2 = Point.create 2 2
+
         match obj.t with
-        | Type.Wall -> Point.create 2 2
+        | Type.Wall -> p2x2
         | Type.Path (w,h) -> Point.create w h
-        | Type.Player -> Point.create 2 2
+        | Type.Player -> p2x2
+        | Type.PlayerSpawner -> p2x2
 
     let getPoints (obj: Model): Point List =
         let objSize = size obj

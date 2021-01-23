@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open FsCheck
-open LuceRPG.Models
 
 [<TestFixture>]
 module SrlAndDesrl =

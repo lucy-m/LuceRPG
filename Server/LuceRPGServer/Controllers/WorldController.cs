@@ -75,7 +75,7 @@ namespace LuceRPGServer.Controllers
         [HttpPut("Intention")]
         public async Task Intention()
         {
-            var buffer = new byte[20];
+            var buffer = new byte[40];
             var read = await Request.Body.ReadAsync(buffer);
 
             if (read == buffer.Length)
