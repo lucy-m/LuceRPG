@@ -3,13 +3,14 @@ using UnityEngine;
 
 public static class CoOrdTranslator
 {
-    public static Vector3 GetGameLocation(this WorldObjectModule.Model obj)
+    public static Vector3 GetGameLocation(this WithGuid.Model<WorldObjectModule.Payload> obj)
     {
         var size = WorldObjectModule.size(obj);
+        var topLeft = WorldObjectModule.topLeft(obj);
 
         var location = new Vector3(
-            obj.topLeft.x + size.x * 0.5f,
-            obj.topLeft.y - size.y * 0.5f
+            topLeft.x + size.x * 0.5f,
+            topLeft.y - size.y * 0.5f
         );
 
         return location;

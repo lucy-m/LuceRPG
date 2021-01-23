@@ -1,4 +1,5 @@
 using LuceRPG.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
 
-    private Dictionary<int, UniversalController> _controllers;
+    private Dictionary<Guid, UniversalController> _controllers;
 
     private void Awake()
     {
@@ -24,17 +25,19 @@ public class WorldLoader : MonoBehaviour
         }
     }
 
-    private GameObject GetPrefab(WorldObjectModule.Model obj)
+    private GameObject GetPrefab(WithGuid.Model<WorldObjectModule.Payload> obj)
     {
-        if (obj.t.IsWall)
+        var t = WorldObjectModule.t(obj);
+
+        if (t.IsWall)
         {
             return WallPrefab;
         }
-        else if (obj.t.IsPath)
+        else if (t.IsPath)
         {
             return PathPrefab;
         }
-        else if (obj.t.IsPlayer)
+        else if (t.IsPlayer)
         {
             return PlayerPrefab;
         }
@@ -44,7 +47,10 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(WorldModule.Model world)
     {
-        _controllers = new Dictionary<int, UniversalController>();
+        _controllers = new Dictionary<Guid, UniversalController>();
+
+        var objectCount = world.objects.Count;
+        Debug.Log($"Loading {objectCount} objects");
 
         foreach (var kvp in world.objects)
         {
@@ -61,12 +67,12 @@ public class WorldLoader : MonoBehaviour
 
                 if (uc != null)
                 {
-                    Debug.Log("Setting UC ID");
+                    Debug.Log($"Setting UC ID to {obj.id}");
                     uc.Id = obj.id;
                     _controllers[obj.id] = uc;
                 }
 
-                if (obj.t.IsPath)
+                if (WorldObjectModule.t(obj).IsPath)
                 {
                     var size = WorldObjectModule.size(obj);
                     var spriteRenderer = go.GetComponent<SpriteRenderer>();

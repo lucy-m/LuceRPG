@@ -28,6 +28,12 @@ public class WorldFetcher : MonoBehaviour
         {
             var bytes = webRequest.downloadHandler.data;
 
+            var bytes28 = bytes.Skip(28).ToArray();
+            var list = ListSrl.deserialise(
+                    FSharpFunc<byte[], FSharpOption<DesrlResult.Payload<WithGuid.Model<WorldObjectModule.Payload>>>>
+                    .FromConverter(WorldObjectSrl.deserialise),
+                    bytes28);
+
             var tWorld = WithTimestampSrl.deserialise(
                 FSharpFunc<byte[], FSharpOption<DesrlResult.Payload<WorldModule.Model>>>.FromConverter(
                     WorldSrl.deserialise

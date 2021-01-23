@@ -1,9 +1,10 @@
 using LuceRPG.Models;
+using System;
 using UnityEngine;
 
 public class UniversalController : MonoBehaviour
 {
-    public int Id = 0;
+    public Guid Id = Guid.Empty;
     public float Speed = 4;
 
     private Vector3 target;

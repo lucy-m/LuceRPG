@@ -11,7 +11,7 @@ module ASCIIWorld =
             world.blocked
             |> Map.tryFind point
             |> Option.map (fun obj ->
-                match obj.t with
+                match WorldObject.t obj with
                 | WorldObject.Type.Wall _ -> "W"
                 | WorldObject.Type.Player _ -> "P"
                 | _ -> " "

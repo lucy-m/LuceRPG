@@ -1,7 +1,5 @@
 ﻿namespace LuceRPG.Serialisation
 
-open System
-
 module ByteSrl =
     let size = 1
 
