@@ -17,7 +17,7 @@ module World =
             [<TestFixture>]
             module ``with a wall`` =
                 let topLeft = Point.create 1 3
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let world =
                    emptyWorld
@@ -26,7 +26,7 @@ module World =
                 [<TestFixture>]
                 module ``adding an unblocked wall`` =
                     let newTopLeft = Point.create 5 4
-                    let newWall = WorldObject.create WorldObject.Type.Wall newTopLeft |> TestUtil.withGuid
+                    let newWall = WorldObject.create WorldObject.Type.Wall newTopLeft |> TestUtil.withId
 
                     let added = World.addObject newWall world
 
@@ -48,7 +48,7 @@ module World =
                 [<TestFixture>]
                 module ``adding a new wall to a different point with the same id`` =
                     let newWall =
-                        WithGuid.create
+                        WithId.create
                             wall.id
                             (WorldObject.create (WorldObject.t wall) (Point.create 3 4))
                     let newWorld = World.addObject newWall world
@@ -85,7 +85,7 @@ module World =
             [<Test>]
             let ``adding a wall out of bounds fails`` () =
                 let topLeft = Point.create 100 100
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
 
@@ -123,7 +123,7 @@ module World =
             [<Test>]
             let ``wall can be placed in first rect`` () =
                 let topLeft = Point.create 1 2
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
 
@@ -134,7 +134,7 @@ module World =
             [<Test>]
             let ``wall can be placed in second rect`` () =
                 let topLeft = Point.create 4 -1
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
 
@@ -145,7 +145,7 @@ module World =
             [<Test>]
             let ``wall can be placed on boundary between rects`` () =
                 let topLeft = Point.create 4 0
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
 
@@ -157,7 +157,7 @@ module World =
             let ``wall cannot be placed partially in world`` () =
                 // top right point is out of bounds
                 let topLeft = Point.create 4 1
-                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withGuid
+                let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
 

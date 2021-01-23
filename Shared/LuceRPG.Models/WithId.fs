@@ -1,16 +1,16 @@
 ﻿namespace LuceRPG.Models
 
-module WithGuid =
+module WithId =
     type 'T Model =
         {
-            id: System.Guid
+            id: string
             value: 'T
         }
 
-    let create (id: System.Guid) (value: 'T): 'T Model =
+    let create (id: string) (value: 'T): 'T Model =
         {
             id = id
             value = value
         }
 
-type 'T WithGuid = 'T WithGuid.Model
+type 'T WithId = 'T WithId.Model

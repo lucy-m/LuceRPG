@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class CoOrdTranslator
 {
-    public static Vector3 GetGameLocation(this WithGuid.Model<WorldObjectModule.Payload> obj)
+    public static Vector3 GetGameLocation(this WithId.Model<WorldObjectModule.Payload> obj)
     {
         var size = WorldObjectModule.size(obj);
         var topLeft = WorldObjectModule.topLeft(obj);

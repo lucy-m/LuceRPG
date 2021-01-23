@@ -9,8 +9,8 @@ module IntentionProcessing =
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
         let bound = Rect.create 0 10 10 10
-        let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withGuid
-        let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withGuid
+        let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
+        let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
 
         let world = World.createWithObjs [bound] [player; wall]
 
@@ -21,7 +21,7 @@ module IntentionProcessing =
 
         [<TestFixture>]
         module ``when the player tries to move one square north`` =
-            let intention = Intention.Move (player.id, Direction.North, 1uy) |> TestUtil.withGuid
+            let intention = Intention.Move (player.id, Direction.North, 1uy) |> TestUtil.withId
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -42,7 +42,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move one square east`` =
             // player should be blocked by the wall in this case
-            let intention = Intention.Move (player.id, Direction.East, 1uy) |> TestUtil.withGuid
+            let intention = Intention.Move (player.id, Direction.East, 1uy) |> TestUtil.withId
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -60,7 +60,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move four squares east`` =
             // player should teleport past the wall in this case
-            let intention = Intention.Move (player.id, Direction.East, 4uy) |> TestUtil.withGuid
+            let intention = Intention.Move (player.id, Direction.East, 4uy) |> TestUtil.withId
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -81,7 +81,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move two squares south `` =
             // player would move out of bounds from this move
-            let intention = Intention.Move (player.id, Direction.South, 2uy) |> TestUtil.withGuid
+            let intention = Intention.Move (player.id, Direction.South, 2uy) |> TestUtil.withId
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]

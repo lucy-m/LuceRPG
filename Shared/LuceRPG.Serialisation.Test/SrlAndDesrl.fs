@@ -33,9 +33,9 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
-        let guidSrl () =
+        let stringSrl () =
             let checkFn =
-                srlAndDesrl GuidSrl.serialise GuidSrl.deserialise
+                srlAndDesrl StringSrl.serialise StringSrl.deserialise
 
             doCheck checkFn
 
@@ -58,11 +58,11 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
-        let withGuidSrl () =
+        let withIdSrl () =
             let checkFn =
                 srlAndDesrl
-                    (WithGuidSrl.serialise IntSrl.serialise)
-                    (WithGuidSrl.deserialise IntSrl.deserialise)
+                    (WithIdSrl.serialise IntSrl.serialise)
+                    (WithIdSrl.deserialise IntSrl.deserialise)
 
             doCheck checkFn
 

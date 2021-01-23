@@ -11,7 +11,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
 
-    private Dictionary<Guid, UniversalController> _controllers;
+    private Dictionary<string, UniversalController> _controllers;
 
     private void Awake()
     {
@@ -25,7 +25,7 @@ public class WorldLoader : MonoBehaviour
         }
     }
 
-    private GameObject GetPrefab(WithGuid.Model<WorldObjectModule.Payload> obj)
+    private GameObject GetPrefab(WithId.Model<WorldObjectModule.Payload> obj)
     {
         var t = WorldObjectModule.t(obj);
 
@@ -47,7 +47,7 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(WorldModule.Model world)
     {
-        _controllers = new Dictionary<Guid, UniversalController>();
+        _controllers = new Dictionary<string, UniversalController>();
 
         var objectCount = world.objects.Count;
         Debug.Log($"Loading {objectCount} objects");

@@ -2,9 +2,9 @@
 
 open LuceRPG.Models
 
-module WithGuidSrl =
-    let serialise (srlVal: 'T -> byte[]) (item: 'T WithGuid): byte[] =
-        let id = GuidSrl.serialise item.id
+module WithIdSrl =
+    let serialise (srlVal: 'T -> byte[]) (item: 'T WithId): byte[] =
+        let id = StringSrl.serialise item.id
         let value = srlVal item.value
 
         Array.append id value
@@ -12,9 +12,9 @@ module WithGuidSrl =
     let deserialise
         (desrlVal: byte[] -> 'T DesrlResult)
         (bytes: byte[])
-        : 'T WithGuid DesrlResult =
+        : 'T WithId DesrlResult =
             DesrlUtil.getTwo
-                GuidSrl.deserialise
+                StringSrl.deserialise
                 desrlVal
-                WithGuid.create
+                WithId.create
                 bytes

@@ -1,12 +1,10 @@
 ﻿namespace LuceRPG.Models
 
-open System
-
 module World =
     type Model =
         {
             bounds: Rect Set
-            objects: Map<Guid, WorldObject>
+            objects: Map<Id.WorldObject, WorldObject>
             blocked: Map<Point, WorldObject>
             playerSpawner: WorldObject Option
         }
@@ -46,11 +44,11 @@ module World =
         |> List.map (fun p -> pointInBounds p world)
         |> List.fold (&&) true
 
-    let containsObject (id: Guid) (world: Model): bool =
+    let containsObject (id: Id.WorldObject) (world: Model): bool =
         world.objects
         |> Map.containsKey id
 
-    let removeObject (id: Guid) (world: Model): Model =
+    let removeObject (id: Id.WorldObject) (world: Model): Model =
         let newObjects =
             world.objects
             |> Map.remove id

@@ -11,7 +11,7 @@
     <Compile Include="DesrlUtil.fs" />
     <Compile Include="IntSrl.fs" />
     <Compile Include="LongSrl.fs" />
-    <Compile Include="GuidSrl.fs" />
+    <Compile Include="StringSrl.fs" />
     <Compile Include="ListSrl.fs" />
     <Compile Include="WithTimestampSrl.fs" />
     <Compile Include="WithGuidSrl.fs" />

@@ -13,7 +13,7 @@ module WorldEventSrl =
             match i with
             | WorldEvent.Moved (id, d,a) ->
                 Array.concat [
-                    (GuidSrl.serialise id)
+                    (StringSrl.serialise id)
                     (DirectionSrl.serialise d)
                     (ByteSrl.serialise a)
                 ]
@@ -25,7 +25,7 @@ module WorldEventSrl =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
-                    GuidSrl.deserialise
+                    StringSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
                     (fun id d a -> WorldEvent.Moved (id, d,a))
