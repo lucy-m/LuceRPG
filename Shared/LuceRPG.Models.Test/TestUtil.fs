@@ -5,4 +5,4 @@ module TestUtil =
     let withId (t: 'T): 'T WithId =
         let guid = System.Guid.NewGuid().ToString()
 
-        WithId.create guid t
+        WithId.useId guid t

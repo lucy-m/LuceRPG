@@ -1,11 +1,15 @@
 ﻿namespace LuceRPG.Models
 
 module World =
+    type BlockedType =
+        | Object of WorldObject
+        | SpawnPoint
+
     type Model =
         {
             bounds: Rect Set
             objects: Map<Id.WorldObject, WorldObject>
-            blocked: Map<Point, WorldObject>
+            blocked: Map<Point, BlockedType>
             playerSpawner: Point
         }
 
@@ -15,10 +19,24 @@ module World =
         |> List.map snd
 
     let empty (bounds: Rect List) (playerSpawner: Point): Model =
+        let blocked =
+            let spawnerPoints =
+                [
+                    Point.zero
+                    Point.create 0 -1
+                    Point.create 1 0
+                    Point.create 1 -1
+                ]
+                |> List.map (Point.add playerSpawner)
+
+            spawnerPoints
+            |> List.map (fun p -> (p, BlockedType.SpawnPoint))
+            |> Map.ofList
+
         {
             bounds = bounds |> Set.ofList
             objects = Map.empty
-            blocked = Map.empty
+            blocked = blocked
             playerSpawner = playerSpawner
         }
 
@@ -26,7 +44,7 @@ module World =
         world.blocked
         |> Map.containsKey p
 
-    let getBlocker (p: Point) (world: Model): WorldObject Option =
+    let getBlocker (p: Point) (world: Model): BlockedType Option =
         world.blocked |> Map.tryFind p
 
     let pointInBounds (p: Point) (world: Model): bool =
@@ -52,10 +70,18 @@ module World =
         let points = WorldObject.getPoints obj.value
 
         let isNotBlocked =
+            let isPlayer = obj.value.t = WorldObject.Type.Player
             let blockedPoints =
                 points
                 |> List.choose (fun p -> getBlocker p world)
-                |> List.filter (fun wo -> wo.id <> obj.id)
+                |> List.filter (fun b ->
+                    match b with
+                    // objects are blocked by other objects with a differing id
+                    | BlockedType.Object o -> o.id <> obj.id
+                    // players are not blocked by spawn points
+                    | BlockedType.SpawnPoint _ -> not isPlayer
+                )
+
             blockedPoints |> List.isEmpty
 
         let inBounds = objInBounds obj world
@@ -69,8 +95,10 @@ module World =
 
         let newBlocked =
             world.blocked
-            |> Map.filter (fun _ wo ->
-                wo.id <> id
+            |> Map.filter (fun _ b ->
+                match b with
+                | BlockedType.Object wo -> wo.id <> id
+                | BlockedType.SpawnPoint _ -> true
             )
 
         {
@@ -104,7 +132,7 @@ module World =
                     // add all points to blocking map
                     points
                     |> List.fold
-                        (fun acc p -> Map.add p obj acc)
+                        (fun acc p -> Map.add p (BlockedType.Object obj) acc)
                         existingIdRemoved.blocked
                 else
                     existingIdRemoved.blocked

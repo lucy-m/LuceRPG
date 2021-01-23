@@ -36,7 +36,7 @@ type SerialisationArbs() =
             Arb.generate<WorldObject.Type>
 
         Gen.zip3 id objType topLeft
-        |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.create id)
+        |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.useId id)
 
     static member genWorld: Gen<World> =
         let bounds = Gen.listOf Arb.generate<Rect>

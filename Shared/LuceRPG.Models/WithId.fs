@@ -7,13 +7,13 @@ module WithId =
             value: 'T
         }
 
-    let create (id: string) (value: 'T): 'T Model =
+    let useId (id: string) (value: 'T): 'T Model =
         {
             id = id
             value = value
         }
 
-    let make (value: 'T): 'T Model =
+    let create (value: 'T): 'T Model =
         let id = Id.make()
         {
             id = id

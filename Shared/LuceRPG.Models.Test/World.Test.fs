@@ -48,7 +48,7 @@ module World =
                 [<TestFixture>]
                 module ``adding a new wall to a different point with the same id`` =
                     let newWall =
-                        WithId.create
+                        WithId.useId
                             wall.id
                             (WorldObject.create (WorldObject.t wall) (Point.create 3 4))
                     let newWorld = World.addObject newWall world
@@ -73,6 +73,13 @@ module World =
 
                         let expected =
                             [
+                                // spawn point
+                                Point.create 0 8
+                                Point.create 1 8
+                                Point.create 0 7
+                                Point.create 1 7
+
+                                // wall
                                 Point.create 3 4
                                 Point.create 3 3
                                 Point.create 4 4
@@ -111,6 +118,26 @@ module World =
                 )
                 |> ignore
 
+            [<Test>]
+            let ``player can be added on top of the spawn point`` () =
+                let player =
+                    WorldObject.create WorldObject.Type.Player bounds.topLeft
+                    |> WithId.create
+
+                let withPlayer = World.addObject player emptyWorld
+
+                World.containsObject player.id withPlayer |> should equal true
+
+            [<Test>]
+            let ``wall cannot be added on top of the spawn point`` () =
+                let wall =
+                    WorldObject.create WorldObject.Type.Wall bounds.topLeft
+                    |> WithId.create
+
+                let withWall = World.addObject wall emptyWorld
+
+                World.containsObject wall.id withWall |> should equal false
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =
@@ -122,7 +149,7 @@ module World =
 
             [<Test>]
             let ``wall can be placed in first rect`` () =
-                let topLeft = Point.create 1 2
+                let topLeft = Point.create 2 2
                 let wall = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
                 let added = World.addObject wall emptyWorld
