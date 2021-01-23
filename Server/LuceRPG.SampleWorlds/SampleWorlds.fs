@@ -11,6 +11,8 @@ module SampleWorlds =
                 Rect.create -6 0 6 11
             ]
 
+        let spawnPoint = Point.create 2 -5
+
         let walls =
             [
                 WorldObject.create WorldObject.Type.Wall (Point.create 2 -2)
@@ -24,7 +26,7 @@ module SampleWorlds =
                 WorldObject.create (WorldObject.Type.Path (15,1)) (Point.create -2 -6)
             ]
             |> List.map (fun wo ->
-                WithId.create (System.Guid.NewGuid().ToString()) wo
+                WithId.create wo
             )
 
-        World.createWithObjs bounds walls
+        World.createWithObjs bounds spawnPoint walls

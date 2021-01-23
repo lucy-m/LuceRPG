@@ -23,7 +23,7 @@ module WorldEventsStore =
             }
 
         let events = [firstEvent; secondEvent]
-        let world = World.empty []
+        let world = World.empty [] Point.zero
 
         let store: WorldEventsStore =
             {
@@ -72,7 +72,7 @@ module WorldEventsStore =
 
         [<TestFixture>]
         module ``adding a process result`` =
-            let newWorld = World.empty [Rect.create 0 0 4 4]
+            let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
             let event = WorldEvent.Moved (System.Guid.NewGuid().ToString(), Direction.South, 1uy)
 
             let processResult: IntentionProcessing.ProcessResult =
@@ -120,7 +120,7 @@ module WorldEventsStore =
 
     [<TestFixture>]
     module ``culled store`` =
-        let world = World.empty []
+        let world = World.empty [] Point.zero
         let event: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
