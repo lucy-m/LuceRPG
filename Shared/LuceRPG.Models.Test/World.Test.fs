@@ -111,6 +111,54 @@ module World =
                 )
                 |> ignore
 
+            [<TestFixture>]
+            module ``adding a spawner`` =
+                let spawner =
+                    WorldObject.create WorldObject.Type.PlayerSpawner (Point.create  2 6)
+                    |> TestUtil.withId
+                let withSpawner = World.addObject spawner emptyWorld
+
+                [<Test>]
+                let ``adds spawner correctly`` () =
+                    withSpawner.playerSpawner.IsSome |> should equal true
+
+                [<Test>]
+                let ``updates blocking map correctly`` () =
+                    let expected =
+                        [
+                            Point.create 2 6
+                            Point.create 2 5
+                            Point.create 3 6
+                            Point.create 3 5
+                        ]
+                        |> Set.ofList
+
+                    let blocked =
+                        withSpawner.blocked
+                        |> Map.toList
+                        |> List.map fst
+                        |> Set.ofList
+
+                    blocked |> should be (equivalent expected)
+
+                [<TestFixture>]
+                module ``adding a new spawner`` =
+                    let newSpawner =
+                        WorldObject.create WorldObject.Type.PlayerSpawner (Point.create 5 6)
+                        |> TestUtil.withId
+                    let withNewSpawner = World.addObject newSpawner withSpawner
+
+                    [<Test>]
+                    let ``updates player spawner`` () =
+                        withNewSpawner.playerSpawner.IsSome |> should equal true
+                        withNewSpawner.playerSpawner.Value |> should equal newSpawner
+
+                    [<Test>]
+                    let ``removes old spawner`` () =
+                        withNewSpawner
+                        |> World.containsObject spawner.id
+                        |> should equal false
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =

@@ -5,8 +5,8 @@ open FsCheck
 
 type SerialisationArbs() =
     static member genString: Gen<string> =
-        Arb.generate<System.Guid>
-        |> Gen.map (fun g -> g.ToString())
+        Arb.generate<string>
+        |> Gen.map (fun s -> if s = null then "" else s)
 
     static member genRect: Gen<Rect> =
         let size =

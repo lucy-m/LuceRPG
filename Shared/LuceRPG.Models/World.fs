@@ -106,12 +106,26 @@ module World =
                 else
                     existingIdRemoved.blocked
 
-            let objects = Map.add obj.id obj existingIdRemoved.objects
+            let objects =
+                match WorldObject.t obj, existingIdRemoved.playerSpawner with
+                | WorldObject.Type.PlayerSpawner, Option.Some playerSpawner ->
+                    // need to remove the existing player spawner
+                    let removedPlayerSpawner = removeObject playerSpawner.id existingIdRemoved
+                    Map.add obj.id obj removedPlayerSpawner.objects
+
+                | _ ->
+                    Map.add obj.id obj existingIdRemoved.objects
+
+            let spawner =
+                match WorldObject.t obj with
+                | WorldObject.Type.PlayerSpawner -> Option.Some obj
+                | _ -> existingIdRemoved.playerSpawner
 
             {
                 world with
                     blocked = blocked
                     objects = objects
+                    playerSpawner = spawner
             }
 
     /// Adds many objects
