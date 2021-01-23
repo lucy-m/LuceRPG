@@ -21,7 +21,7 @@ module IntentionProcessing =
 
         [<TestFixture>]
         module ``when the player tries to move one square north`` =
-            let intention = Intention.Move (player.id, Direction.North, 1uy)
+            let intention = Intention.Move (player.id, Direction.North, 1uy) |> TestUtil.withGuid
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -42,7 +42,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move one square east`` =
             // player should be blocked by the wall in this case
-            let intention = Intention.Move (player.id, Direction.East, 1uy)
+            let intention = Intention.Move (player.id, Direction.East, 1uy) |> TestUtil.withGuid
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -60,7 +60,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move four squares east`` =
             // player should teleport past the wall in this case
-            let intention = Intention.Move (player.id, Direction.East, 4uy)
+            let intention = Intention.Move (player.id, Direction.East, 4uy) |> TestUtil.withGuid
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]
@@ -81,7 +81,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``when the player tries to move two squares south `` =
             // player would move out of bounds from this move
-            let intention = Intention.Move (player.id, Direction.South, 2uy)
+            let intention = Intention.Move (player.id, Direction.South, 2uy) |> TestUtil.withGuid
             let result = IntentionProcessing.processOne intention world
 
             [<Test>]

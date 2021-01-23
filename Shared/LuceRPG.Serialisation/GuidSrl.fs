@@ -12,5 +12,6 @@ module GuidSrl =
         if bytes.Length < size
         then Option.None
         else
-            let guid = new Guid(bytes)
+            let guidBytes = bytes |> Array.take size
+            let guid = new Guid(guidBytes)
             DesrlResult.create guid size

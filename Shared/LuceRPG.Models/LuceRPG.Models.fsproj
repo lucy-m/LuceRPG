@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="Id.fs" />
     <Compile Include="WithTimestamp.fs" />
+    <Compile Include="WithGuid.fs" />
     <Compile Include="Point.fs" />
     <Compile Include="Rect.fs" />
     <Compile Include="Direction.fs" />

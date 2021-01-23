@@ -17,5 +17,5 @@ module WithTimestampSrl =
             DesrlUtil.getTwo
                 LongSrl.deserialise
                 desrlVal
-                (fun t v -> { timestamp = t; value = v })
+                WithTimestamp.create
                 bytes

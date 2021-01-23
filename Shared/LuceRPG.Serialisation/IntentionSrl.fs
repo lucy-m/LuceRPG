@@ -3,8 +3,7 @@
 open LuceRPG.Models
 
 module IntentionSrl =
-    let serialise (i: Intention): byte[] =
-
+    let serialisePayload (i: Intention.Payload): byte[] =
         let label =
             match i with
             | Intention.Move  _-> 1uy
@@ -20,8 +19,11 @@ module IntentionSrl =
 
         Array.append [|label|] addtInfo
 
-    let deserialise (bytes: byte[]): Intention DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): Intention DesrlResult =
+    let serialise (i: Intention): byte[] =
+        WithGuidSrl.serialise serialisePayload i
+
+    let deserialisePayload (bytes: byte[]): Intention.Payload DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): Intention.Payload DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
@@ -35,3 +37,8 @@ module IntentionSrl =
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
+
+    let deserialise (bytes: byte[]): Intention DesrlResult =
+        WithGuidSrl.deserialise
+            deserialisePayload
+            bytes
