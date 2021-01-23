@@ -2,6 +2,6 @@
 
 module WorldEvent =
     type Model =
-        | Moved of System.Guid * Direction * byte
+        | Moved of Id.WorldObject * Direction * byte
 
 type WorldEvent = WorldEvent.Model

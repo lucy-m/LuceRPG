@@ -16,7 +16,7 @@ module WorldObject =
             topLeft: Point
         }
 
-    type Model = Payload WithGuid
+    type Model = Payload WithId
 
     let create (t: Type) (topLeft: Point): Payload =
         {

@@ -12,7 +12,7 @@ module IntentionSrl =
             match i with
             | Intention.Move (id, d,a) ->
                 Array.concat [
-                    (GuidSrl.serialise id)
+                    (StringSrl.serialise id)
                     (DirectionSrl.serialise d)
                     (ByteSrl.serialise a)
                 ]
@@ -20,14 +20,14 @@ module IntentionSrl =
         Array.append [|label|] addtInfo
 
     let serialise (i: Intention): byte[] =
-        WithGuidSrl.serialise serialisePayload i
+        WithIdSrl.serialise serialisePayload i
 
     let deserialisePayload (bytes: byte[]): Intention.Payload DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): Intention.Payload DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
-                    GuidSrl.deserialise
+                    StringSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
                     (fun id d a -> Intention.Move (id, d,a))
@@ -39,6 +39,6 @@ module IntentionSrl =
         DesrlUtil.getTagged loadObj bytes
 
     let deserialise (bytes: byte[]): Intention DesrlResult =
-        WithGuidSrl.deserialise
+        WithIdSrl.deserialise
             deserialisePayload
             bytes

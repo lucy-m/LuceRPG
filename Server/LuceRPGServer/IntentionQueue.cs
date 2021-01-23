@@ -8,14 +8,14 @@ namespace LuceRPG.Server
 {
     public class IntentionQueue
     {
-        private readonly Queue<WithGuid.Model<IntentionModule.Payload>> _queue;
+        private readonly Queue<WithId.Model<IntentionModule.Payload>> _queue;
 
         public IntentionQueue()
         {
-            _queue = new Queue<WithGuid.Model<IntentionModule.Payload>>();
+            _queue = new Queue<WithId.Model<IntentionModule.Payload>>();
         }
 
-        public void Enqueue(WithGuid.Model<IntentionModule.Payload> intention)
+        public void Enqueue(WithId.Model<IntentionModule.Payload> intention)
         {
             lock (_queue)
             {
@@ -23,7 +23,7 @@ namespace LuceRPG.Server
             }
         }
 
-        public IEnumerable<WithGuid.Model<IntentionModule.Payload>> DequeueAll()
+        public IEnumerable<WithId.Model<IntentionModule.Payload>> DequeueAll()
         {
             lock (_queue)
             {

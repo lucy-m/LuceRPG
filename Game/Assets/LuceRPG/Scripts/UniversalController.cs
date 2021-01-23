@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UniversalController : MonoBehaviour
 {
-    public Guid Id = Guid.Empty;
+    public string Id = "";
     public float Speed = 4;
 
     private Vector3 target;

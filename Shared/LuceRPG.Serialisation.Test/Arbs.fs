@@ -4,6 +4,10 @@ open LuceRPG.Models
 open FsCheck
 
 type SerialisationArbs() =
+    static member genString: Gen<string> =
+        Arb.generate<System.Guid>
+        |> Gen.map (fun g -> g.ToString())
+
     static member genRect: Gen<Rect> =
         let size =
             Gen.choose (5,80)
@@ -19,7 +23,9 @@ type SerialisationArbs() =
         |> Gen.map (fun (t, s) -> Rect.pointCreate t s)
 
     static member genWorldObject: Gen<WorldObject> =
-        let id = Arb.generate<System.Guid>
+        let id =
+            Arb.generate<System.Guid>
+            |> Gen.map (fun g -> g.ToString())
 
         let topLeft =
             Gen.choose (-100,100)
@@ -30,7 +36,7 @@ type SerialisationArbs() =
             Arb.generate<WorldObject.Type>
 
         Gen.zip3 id objType topLeft
-        |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithGuid.create id)
+        |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.create id)
 
     static member genWorld: Gen<World> =
         let bounds = Gen.listOf Arb.generate<Rect>
@@ -44,6 +50,7 @@ type SerialisationArbs() =
 
         world
 
+    static member string (): Arbitrary<string> = Arb.fromGen SerialisationArbs.genString
     static member rect (): Arbitrary<Rect> = Arb.fromGen SerialisationArbs.genRect
     static member worldObject (): Arbitrary<WorldObject> = Arb.fromGen SerialisationArbs.genWorldObject
     static member world (): Arbitrary<World> = Arb.fromGen SerialisationArbs.genWorld

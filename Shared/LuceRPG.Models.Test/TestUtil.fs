@@ -2,7 +2,7 @@
 
 module TestUtil =
 
-    let withGuid (t: 'T): 'T WithGuid =
-        let guid = System.Guid.NewGuid()
+    let withId (t: 'T): 'T WithId =
+        let guid = System.Guid.NewGuid().ToString()
 
-        WithGuid.create guid t
+        WithId.create guid t

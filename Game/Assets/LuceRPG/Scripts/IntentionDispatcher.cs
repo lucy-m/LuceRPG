@@ -25,12 +25,12 @@ public class IntentionDispatcher : MonoBehaviour
 
     public void Dispatch(IntentionModule.Payload payload)
     {
-        var intention = WithGuid.create<IntentionModule.Payload>(Guid.NewGuid(), payload);
+        var intention = WithId.create<IntentionModule.Payload>(Guid.NewGuid().ToString(), payload);
 
         StartCoroutine(SendIntention(intention));
     }
 
-    private IEnumerator SendIntention(WithGuid.Model<IntentionModule.Payload> intention)
+    private IEnumerator SendIntention(WithId.Model<IntentionModule.Payload> intention)
     {
         var bytes = IntentionSrl.serialise(intention);
         var webRequest = UnityWebRequest.Put("https://localhost:5001/World/Intention", bytes);

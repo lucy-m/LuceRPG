@@ -53,7 +53,7 @@ module WorldObjectSrl =
             bytes
 
     let serialise (obj: WorldObject): byte[] =
-        WithGuidSrl.serialise serialisePayload obj
+        WithIdSrl.serialise serialisePayload obj
 
     let deserialise (bytes: byte[]): WorldObject DesrlResult =
-        WithGuidSrl.deserialise deserialisePayload bytes
+        WithIdSrl.deserialise deserialisePayload bytes
