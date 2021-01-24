@@ -40,7 +40,11 @@ module GetSinceResultSrl =
         DesrlUtil.getTagged loadObj bytes
 
     let serialise (result: GetSinceResult): byte[] =
-        WithTimestampSrl.serialise serialisePayload result
+        WithTimestampSrl.serialise
+            (WithIdSrl.serialise serialisePayload)
+            result
 
     let deserialise (bytes: byte[]): GetSinceResult DesrlResult =
-        WithTimestampSrl.deserialise deserialisePayload bytes
+        WithTimestampSrl.deserialise
+            (WithIdSrl.deserialise deserialisePayload)
+            bytes
