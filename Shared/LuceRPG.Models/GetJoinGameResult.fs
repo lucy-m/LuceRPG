@@ -2,7 +2,7 @@
 
 module GetJoinGameResult =
     type Model =
-        | Success of World
+        | Success of Id.WorldObject * World WithTimestamp
         | Failure of string
 
 type GetJoinGameResult = GetJoinGameResult.Model

@@ -3,6 +3,7 @@
 open LuceRPG.Models
 
 module GetJoinGameResultSrl =
+
     let serialise (result: GetJoinGameResult): byte[] =
         let label =
             match result with
@@ -11,7 +12,10 @@ module GetJoinGameResultSrl =
 
         let addtInfo =
             match result with
-            | GetJoinGameResult.Success w -> WorldSrl.serialise w
+            | GetJoinGameResult.Success (id, w) ->
+                Array.append
+                    (StringSrl.serialise id)
+                    (WithTimestampSrl.serialise WorldSrl.serialise w)
             | GetJoinGameResult.Failure s -> StringSrl.serialise s
 
         Array.append [|label|] addtInfo
@@ -20,8 +24,11 @@ module GetJoinGameResultSrl =
         let loadObj (tag: byte) (objectBytes: byte[]): GetJoinGameResult DesrlResult =
             match tag with
             | 1uy ->
-                WorldSrl.deserialise objectBytes
-                |> DesrlResult.map (fun w -> GetJoinGameResult.Success w)
+                DesrlUtil.getTwo
+                    StringSrl.deserialise
+                    (WithTimestampSrl.deserialise WorldSrl.deserialise)
+                    (fun id w -> GetJoinGameResult.Success(id, w))
+                    objectBytes
             | 2uy ->
                 StringSrl.deserialise objectBytes
                 |> DesrlResult.map (fun s -> GetJoinGameResult.Failure s)

@@ -56,7 +56,7 @@ namespace LuceRPGServer.Controllers
         public ActionResult JoinGame()
         {
             WithId.Model<WorldObjectModule.Payload>? playerObject = null;
-            bool playerSet = false;
+            bool intentionProcessed = false;
 
             var intention = WithId.create(IntentionModule.Payload.JoinGame);
 
@@ -73,13 +73,13 @@ namespace LuceRPGServer.Controllers
                     playerObject = playerAdded.Item;
                 }
 
-                playerSet = true;
+                intentionProcessed = true;
             }
 
             _queue.Enqueue(intention, Action);
 
             var attempts = 0;
-            while (!playerSet && attempts < MaxJoinGameAttempts)
+            while (!intentionProcessed && attempts < MaxJoinGameAttempts)
             {
                 attempts++;
                 Thread.Sleep(50);
@@ -87,7 +87,16 @@ namespace LuceRPGServer.Controllers
 
             _logger.LogDebug($"Join game result player ID {playerObject?.id}");
 
-            return Ok();
+            var joinGameResult = playerObject != null
+                ? GetJoinGameResultModule.Model.NewSuccess(
+                    playerObject.id,
+                    WithTimestamp.create(TimestampProvider.Now, _store.CurrentWorld)
+                )
+                : GetJoinGameResultModule.Model.NewFailure("Could not join game");
+
+            var serialised = GetJoinGameResultSrl.serialise(joinGameResult);
+
+            return File(serialised, RawBytesContentType);
         }
 
         [HttpGet("since")]
