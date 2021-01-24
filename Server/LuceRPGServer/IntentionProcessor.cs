@@ -1,6 +1,7 @@
 ﻿using LuceRPG.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Linq;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace LuceRPG.Server
         private readonly IntentionQueue _queue;
         private Timer? _timer;
 
+        private FSharpMap<string, string> _objectClientMap;
+
         public IntentionProcessor(
             ILogger<IntentionProcessor> logger,
             IntentionQueue queue,
@@ -24,6 +27,11 @@ namespace LuceRPG.Server
             _logger = logger;
             _queue = queue;
             _store = store;
+
+            // So far the only way for ownership to be established is
+            //   through intentions
+            // A freshly loaded world will never have any ownership
+            _objectClientMap = new FSharpMap<string, string>(Array.Empty<Tuple<string, string>>());
         }
 
         public void Dispose()
@@ -55,7 +63,7 @@ namespace LuceRPG.Server
             {
                 _logger.LogDebug($"Processing {entries.Length} intentions");
                 var intentions = entries.Select(e => e.Intention).ToArray();
-                var processed = IntentionProcessing.processMany(intentions, _store.CurrentWorld);
+                var processed = IntentionProcessing.processMany(_objectClientMap, _store.CurrentWorld, intentions);
 
                 var events = processed.events.ToArray();
                 foreach (var (Intention, OnProcessed) in entries)
@@ -68,6 +76,7 @@ namespace LuceRPG.Server
                 }
 
                 _store.Update(processed);
+                _objectClientMap = processed.objectClientMap;
             }
         }
     }

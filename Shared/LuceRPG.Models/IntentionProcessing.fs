@@ -1,24 +1,24 @@
 ﻿namespace LuceRPG.Models
 
 module IntentionProcessing =
-    type ClientObjectMap = Map<Id.WorldObject, Id.Client>
+    type ObjectClientMap = Map<Id.WorldObject, Id.Client>
 
     type ProcessResult =
         {
             events: WorldEvent seq
             world: World
-            clientObjectMap: ClientObjectMap
+            objectClientMap: ObjectClientMap
         }
 
-    let unchanged (clientObjectMap: ClientObjectMap) (world: World): ProcessResult =
+    let unchanged (clientObjectMap: ObjectClientMap) (world: World): ProcessResult =
         {
             events = []
             world = world
-            clientObjectMap = clientObjectMap
+            objectClientMap = clientObjectMap
         }
 
     let processOne
-            (clientObjectMap: ClientObjectMap)
+            (clientObjectMap: ObjectClientMap)
             (world: World)
             (intention: Intention)
             : ProcessResult =
@@ -54,7 +54,7 @@ module IntentionProcessing =
                         {
                             events = [event]
                             world = newWorld
-                            clientObjectMap = clientObjectMap
+                            objectClientMap = clientObjectMap
                         }
                     else thisUnchanged
                 else
@@ -66,7 +66,7 @@ module IntentionProcessing =
 
             let newClientObjectMap =
                 clientObjectMap
-                |> Map.add intention.value.clientId obj.id
+                |> Map.add obj.id intention.value.clientId
 
             let newWorld = World.addObject obj world
             let event =
@@ -76,7 +76,7 @@ module IntentionProcessing =
             {
                 events = [event]
                 world = newWorld
-                clientObjectMap = newClientObjectMap
+                objectClientMap = newClientObjectMap
             }
 
     let processMany
@@ -88,11 +88,11 @@ module IntentionProcessing =
 
         intentions
         |> Seq.fold (fun acc i ->
-            let resultOne = processOne acc.clientObjectMap acc.world i
+            let resultOne = processOne acc.objectClientMap acc.world i
 
             {
                 events = Seq.append resultOne.events acc.events
                 world = resultOne.world
-                clientObjectMap = resultOne.clientObjectMap
+                objectClientMap = resultOne.objectClientMap
             }
         ) initial

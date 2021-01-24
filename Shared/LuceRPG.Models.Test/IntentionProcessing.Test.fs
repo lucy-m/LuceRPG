@@ -51,7 +51,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``client object map is unchanged`` () =
-                    result.clientObjectMap |> should equal clientObjectMap
+                    result.objectClientMap |> should equal clientObjectMap
 
             [<TestFixture>]
             module ``when another client tries to move the player one square north`` =
@@ -194,9 +194,9 @@ module IntentionProcessing =
                     )
 
                 let tEntry =
-                    processResult.clientObjectMap
-                    |> Map.tryFind newClientId
+                    processResult.objectClientMap
+                    |> Map.tryFind newPlayer.id
 
                 tEntry.IsSome |> should equal true
 
-                tEntry.Value |> should equal newPlayer.id
+                tEntry.Value |> should equal newClientId
