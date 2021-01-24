@@ -109,13 +109,20 @@ public class WorldLoader : MonoBehaviour
             {
                 var objectId = tObjectId.Value;
 
-                if (_controllers.TryGetValue(objectId, out var uc))
+                if (worldEvent.t.IsGameJoined)
                 {
-                    uc.Apply(worldEvent);
+                    // add object to game
                 }
                 else
                 {
-                    Debug.LogError($"Could not process update for unknown object {objectId}");
+                    if (_controllers.TryGetValue(objectId, out var uc))
+                    {
+                        uc.Apply(worldEvent);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Could not process update for unknown object {objectId}");
+                    }
                 }
             }
         }

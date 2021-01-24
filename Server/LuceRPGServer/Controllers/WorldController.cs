@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.FSharp.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LuceRPGServer.Controllers
@@ -17,6 +20,7 @@ namespace LuceRPGServer.Controllers
     public class WorldController : ControllerBase
     {
         private const string RawBytesContentType = "application/octet-stream";
+        private const int MaxJoinGameAttempts = 10;
 
         private readonly ILogger<WorldController> _logger;
         private readonly IntentionQueue _queue;
@@ -46,6 +50,38 @@ namespace LuceRPGServer.Controllers
                 timestampedWorld
             );
             return File(serialised, RawBytesContentType);
+        }
+
+        [HttpGet("join")]
+        public ActionResult JoinGame()
+        {
+            string? playerId = null;
+            bool playerSet = false;
+
+            var intention = WithId.create(IntentionModule.Payload.JoinGame);
+
+            void Action(IEnumerable<WorldEventModule.Model> events)
+            {
+                var gameJoined = events.FirstOrDefault(e => e.t.IsGameJoined);
+                if (gameJoined != null)
+                {
+                    playerId = ((WorldEventModule.Type.GameJoined)gameJoined.t).Item;
+                }
+                playerSet = true;
+            }
+
+            _queue.Enqueue(intention, Action);
+
+            var attempts = 0;
+            while (!playerSet && attempts < MaxJoinGameAttempts)
+            {
+                attempts++;
+                Thread.Sleep(50);
+            }
+
+            _logger.LogDebug($"Join game result player ID {playerId}");
+
+            return Ok();
         }
 
         [HttpGet("since")]
@@ -87,7 +123,6 @@ namespace LuceRPGServer.Controllers
 
             if (intention.HasValue())
             {
-                _logger.LogDebug("Queueing intention");
                 _queue.Enqueue(intention.Value.value);
             }
             else
