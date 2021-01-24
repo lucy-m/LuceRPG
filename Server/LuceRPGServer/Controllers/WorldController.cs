@@ -37,21 +37,6 @@ namespace LuceRPGServer.Controllers
             _store = store;
         }
 
-        [HttpGet]
-        public ActionResult Get()
-        {
-            var world = _store.CurrentWorld;
-            var timestamp = TimestampProvider.Now;
-
-            var timestampedWorld = new WithTimestamp.Model<WorldModule.Model>(timestamp, world);
-
-            var serialised = WithTimestampSrl.serialise(
-                new Func<WorldModule.Model, byte[]>(WorldSrl.serialise).ToFSharpFunc(),
-                timestampedWorld
-            );
-            return File(serialised, RawBytesContentType);
-        }
-
         [HttpGet("join")]
         public ActionResult JoinGame()
         {
@@ -142,7 +127,6 @@ namespace LuceRPGServer.Controllers
 
             if (intention.HasValue())
             {
-                _logger.LogDebug($"Got intention from {intention.Value.value.value.clientId}");
                 _queue.Enqueue(intention.Value.value);
             }
             else
