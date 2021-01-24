@@ -89,7 +89,7 @@ namespace LuceRPGServer.Controllers
         }
 
         [HttpGet("since")]
-        public ActionResult GetSince(long timestamp)
+        public ActionResult GetSince(long timestamp, string clientId)
         {
             var result = _store.GetSince(timestamp);
             var newTimestamp = TimestampProvider.Now;

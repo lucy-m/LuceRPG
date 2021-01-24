@@ -89,7 +89,10 @@ public class CommsService : MonoBehaviour
 
         while (true)
         {
-            var url = BaseUrl + "World/since?timestamp=" + lastTimestamp;
+            var url =
+                BaseUrl
+                + "World/since?timestamp=" + lastTimestamp
+                + "&clientId=" + _clientId;
 
             var webRequest = UnityWebRequest.Get(url);
             yield return webRequest.SendWebRequest();
