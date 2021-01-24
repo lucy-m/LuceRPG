@@ -16,24 +16,29 @@ public class UniversalController : MonoBehaviour
 
     public void Apply(WorldEventModule.Model worldEvent)
     {
-        var direction = worldEvent.Item2;
-        var amount = worldEvent.Item3;
+        if (worldEvent.t.IsMoved)
+        {
+            var moved = (WorldEventModule.Type.Moved)worldEvent.t;
 
-        if (direction.IsNorth)
-        {
-            target += new Vector3(0, amount);
-        }
-        else if (direction.IsSouth)
-        {
-            target += new Vector3(0, -amount);
-        }
-        else if (direction.IsEast)
-        {
-            target += new Vector3(amount, 0);
-        }
-        else if (direction.IsWest)
-        {
-            target += new Vector3(-amount, 0);
+            var direction = moved.Item2;
+            var amount = moved.Item3;
+
+            if (direction.IsNorth)
+            {
+                target += new Vector3(0, amount);
+            }
+            else if (direction.IsSouth)
+            {
+                target += new Vector3(0, -amount);
+            }
+            else if (direction.IsEast)
+            {
+                target += new Vector3(amount, 0);
+            }
+            else if (direction.IsWest)
+            {
+                target += new Vector3(-amount, 0);
+            }
         }
     }
 

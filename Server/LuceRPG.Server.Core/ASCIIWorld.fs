@@ -10,11 +10,13 @@ module ASCIIWorld =
         then
             world.blocked
             |> Map.tryFind point
-            |> Option.map (fun obj ->
-                match WorldObject.t obj with
-                | WorldObject.Type.Wall _ -> "W"
-                | WorldObject.Type.Player _ -> "P"
-                | _ -> " "
+            |> Option.map (fun b ->
+                match b with
+                | World.BlockedType.Object obj ->
+                    match WorldObject.t obj with
+                    | WorldObject.Type.Wall _ -> "W"
+                    | _ -> " "
+                | World.BlockedType.SpawnPoint _ -> "S"
             )
             |> Option.defaultValue " "
         else

@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.FSharp.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LuceRPGServer.Controllers
@@ -17,6 +20,7 @@ namespace LuceRPGServer.Controllers
     public class WorldController : ControllerBase
     {
         private const string RawBytesContentType = "application/octet-stream";
+        private const int MaxJoinGameAttempts = 10;
 
         private readonly ILogger<WorldController> _logger;
         private readonly IntentionQueue _queue;
@@ -48,6 +52,53 @@ namespace LuceRPGServer.Controllers
             return File(serialised, RawBytesContentType);
         }
 
+        [HttpGet("join")]
+        public ActionResult JoinGame()
+        {
+            WithId.Model<WorldObjectModule.Payload>? playerObject = null;
+            bool intentionProcessed = false;
+
+            var intention = WithId.create(IntentionModule.Payload.JoinGame);
+
+            void Action(IEnumerable<WorldEventModule.Model> events)
+            {
+                var objectAdded =
+                    events
+                        .Where(e => e.t.IsObjectAdded)
+                        .Select(e => (WorldEventModule.Type.ObjectAdded)e.t);
+                var playerAdded = objectAdded.FirstOrDefault(a => a.Item.value.t.IsPlayer);
+
+                if (playerAdded != null)
+                {
+                    playerObject = playerAdded.Item;
+                }
+
+                intentionProcessed = true;
+            }
+
+            _queue.Enqueue(intention, Action);
+
+            var attempts = 0;
+            while (!intentionProcessed && attempts < MaxJoinGameAttempts)
+            {
+                attempts++;
+                Thread.Sleep(50);
+            }
+
+            _logger.LogDebug($"Join game result player ID {playerObject?.id}");
+
+            var joinGameResult = playerObject != null
+                ? GetJoinGameResultModule.Model.NewSuccess(
+                    playerObject.id,
+                    WithTimestamp.create(TimestampProvider.Now, _store.CurrentWorld)
+                )
+                : GetJoinGameResultModule.Model.NewFailure("Could not join game");
+
+            var serialised = GetJoinGameResultSrl.serialise(joinGameResult);
+
+            return File(serialised, RawBytesContentType);
+        }
+
         [HttpGet("since")]
         public ActionResult GetSince(long timestamp)
         {
@@ -75,7 +126,7 @@ namespace LuceRPGServer.Controllers
         [HttpPut("Intention")]
         public async Task Intention()
         {
-            var buffer = new byte[40];
+            var buffer = new byte[200];
             var read = await Request.Body.ReadAsync(buffer);
 
             if (read == buffer.Length)
@@ -87,7 +138,6 @@ namespace LuceRPGServer.Controllers
 
             if (intention.HasValue())
             {
-                _logger.LogDebug("Queueing intention");
                 _queue.Enqueue(intention.Value.value);
             }
             else

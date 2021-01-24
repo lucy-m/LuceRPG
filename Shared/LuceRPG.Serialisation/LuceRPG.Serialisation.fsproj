@@ -23,6 +23,7 @@
     <Compile Include="WorldEventSrl.fs" />
     <Compile Include="WorldSrl.fs" />
     <Compile Include="GetSinceResultSrl.fs" />
+    <Compile Include="GetJoinGameResultSrl.fs" />
   </ItemGroup>
 
   <ItemGroup>

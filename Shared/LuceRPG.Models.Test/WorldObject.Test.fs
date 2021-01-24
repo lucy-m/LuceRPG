@@ -14,7 +14,7 @@ module WorldObject =
             let topLeft = Point.create 8 2
             let obj = WorldObject.create (WorldObject.Type.Path (1,1)) topLeft |> TestUtil.withId
 
-            let points = WorldObject.getPoints obj
+            let points = WorldObject.getPoints obj.value
 
             [<Test>]
             let ``has one point`` () =
@@ -29,7 +29,7 @@ module WorldObject =
             let topLeft = Point.create 10 1
             let obj = WorldObject.create WorldObject.Type.Wall topLeft |> TestUtil.withId
 
-            let points = WorldObject.getPoints obj
+            let points = WorldObject.getPoints obj.value
 
             [<Test>]
             let ``has four points`` () =

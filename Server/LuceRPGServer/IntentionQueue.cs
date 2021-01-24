@@ -1,29 +1,47 @@
 ﻿using LuceRPG.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LuceRPG.Server
 {
     public class IntentionQueue
     {
-        private readonly Queue<WithId.Model<IntentionModule.Payload>> _queue;
+        private readonly Queue<(
+            WithId.Model<IntentionModule.Payload> Intention,
+            Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
+        )> _queue;
 
         public IntentionQueue()
         {
-            _queue = new Queue<WithId.Model<IntentionModule.Payload>>();
+            _queue = new Queue<(
+                WithId.Model<IntentionModule.Payload> Intention,
+                Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
+            )>();
         }
 
         public void Enqueue(WithId.Model<IntentionModule.Payload> intention)
         {
             lock (_queue)
             {
-                _queue.Enqueue(intention);
+                _queue.Enqueue((Intention: intention, OnProcessed: null));
             }
         }
 
-        public IEnumerable<WithId.Model<IntentionModule.Payload>> DequeueAll()
+        public void Enqueue(
+            WithId.Model<IntentionModule.Payload> intention,
+            Action<IEnumerable<WorldEventModule.Model>> onProcessed
+        )
+        {
+            lock (_queue)
+            {
+                _queue.Enqueue((Intention: intention, OnProcessed: onProcessed));
+            }
+        }
+
+        public IEnumerable<(
+            WithId.Model<IntentionModule.Payload> Intention,
+            Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
+        )> DequeueAll()
         {
             lock (_queue)
             {

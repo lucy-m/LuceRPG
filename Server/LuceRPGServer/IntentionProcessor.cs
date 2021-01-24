@@ -13,7 +13,7 @@ namespace LuceRPG.Server
         private readonly ILogger<IntentionProcessor> _logger;
         private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
-        private Timer _timer;
+        private Timer? _timer;
 
         public IntentionProcessor(
             ILogger<IntentionProcessor> logger,
@@ -47,14 +47,26 @@ namespace LuceRPG.Server
             return Task.CompletedTask;
         }
 
-        private void ProcessIntentions(object state)
+        private void ProcessIntentions(object? state)
         {
-            var intentions = _queue.DequeueAll().ToArray();
+            var entries = _queue.DequeueAll().ToArray();
 
-            if (intentions.Length > 0)
+            if (entries.Length > 0)
             {
-                _logger.LogDebug($"Processing {intentions.Length} intentions");
+                _logger.LogDebug($"Processing {entries.Length} intentions");
+                var intentions = entries.Select(e => e.Intention).ToArray();
                 var processed = IntentionProcessing.processMany(intentions, _store.CurrentWorld);
+
+                var events = processed.events.ToArray();
+                foreach (var (Intention, OnProcessed) in entries)
+                {
+                    if (OnProcessed != null)
+                    {
+                        var myEvents = events.Where(e => e.resultOf == Intention.id);
+                        OnProcessed(myEvents);
+                    }
+                }
+
                 _store.Update(processed);
             }
         }

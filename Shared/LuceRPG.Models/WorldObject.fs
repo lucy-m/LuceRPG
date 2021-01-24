@@ -6,7 +6,6 @@ module WorldObject =
             | Wall
             | Path of int * int
             | Player
-            | PlayerSpawner
 
     type Type = Type.Model
 
@@ -32,18 +31,16 @@ module WorldObject =
         | Type.Wall -> true
         | Type.Path _ -> false
         | Type.Player -> false
-        | Type.PlayerSpawner -> true
 
-    let size (obj: Model): Point =
+    let size (obj: Payload): Point =
         let p2x2 = Point.create 2 2
 
-        match obj.value.t with
+        match obj.t with
         | Type.Wall -> p2x2
         | Type.Path (w,h) -> Point.create w h
         | Type.Player -> p2x2
-        | Type.PlayerSpawner -> p2x2
 
-    let getPoints (obj: Model): Point List =
+    let getPoints (obj: Payload): Point List =
         let objSize = size obj
 
         let relPoints =
@@ -55,7 +52,7 @@ module WorldObject =
 
         let blocked =
             relPoints
-            |> List.map (fun p1 -> Point.add p1 obj.value.topLeft)
+            |> List.map (fun p1 -> Point.add p1 obj.topLeft)
 
         blocked
 

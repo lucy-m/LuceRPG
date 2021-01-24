@@ -16,5 +16,5 @@ module WithIdSrl =
             DesrlUtil.getTwo
                 StringSrl.deserialise
                 desrlVal
-                WithId.create
+                WithId.useId
                 bytes

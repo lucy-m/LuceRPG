@@ -1,4 +1,5 @@
 using LuceRPG.Models;
+using LuceRPG.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,41 +46,36 @@ public class WorldLoader : MonoBehaviour
         return null;
     }
 
+    private void AddObject(WithId.Model<WorldObjectModule.Payload> obj)
+    {
+        var location = obj.GetGameLocation();
+        var prefab = GetPrefab(obj);
+
+        if (prefab != null)
+        {
+            var go = Instantiate(prefab, location, Quaternion.identity);
+
+            var uc = go.GetComponent<UniversalController>();
+
+            if (uc != null)
+            {
+                Debug.Log($"Setting UC ID to {obj.id}");
+                uc.Id = obj.id;
+                _controllers[obj.id] = uc;
+            }
+
+            if (WorldObjectModule.t(obj).IsPath)
+            {
+                var size = WorldObjectModule.size(obj.value);
+                var spriteRenderer = go.GetComponent<SpriteRenderer>();
+                spriteRenderer.size = new Vector2(size.x, size.y);
+            }
+        }
+    }
+
     public void LoadWorld(WorldModule.Model world)
     {
         _controllers = new Dictionary<string, UniversalController>();
-
-        var objectCount = world.objects.Count;
-        Debug.Log($"Loading {objectCount} objects");
-
-        foreach (var kvp in world.objects)
-        {
-            var obj = kvp.Value;
-
-            var location = obj.GetGameLocation();
-            var prefab = GetPrefab(obj);
-
-            if (prefab != null)
-            {
-                var go = Instantiate(prefab, location, Quaternion.identity);
-
-                var uc = go.GetComponent<UniversalController>();
-
-                if (uc != null)
-                {
-                    Debug.Log($"Setting UC ID to {obj.id}");
-                    uc.Id = obj.id;
-                    _controllers[obj.id] = uc;
-                }
-
-                if (WorldObjectModule.t(obj).IsPath)
-                {
-                    var size = WorldObjectModule.size(obj);
-                    var spriteRenderer = go.GetComponent<SpriteRenderer>();
-                    spriteRenderer.size = new Vector2(size.x, size.y);
-                }
-            }
-        }
 
         foreach (var bound in world.bounds)
         {
@@ -97,19 +93,43 @@ public class WorldLoader : MonoBehaviour
                 }
             }
         }
+
+        var objectCount = world.objects.Count;
+        Debug.Log($"Loading {objectCount} objects");
+
+        foreach (var kvp in world.objects)
+        {
+            var obj = kvp.Value;
+            AddObject(obj);
+        }
     }
 
     public void ApplyUpdate(IEnumerable<WorldEventModule.Model> worldEvents)
     {
         foreach (var worldEvent in worldEvents)
         {
-            if (_controllers.TryGetValue(worldEvent.Item1, out var uc))
+            var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
+            if (tObjectId.HasValue())
             {
-                uc.Apply(worldEvent);
-            }
-            else
-            {
-                Debug.LogError($"Could not process update for unknown object {worldEvent.Item1}");
+                var objectId = tObjectId.Value;
+
+                if (worldEvent.t.IsObjectAdded)
+                {
+                    var objectAdded = ((WorldEventModule.Type.ObjectAdded)worldEvent.t).Item;
+                    AddObject(objectAdded);
+                    Debug.Log($"Adding item to game {objectAdded.id}");
+                }
+                else
+                {
+                    if (_controllers.TryGetValue(objectId, out var uc))
+                    {
+                        uc.Apply(worldEvent);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Could not process update for unknown object {objectId}");
+                    }
+                }
             }
         }
     }

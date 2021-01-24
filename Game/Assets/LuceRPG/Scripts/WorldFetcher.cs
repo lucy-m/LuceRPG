@@ -6,6 +6,7 @@ using LuceRPG.Serialisation;
 using Microsoft.FSharp.Core;
 using LuceRPG.Utility;
 using System.Linq;
+using System;
 
 public class WorldFetcher : MonoBehaviour
 {
@@ -21,37 +22,40 @@ public class WorldFetcher : MonoBehaviour
     private IEnumerator FetchWorld()
     {
         Debug.Log("Attempting to load world");
-        var webRequest = UnityWebRequest.Get(BaseUrl);
+        var webRequest = UnityWebRequest.Get(BaseUrl + "join");
         yield return webRequest.SendWebRequest();
 
         if (webRequest.result == UnityWebRequest.Result.Success)
         {
             var bytes = webRequest.downloadHandler.data;
 
-            var bytes28 = bytes.Skip(28).ToArray();
-            var list = ListSrl.deserialise(
-                    FSharpFunc<byte[], FSharpOption<DesrlResult.Payload<WithId.Model<WorldObjectModule.Payload>>>>
-                    .FromConverter(WorldObjectSrl.deserialise),
-                    bytes28);
+            var tResult = GetJoinGameResultSrl.deserialise(bytes);
 
-            var tWorld = WithTimestampSrl.deserialise(
-                FSharpFunc<byte[], FSharpOption<DesrlResult.Payload<WorldModule.Model>>>.FromConverter(
-                    WorldSrl.deserialise
-                ),
-                bytes
-            );
-
-            if (tWorld.HasValue())
+            if (tResult.HasValue())
             {
-                _lastTimestamp = tWorld.Value.value.timestamp;
-                var world = tWorld.Value.value.value;
+                var result = tResult.Value.value;
 
-                if (WorldLoader.Instance != null)
+                if (result.IsSuccess)
                 {
-                    Debug.Log("Loading world");
-                    WorldLoader.Instance.LoadWorld(world);
+                    var success = (GetJoinGameResultModule.Model.Success)result;
+                    var playerId = success.Item1;
+                    Debug.Log($"Joined with player ID {playerId}");
+                    var tsWorld = success.Item2;
 
-                    yield return FetchUpdates();
+                    _lastTimestamp = tsWorld.timestamp;
+
+                    if (WorldLoader.Instance != null)
+                    {
+                        Debug.Log("Loading world");
+                        WorldLoader.Instance.LoadWorld(tsWorld.value);
+
+                        yield return FetchUpdates();
+                    }
+                }
+                else
+                {
+                    var failure = (GetJoinGameResultModule.Model.Failure)result;
+                    Debug.LogError($"Could not join world {failure.Item}");
                 }
             }
             else
@@ -98,6 +102,10 @@ public class WorldFetcher : MonoBehaviour
                             Debug.Log($"Updating world with {events.Length} events");
                             WorldLoader.Instance.ApplyUpdate(events);
                         }
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Updating from entire world state is not yet supported");
                     }
                 }
                 else

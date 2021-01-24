@@ -28,13 +28,28 @@ module IntentionProcessing =
                 if World.canPlace newObj world
                 then
                     let newWorld = World.addObject newObj world
-                    let event = WorldEvent.Model.Moved (id, dir, amount)
+                    let event =
+                        WorldEvent.Type.Moved (id, dir, amount)
+                        |> WorldEvent.asResult intention.id
 
                     {
                         events = [event]
                         world = newWorld
                     }
                 else unchanged world
+        | Intention.JoinGame ->
+            let spawnPoint = World.spawnPoint world
+            let obj = WorldObject.create WorldObject.Type.Player spawnPoint |> WithId.create
+
+            let newWorld = World.addObject obj world
+            let event =
+                WorldEvent.Type.ObjectAdded obj
+                |> WorldEvent.asResult intention.id
+
+            {
+                events = [event]
+                world = newWorld
+            }
 
     let processMany (intentions: Intention seq) (world: World): ProcessResult =
         let initial = unchanged world
