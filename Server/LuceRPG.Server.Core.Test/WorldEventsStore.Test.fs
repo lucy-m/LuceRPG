@@ -36,6 +36,7 @@ module WorldEventsStore =
                 lastCull = 0L
                 recentEvents = events
                 world = world
+                objectClientMap = Map.empty
             }
 
         [<TestFixture>]
@@ -80,11 +81,13 @@ module WorldEventsStore =
         module ``adding a process result`` =
             let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
             let event = WorldEvent.Moved (objId, Direction.South, 1uy) |> makeEvent
+            let objectClientMap = Map.ofList ["obj1", "client1"]
 
             let processResult: IntentionProcessing.ProcessResult =
                 {
                     events = [event]
                     world = newWorld
+                    objectClientMap = objectClientMap
                 }
 
             let now = 1400L
@@ -103,6 +106,10 @@ module WorldEventsStore =
             [<Test>]
             let ``world is updated`` () =
                 newStore.world |> should equal newWorld
+
+            [<Test>]
+            let ``objectClientMap is updated`` () =
+                newStore.objectClientMap |> should equal objectClientMap
 
         [<TestFixture>]
         module ``culling`` =
@@ -140,6 +147,7 @@ module WorldEventsStore =
                 lastCull = cullTime
                 recentEvents = [event]
                 world = world
+                objectClientMap = Map.empty
             }
 
         [<Test>]
