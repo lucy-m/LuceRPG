@@ -3,7 +3,7 @@
 open LuceRPG.Models
 
 module WorldEventSrl =
-    let serialise (i: WorldEvent): byte[] =
+    let serialiseType (i: WorldEvent.Type): byte[] =
 
         let label =
             match i with
@@ -23,21 +23,34 @@ module WorldEventSrl =
 
         Array.append [|label|] addtInfo
 
-    let deserialise (bytes: byte[]): WorldEvent DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): WorldEvent DesrlResult =
+    let serialise (e: WorldEvent): byte[] =
+        let id = StringSrl.serialise e.resultOf
+        let payload = serialiseType e.t
+
+        Array.append id payload
+
+    let deserialiseType (bytes: byte[]): WorldEvent.Type DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): WorldEvent.Type DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
                     StringSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
-                    (fun id d a -> WorldEvent.Moved (id, d,a))
+                    (fun id d a -> WorldEvent.Type.Moved (id, d,a))
                     objectBytes
             | 2uy ->
                 StringSrl.deserialise objectBytes
-                |> DesrlResult.map (fun s -> WorldEvent.GameJoined s)
+                |> DesrlResult.map (fun s -> WorldEvent.Type.GameJoined s)
             | _ ->
                 printfn "Unknown WorldEvent tag %u" tag
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
+
+    let deserialise (bytes: byte[]): WorldEvent DesrlResult =
+        DesrlUtil.getTwo
+            StringSrl.deserialise
+            deserialiseType
+            WorldEvent.asResult
+            bytes
