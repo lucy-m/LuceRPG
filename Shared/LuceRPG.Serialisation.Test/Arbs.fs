@@ -70,10 +70,7 @@ type SerialisationArbs() =
             Arb.generate<string>
             |> Gen.map (fun s -> GetJoinGameResult.Failure s)
 
-        let payload =
-            Gen.oneof [worldGen; failureGen]
-
-        payload |> Gen.map WithId.create
+        Gen.oneof [worldGen; failureGen]
 
     static member string (): Arbitrary<string> = Arb.fromGen SerialisationArbs.genString
     static member rect (): Arbitrary<Rect> = Arb.fromGen SerialisationArbs.genRect

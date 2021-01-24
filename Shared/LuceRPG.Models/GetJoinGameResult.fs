@@ -1,10 +1,8 @@
 ﻿namespace LuceRPG.Models
 
 module GetJoinGameResult =
-    type Payload =
+    type Model =
         | Success of Id.WorldObject * World WithTimestamp
         | Failure of string
-
-    type Model = Payload WithId
 
 type GetJoinGameResult = GetJoinGameResult.Model

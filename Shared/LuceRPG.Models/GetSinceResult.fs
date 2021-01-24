@@ -5,6 +5,6 @@ module GetSinceResult =
         | Events of WorldEvent WithTimestamp List
         | World of World
 
-    type Model = Payload WithId WithTimestamp
+    type Model = Payload WithTimestamp
 
 type GetSinceResult = GetSinceResult.Model
