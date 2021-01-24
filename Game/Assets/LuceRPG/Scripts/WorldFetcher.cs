@@ -46,7 +46,7 @@ public class WorldFetcher : MonoBehaviour
             if (WorldLoader.Instance != null)
             {
                 Debug.Log("Loading world");
-                WorldLoader.Instance.LoadWorld(world);
+                WorldLoader.Instance.LoadWorld(playerId, world);
             }
         }
 
