@@ -13,7 +13,7 @@ namespace LuceRPG.Server
         private readonly ILogger<IntentionProcessor> _logger;
         private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
-        private Timer _timer;
+        private Timer? _timer;
 
         public IntentionProcessor(
             ILogger<IntentionProcessor> logger,
@@ -47,7 +47,7 @@ namespace LuceRPG.Server
             return Task.CompletedTask;
         }
 
-        private void ProcessIntentions(object state)
+        private void ProcessIntentions(object? state)
         {
             var intentions = _queue.DequeueAll().ToArray();
 

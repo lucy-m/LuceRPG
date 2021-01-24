@@ -8,18 +8,24 @@ open System
 [<TestFixture>]
 module WorldEventsStore =
 
+    let objId = System.Guid.NewGuid().ToString()
+
+    let makeEvent (t: WorldEvent.Type): WorldEvent =
+        let intentionId = System.Guid.NewGuid.ToString()
+        WorldEvent.asResult intentionId t
+
     [<TestFixture>]
     module ``unculled store with two events`` =
         let firstEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                value = WorldEvent.Moved (System.Guid.NewGuid().ToString(), Direction.North, 1uy)
+                value = WorldEvent.Moved (objId, Direction.North, 1uy) |> makeEvent
             }
 
         let secondEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1200L
-                value = WorldEvent.Moved (System.Guid.NewGuid().ToString(), Direction.East, 1uy)
+                value = WorldEvent.Moved (objId, Direction.East, 1uy) |> makeEvent
             }
 
         let events = [firstEvent; secondEvent]
@@ -73,7 +79,7 @@ module WorldEventsStore =
         [<TestFixture>]
         module ``adding a process result`` =
             let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
-            let event = WorldEvent.Moved (System.Guid.NewGuid().ToString(), Direction.South, 1uy)
+            let event = WorldEvent.Moved (objId, Direction.South, 1uy) |> makeEvent
 
             let processResult: IntentionProcessing.ProcessResult =
                 {
@@ -124,7 +130,7 @@ module WorldEventsStore =
         let event: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                value = WorldEvent.Moved (System.Guid.NewGuid().ToString(), Direction.North, 1uy)
+                value = WorldEvent.Moved (objId, Direction.North, 1uy) |> makeEvent
             }
 
         let cullTime = 800L
