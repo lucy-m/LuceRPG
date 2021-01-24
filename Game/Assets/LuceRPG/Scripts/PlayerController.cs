@@ -24,25 +24,25 @@ public class PlayerController : MonoBehaviour
 
             if (vertIn > 0)
             {
-                var intention = IntentionModule.Payload.NewMove(_uc.Id, DirectionModule.Model.North, 1);
+                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.North, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
                 yield return new WaitForSeconds(InputDelay);
             }
             else if (vertIn < 0)
             {
-                var intention = IntentionModule.Payload.NewMove(_uc.Id, DirectionModule.Model.South, 1);
+                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.South, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
                 yield return new WaitForSeconds(InputDelay);
             }
             else if (horzIn > 0)
             {
-                var intention = IntentionModule.Payload.NewMove(_uc.Id, DirectionModule.Model.East, 1);
+                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.East, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
                 yield return new WaitForSeconds(InputDelay);
             }
             else if (horzIn < 0)
             {
-                var intention = IntentionModule.Payload.NewMove(_uc.Id, DirectionModule.Model.West, 1);
+                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.West, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
                 yield return new WaitForSeconds(InputDelay);
             }

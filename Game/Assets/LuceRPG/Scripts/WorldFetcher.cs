@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using LuceRPG.Models;
 using LuceRPG.Serialisation;
-using Microsoft.FSharp.Core;
 using LuceRPG.Utility;
 using System.Linq;
 using System;
@@ -38,9 +37,11 @@ public class WorldFetcher : MonoBehaviour
                 if (result.IsSuccess)
                 {
                     var success = (GetJoinGameResultModule.Model.Success)result;
-                    var playerId = success.Item1;
-                    Debug.Log($"Joined with player ID {playerId}");
-                    var tsWorld = success.Item2;
+                    var clientId = success.Item1;
+                    IntentionDispatcher.Instance.ClientId = clientId;
+                    var playerId = success.Item2;
+                    Debug.Log($"Client {clientId} joined with player ID {playerId}");
+                    var tsWorld = success.Item3;
 
                     _lastTimestamp = tsWorld.timestamp;
 

@@ -10,6 +10,7 @@ public class IntentionDispatcher : MonoBehaviour
 {
     public static IntentionDispatcher Instance = null;
     public float PollPeriod = 0.5f;
+    public string ClientId;
 
     private void Awake()
     {
@@ -23,17 +24,24 @@ public class IntentionDispatcher : MonoBehaviour
         }
     }
 
-    public void Dispatch(IntentionModule.Payload payload)
+    public void Dispatch(IntentionModule.Type t)
     {
-        var intention = WithId.create(payload);
+        if (ClientId != null)
+        {
+            var intention = WithId.create(IntentionModule.makePayload(ClientId, t));
 
-        StartCoroutine(SendIntention(intention));
+            StartCoroutine(SendIntention(intention));
+        }
+        else
+        {
+            Debug.LogError("No client ID available");
+        }
     }
 
     private IEnumerator SendIntention(WithId.Model<IntentionModule.Payload> intention)
     {
         var bytes = IntentionSrl.serialise(intention);
-        var webRequest = UnityWebRequest.Put("https://localhost:5001/World/Intention", bytes);
+        var webRequest = UnityWebRequest.Put("https://localhost:5001/World/intention", bytes);
         yield return webRequest.SendWebRequest();
 
         if (webRequest.result == UnityWebRequest.Result.Success)

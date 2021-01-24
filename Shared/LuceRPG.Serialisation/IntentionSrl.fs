@@ -3,7 +3,7 @@
 open LuceRPG.Models
 
 module IntentionSrl =
-    let serialisePayload (i: Intention.Payload): byte[] =
+    let serialiseType (i: Intention.Type): byte[] =
         let label =
             match i with
             | Intention.Move  _-> 1uy
@@ -11,7 +11,7 @@ module IntentionSrl =
 
         let addtInfo =
             match i with
-            | Intention.Move (id, d,a) ->
+            | Intention.Move (id, d, a) ->
                 Array.concat [
                     (StringSrl.serialise id)
                     (DirectionSrl.serialise d)
@@ -21,18 +21,24 @@ module IntentionSrl =
 
         Array.append [|label|] addtInfo
 
+    let serialisePayload (i: Intention.Payload): byte[] =
+        let clientId = StringSrl.serialise i.clientId
+        let t = serialiseType i.t
+
+        Array.append clientId t
+
     let serialise (i: Intention): byte[] =
         WithIdSrl.serialise serialisePayload i
 
-    let deserialisePayload (bytes: byte[]): Intention.Payload DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): Intention.Payload DesrlResult =
+    let deserialiseType (bytes: byte[]): Intention.Type DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): Intention.Type DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getThree
                     StringSrl.deserialise
                     DirectionSrl.deserialise
                     ByteSrl.deserialise
-                    (fun id d a -> Intention.Move (id, d,a))
+                    (fun id d a -> Intention.Move (id, d, a))
                     objectBytes
             | 2uy ->
                 DesrlResult.create Intention.JoinGame 0
@@ -41,6 +47,13 @@ module IntentionSrl =
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
+
+    let deserialisePayload (bytes: byte[]): Intention.Payload DesrlResult =
+        DesrlUtil.getTwo
+            StringSrl.deserialise
+            deserialiseType
+            Intention.makePayload
+            bytes
 
     let deserialise (bytes: byte[]): Intention DesrlResult =
         WithIdSrl.deserialise

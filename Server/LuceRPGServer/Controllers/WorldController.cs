@@ -57,8 +57,11 @@ namespace LuceRPGServer.Controllers
         {
             WithId.Model<WorldObjectModule.Payload>? playerObject = null;
             bool intentionProcessed = false;
+            var clientId = Guid.NewGuid().ToString();
 
-            var intention = WithId.create(IntentionModule.Payload.JoinGame);
+            var intention = WithId.create(
+                IntentionModule.makePayload(clientId, IntentionModule.Type.JoinGame)
+            );
 
             void Action(IEnumerable<WorldEventModule.Model> events)
             {
@@ -89,6 +92,7 @@ namespace LuceRPGServer.Controllers
 
             var joinGameResult = playerObject != null
                 ? GetJoinGameResultModule.Model.NewSuccess(
+                    clientId,
                     playerObject.id,
                     WithTimestamp.create(TimestampProvider.Now, _store.CurrentWorld)
                 )
@@ -123,7 +127,7 @@ namespace LuceRPGServer.Controllers
             return dump;
         }
 
-        [HttpPut("Intention")]
+        [HttpPut("intention")]
         public async Task Intention()
         {
             var buffer = new byte[200];
@@ -138,6 +142,7 @@ namespace LuceRPGServer.Controllers
 
             if (intention.HasValue())
             {
+                _logger.LogDebug($"Got intention from {intention.Value.value.value.clientId}");
                 _queue.Enqueue(intention.Value.value);
             }
             else
