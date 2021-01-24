@@ -1,4 +1,5 @@
 using LuceRPG.Models;
+using LuceRPG.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -74,7 +75,7 @@ public class WorldLoader : MonoBehaviour
 
                 if (WorldObjectModule.t(obj).IsPath)
                 {
-                    var size = WorldObjectModule.size(obj);
+                    var size = WorldObjectModule.size(obj.value);
                     var spriteRenderer = go.GetComponent<SpriteRenderer>();
                     spriteRenderer.size = new Vector2(size.x, size.y);
                 }
@@ -103,13 +104,19 @@ public class WorldLoader : MonoBehaviour
     {
         foreach (var worldEvent in worldEvents)
         {
-            if (_controllers.TryGetValue(worldEvent.Item1, out var uc))
+            var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
+            if (tObjectId.HasValue())
             {
-                uc.Apply(worldEvent);
-            }
-            else
-            {
-                Debug.LogError($"Could not process update for unknown object {worldEvent.Item1}");
+                var objectId = tObjectId.Value;
+
+                if (_controllers.TryGetValue(objectId, out var uc))
+                {
+                    uc.Apply(worldEvent);
+                }
+                else
+                {
+                    Debug.LogError($"Could not process update for unknown object {objectId}");
+                }
             }
         }
     }

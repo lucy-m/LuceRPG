@@ -5,7 +5,7 @@ public static class CoOrdTranslator
 {
     public static Vector3 GetGameLocation(this WithId.Model<WorldObjectModule.Payload> obj)
     {
-        var size = WorldObjectModule.size(obj);
+        var size = WorldObjectModule.size(obj.value);
         var topLeft = WorldObjectModule.topLeft(obj);
 
         var location = new Vector3(

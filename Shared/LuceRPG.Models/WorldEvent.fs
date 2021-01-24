@@ -17,4 +17,9 @@ module WorldEvent =
             t = t
         }
 
+    let getObjectId (t: Type): Id.WorldObject Option =
+        match t with
+        | Type.Moved (id, _, _) -> id |> Option.Some
+        | Type.GameJoined id -> id |> Option.Some
+
 type WorldEvent = WorldEvent.Model

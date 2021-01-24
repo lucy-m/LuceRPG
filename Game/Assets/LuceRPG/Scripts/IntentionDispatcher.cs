@@ -25,7 +25,7 @@ public class IntentionDispatcher : MonoBehaviour
 
     public void Dispatch(IntentionModule.Payload payload)
     {
-        var intention = WithId.create<IntentionModule.Payload>(Guid.NewGuid().ToString(), payload);
+        var intention = WithId.create(payload);
 
         StartCoroutine(SendIntention(intention));
     }
