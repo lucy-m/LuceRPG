@@ -5,8 +5,7 @@ open FsCheck
 
 type SerialisationArbs() =
     static member genString: Gen<string> =
-        Arb.generate<string>
-        |> Gen.map (fun s -> if s = null then "" else s)
+        Gen.fresh (fun () -> System.Guid.NewGuid().ToString())
 
     static member genRect: Gen<Rect> =
         let size =
@@ -57,7 +56,18 @@ type SerialisationArbs() =
 
         world
 
+    static member genGetJoinGameResult: Gen<GetJoinGameResult> =
+        let worldGen =
+            Arb.generate<World>
+            |> Gen.map (fun w -> GetJoinGameResult.Success w)
+        let failureGen =
+            Arb.generate<string>
+            |> Gen.map (fun s -> GetJoinGameResult.Failure s)
+
+        Gen.oneof [worldGen; failureGen]
+
     static member string (): Arbitrary<string> = Arb.fromGen SerialisationArbs.genString
     static member rect (): Arbitrary<Rect> = Arb.fromGen SerialisationArbs.genRect
     static member worldObject (): Arbitrary<WorldObject> = Arb.fromGen SerialisationArbs.genWorldObject
     static member world (): Arbitrary<World> = Arb.fromGen SerialisationArbs.genWorld
+    static member getJoinGameResult (): Arbitrary<GetJoinGameResult> = Arb.fromGen SerialisationArbs.genGetJoinGameResult

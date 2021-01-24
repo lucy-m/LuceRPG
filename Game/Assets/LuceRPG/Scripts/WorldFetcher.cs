@@ -6,6 +6,7 @@ using LuceRPG.Serialisation;
 using Microsoft.FSharp.Core;
 using LuceRPG.Utility;
 using System.Linq;
+using System;
 
 public class WorldFetcher : MonoBehaviour
 {
@@ -98,6 +99,10 @@ public class WorldFetcher : MonoBehaviour
                             Debug.Log($"Updating world with {events.Length} events");
                             WorldLoader.Instance.ApplyUpdate(events);
                         }
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Updating from entire world state is not yet supported");
                     }
                 }
                 else

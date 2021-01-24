@@ -17,6 +17,7 @@
     <Compile Include="World.fs" />
     <Compile Include="IntentionProcessing.fs" />
     <Compile Include="GetSinceResult.fs" />
+    <Compile Include="GetJoinGameResult.fs" />
   </ItemGroup>
 
 </Project>

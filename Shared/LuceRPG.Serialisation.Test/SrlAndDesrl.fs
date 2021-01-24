@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open FsCheck
+open LuceRPG.Models
 
 [<TestFixture>]
 module SrlAndDesrl =
@@ -126,5 +127,15 @@ module SrlAndDesrl =
         let getSinceResultSrl () =
             let checkFn =
                 srlAndDesrl GetSinceResultSrl.serialise GetSinceResultSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let getJoinGameResultSrl () =
+            let checkFn (r: GetJoinGameResult): bool =
+                srlAndDesrl
+                    GetJoinGameResultSrl.serialise
+                    GetJoinGameResultSrl.deserialise
+                    r
 
             doCheck checkFn

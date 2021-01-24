@@ -24,3 +24,7 @@ module UnknownTag =
         [<Test>]
         let worldObjectTypeSrl () =
             unknownTag WorldObjectSrl.deserialiseType 200uy
+
+        [<Test>]
+        let getJoinGameResultSrl () =
+            unknownTag GetJoinGameResultSrl.deserialise 100uy
