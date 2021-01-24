@@ -8,15 +8,18 @@ module WorldEventSrl =
         let label =
             match i with
             | WorldEvent.Moved  _-> 1uy
+            | WorldEvent.GameJoined _ -> 2uy
 
         let addtInfo =
             match i with
-            | WorldEvent.Moved (id, d,a) ->
+            | WorldEvent.Moved (id, d, a) ->
                 Array.concat [
                     (StringSrl.serialise id)
                     (DirectionSrl.serialise d)
                     (ByteSrl.serialise a)
                 ]
+            | WorldEvent.GameJoined id ->
+                StringSrl.serialise id
 
         Array.append [|label|] addtInfo
 
@@ -30,6 +33,9 @@ module WorldEventSrl =
                     ByteSrl.deserialise
                     (fun id d a -> WorldEvent.Moved (id, d,a))
                     objectBytes
+            | 2uy ->
+                StringSrl.deserialise objectBytes
+                |> DesrlResult.map (fun s -> WorldEvent.GameJoined s)
             | _ ->
                 printfn "Unknown WorldEvent tag %u" tag
                 Option.None
