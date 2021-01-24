@@ -14,7 +14,7 @@ module IntentionProcessing =
         }
 
     let processOne (intention: Intention) (world: World): ProcessResult =
-        match intention.value with
+        match intention.value.t with
         | Intention.Move (id, dir, amount) ->
             let tObj = world.objects |> Map.tryFind id
 

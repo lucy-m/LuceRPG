@@ -58,13 +58,12 @@ type SerialisationArbs() =
 
     static member genGetJoinGameResult: Gen<GetJoinGameResult> =
         let worldGen =
-            Gen.zip3
-                Arb.generate<string>
-                Arb.generate<int64>
-                Arb.generate<World>
-            |> Gen.map (fun (id, ts, w) ->
+            Gen.zip
+                (Gen.zip Arb.generate<string> Arb.generate<string>)
+                (Gen.zip Arb.generate<int64> Arb.generate<World>)
+            |> Gen.map (fun ((cId, oId), (ts, w)) ->
                 let tsWorld = WithTimestamp.create ts w
-                GetJoinGameResult.Success (id, tsWorld)
+                GetJoinGameResult.Success (cId, oId, tsWorld)
             )
         let failureGen =
             Arb.generate<string>

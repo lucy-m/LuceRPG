@@ -12,10 +12,12 @@ module GetJoinGameResultSrl =
 
         let addtInfo =
             match result with
-            | GetJoinGameResult.Success (id, w) ->
-                Array.append
-                    (StringSrl.serialise id)
+            | GetJoinGameResult.Success (cId, oId, w) ->
+                Array.concat [
+                    (StringSrl.serialise cId)
+                    (StringSrl.serialise oId)
                     (WithTimestampSrl.serialise WorldSrl.serialise w)
+                ]
             | GetJoinGameResult.Failure s -> StringSrl.serialise s
 
         Array.append [|label|] addtInfo
@@ -24,10 +26,11 @@ module GetJoinGameResultSrl =
         let loadObj (tag: byte) (objectBytes: byte[]): GetJoinGameResult DesrlResult =
             match tag with
             | 1uy ->
-                DesrlUtil.getTwo
+                DesrlUtil.getThree
+                    StringSrl.deserialise
                     StringSrl.deserialise
                     (WithTimestampSrl.deserialise WorldSrl.deserialise)
-                    (fun id w -> GetJoinGameResult.Success(id, w))
+                    (fun cId oId w -> GetJoinGameResult.Success(cId, oId, w))
                     objectBytes
             | 2uy ->
                 StringSrl.deserialise objectBytes

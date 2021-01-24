@@ -37,28 +37,16 @@ namespace LuceRPGServer.Controllers
             _store = store;
         }
 
-        [HttpGet]
-        public ActionResult Get()
-        {
-            var world = _store.CurrentWorld;
-            var timestamp = TimestampProvider.Now;
-
-            var timestampedWorld = new WithTimestamp.Model<WorldModule.Model>(timestamp, world);
-
-            var serialised = WithTimestampSrl.serialise(
-                new Func<WorldModule.Model, byte[]>(WorldSrl.serialise).ToFSharpFunc(),
-                timestampedWorld
-            );
-            return File(serialised, RawBytesContentType);
-        }
-
         [HttpGet("join")]
         public ActionResult JoinGame()
         {
             WithId.Model<WorldObjectModule.Payload>? playerObject = null;
             bool intentionProcessed = false;
+            var clientId = Guid.NewGuid().ToString();
 
-            var intention = WithId.create(IntentionModule.Payload.JoinGame);
+            var intention = WithId.create(
+                IntentionModule.makePayload(clientId, IntentionModule.Type.JoinGame)
+            );
 
             void Action(IEnumerable<WorldEventModule.Model> events)
             {
@@ -89,6 +77,7 @@ namespace LuceRPGServer.Controllers
 
             var joinGameResult = playerObject != null
                 ? GetJoinGameResultModule.Model.NewSuccess(
+                    clientId,
                     playerObject.id,
                     WithTimestamp.create(TimestampProvider.Now, _store.CurrentWorld)
                 )
@@ -100,7 +89,7 @@ namespace LuceRPGServer.Controllers
         }
 
         [HttpGet("since")]
-        public ActionResult GetSince(long timestamp)
+        public ActionResult GetSince(long timestamp, string clientId)
         {
             var result = _store.GetSince(timestamp);
             var newTimestamp = TimestampProvider.Now;
@@ -123,7 +112,7 @@ namespace LuceRPGServer.Controllers
             return dump;
         }
 
-        [HttpPut("Intention")]
+        [HttpPut("intention")]
         public async Task Intention()
         {
             var buffer = new byte[200];
