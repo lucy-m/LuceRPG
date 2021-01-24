@@ -106,12 +106,12 @@ module IntentionProcessing =
             let processResult = IntentionProcessing.processOne intention world
 
             [<Test>]
-            let ``creates joined game event`` () =
+            let ``creates object added event`` () =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 1
                 events.Head.resultOf |> should equal intention.id
-                events.Head.t |> should be (ofCase <@WorldEvent.GameJoined@>)
+                events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
 
             [<Test>]
             let ``adds a new player with event id`` () =

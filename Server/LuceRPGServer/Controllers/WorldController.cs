@@ -55,18 +55,24 @@ namespace LuceRPGServer.Controllers
         [HttpGet("join")]
         public ActionResult JoinGame()
         {
-            string? playerId = null;
+            WithId.Model<WorldObjectModule.Payload>? playerObject = null;
             bool playerSet = false;
 
             var intention = WithId.create(IntentionModule.Payload.JoinGame);
 
             void Action(IEnumerable<WorldEventModule.Model> events)
             {
-                var gameJoined = events.FirstOrDefault(e => e.t.IsGameJoined);
-                if (gameJoined != null)
+                var objectAdded =
+                    events
+                        .Where(e => e.t.IsObjectAdded)
+                        .Select(e => (WorldEventModule.Type.ObjectAdded)e.t);
+                var playerAdded = objectAdded.FirstOrDefault(a => a.Item.value.t.IsPlayer);
+
+                if (playerAdded != null)
                 {
-                    playerId = ((WorldEventModule.Type.GameJoined)gameJoined.t).Item;
+                    playerObject = playerAdded.Item;
                 }
+
                 playerSet = true;
             }
 
@@ -79,7 +85,7 @@ namespace LuceRPGServer.Controllers
                 Thread.Sleep(50);
             }
 
-            _logger.LogDebug($"Join game result player ID {playerId}");
+            _logger.LogDebug($"Join game result player ID {playerObject?.id}");
 
             return Ok();
         }

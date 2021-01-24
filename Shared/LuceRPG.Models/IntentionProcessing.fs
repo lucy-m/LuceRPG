@@ -43,7 +43,7 @@ module IntentionProcessing =
 
             let newWorld = World.addObject obj world
             let event =
-                WorldEvent.Type.GameJoined obj.id
+                WorldEvent.Type.ObjectAdded obj
                 |> WorldEvent.asResult intention.id
 
             {

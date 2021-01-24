@@ -3,7 +3,7 @@
 module WorldEvent =
     type Type =
         | Moved of Id.WorldObject * Direction * byte
-        | GameJoined of Id.WorldObject
+        | ObjectAdded of WorldObject
 
     type Model =
         {
@@ -20,6 +20,6 @@ module WorldEvent =
     let getObjectId (t: Type): Id.WorldObject Option =
         match t with
         | Type.Moved (id, _, _) -> id |> Option.Some
-        | Type.GameJoined id -> id |> Option.Some
+        | Type.ObjectAdded o -> o.id |> Option.Some
 
 type WorldEvent = WorldEvent.Model
