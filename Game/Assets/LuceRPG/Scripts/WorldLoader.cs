@@ -46,7 +46,7 @@ public class WorldLoader : MonoBehaviour
         return null;
     }
 
-    private void AddObject(WithId.Model<WorldObjectModule.Payload> obj)
+    private GameObject AddObject(WithId.Model<WorldObjectModule.Payload> obj)
     {
         var location = obj.GetGameLocation();
         var prefab = GetPrefab(obj);
@@ -70,10 +70,16 @@ public class WorldLoader : MonoBehaviour
                 var spriteRenderer = go.GetComponent<SpriteRenderer>();
                 spriteRenderer.size = new Vector2(size.x, size.y);
             }
+
+            return go;
+        }
+        else
+        {
+            return null;
         }
     }
 
-    public void LoadWorld(WorldModule.Model world)
+    public void LoadWorld(string playerId, WorldModule.Model world)
     {
         _controllers = new Dictionary<string, UniversalController>();
 
@@ -100,7 +106,13 @@ public class WorldLoader : MonoBehaviour
         foreach (var kvp in world.objects)
         {
             var obj = kvp.Value;
-            AddObject(obj);
+            var go = AddObject(obj);
+
+            if (obj.id == playerId && go != null)
+            {
+                Debug.Log($"Adding PC to {obj.id}");
+                go.AddComponent<PlayerController>();
+            }
         }
     }
 

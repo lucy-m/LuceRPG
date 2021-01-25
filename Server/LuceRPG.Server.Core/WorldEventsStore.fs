@@ -12,13 +12,18 @@ module WorldEventsStore =
             lastCull: int64
             recentEvents: WorldEvent WithTimestamp List
             world: World
+            objectClientMap: IntentionProcessing.ObjectClientMap
         }
 
+    // So far the only way for ownership to be established is
+    //   through intentions process results
+    // A freshly loaded world will never have any ownership
     let create (world: World): Model =
         {
             lastCull = 0L
             recentEvents = []
             world = world
+            objectClientMap = Map.empty
         }
 
     let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =
@@ -38,6 +43,7 @@ module WorldEventsStore =
             lastCull = state.lastCull
             recentEvents = recentEvents
             world = result.world
+            objectClientMap = result.objectClientMap
         }
 
     /// Returns recent events if available
@@ -60,6 +66,7 @@ module WorldEventsStore =
             lastCull = timestamp
             recentEvents = recentEvents
             world = state.world
+            objectClientMap = state.objectClientMap
         }
 
 type WorldEventsStore = WorldEventsStore.Model

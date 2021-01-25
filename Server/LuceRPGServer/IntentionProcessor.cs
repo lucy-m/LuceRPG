@@ -1,6 +1,7 @@
 ﻿using LuceRPG.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Linq;
 using System.Threading;
@@ -55,7 +56,7 @@ namespace LuceRPG.Server
             {
                 _logger.LogDebug($"Processing {entries.Length} intentions");
                 var intentions = entries.Select(e => e.Intention).ToArray();
-                var processed = IntentionProcessing.processMany(intentions, _store.CurrentWorld);
+                var processed = IntentionProcessing.processMany(_store.ObjectClientMap, _store.CurrentWorld, intentions);
 
                 var events = processed.events.ToArray();
                 foreach (var (Intention, OnProcessed) in entries)

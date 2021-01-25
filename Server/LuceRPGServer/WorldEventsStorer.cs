@@ -1,5 +1,6 @@
 ﻿using LuceRPG.Models;
 using LuceRPG.Server.Core;
+using Microsoft.FSharp.Collections;
 
 namespace LuceRPG.Server
 {
@@ -13,6 +14,7 @@ namespace LuceRPG.Server
         }
 
         public WorldModule.Model CurrentWorld => _store.world;
+        public FSharpMap<string, string> ObjectClientMap => _store.objectClientMap;
 
         public void Update(IntentionProcessing.ProcessResult result)
         {
