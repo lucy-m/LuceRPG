@@ -6,9 +6,7 @@
         "UnityEditor.TestRunner",
         "Scripts"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
@@ -17,7 +15,8 @@
         "FSharp.Core.dll",
         "LuceRPG.Models.dll",
         "LuceRPG.Serialisation.dll",
-        "LuceRPG.Utility.dll"
+        "LuceRPG.Utility.dll",
+        "LuceRPG.Samples.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
