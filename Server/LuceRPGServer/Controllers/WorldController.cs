@@ -22,17 +22,20 @@ namespace LuceRPGServer.Controllers
 
         private readonly ILogger<WorldController> _logger;
         private readonly IntentionQueue _queue;
-        private readonly WorldEventsStorer _store;
+        private readonly WorldEventsStorer _worldStore;
+        private readonly LastPingStorer _pingStorer;
 
         public WorldController(
             ILogger<WorldController> logger,
             IntentionQueue queue,
-            WorldEventsStorer store
+            WorldEventsStorer store,
+            LastPingStorer pingStorer
         )
         {
             _logger = logger;
             _queue = queue;
-            _store = store;
+            _worldStore = store;
+            _pingStorer = pingStorer;
         }
 
         [HttpGet("join")]
@@ -77,7 +80,7 @@ namespace LuceRPGServer.Controllers
                 ? GetJoinGameResultModule.Model.NewSuccess(
                     clientId,
                     playerObject.id,
-                    WithTimestamp.create(TimestampProvider.Now, _store.CurrentWorld)
+                    WithTimestamp.create(TimestampProvider.Now, _worldStore.CurrentWorld)
                 )
                 : GetJoinGameResultModule.Model.NewFailure("Could not join game");
 
@@ -89,9 +92,10 @@ namespace LuceRPGServer.Controllers
         [HttpGet("since")]
         public ActionResult GetSince(long timestamp, string clientId)
         {
-            var result = _store.GetSince(timestamp);
+            var result = _worldStore.GetSince(timestamp);
             var newTimestamp = TimestampProvider.Now;
 
+            _pingStorer.Update(clientId, newTimestamp);
             var timestampedResult = new WithTimestamp.Model<GetSinceResultModule.Payload>(newTimestamp, result);
 
             var serialised = GetSinceResultSrl.serialise(timestampedResult);
@@ -102,7 +106,7 @@ namespace LuceRPGServer.Controllers
         [HttpGet("dump")]
         public string Dump()
         {
-            var world = _store.CurrentWorld;
+            var world = _worldStore.CurrentWorld;
             var dump = ASCIIWorld.dump(world);
 
             Console.WriteLine(dump);

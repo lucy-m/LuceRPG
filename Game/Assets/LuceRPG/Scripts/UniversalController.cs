@@ -1,5 +1,4 @@
 using LuceRPG.Models;
-using System;
 using UnityEngine;
 
 public class UniversalController : MonoBehaviour
@@ -39,6 +38,10 @@ public class UniversalController : MonoBehaviour
             {
                 target += new Vector3(-amount, 0);
             }
+        }
+        else if (worldEvent.t.IsObjectRemoved)
+        {
+            Destroy(gameObject);
         }
     }
 

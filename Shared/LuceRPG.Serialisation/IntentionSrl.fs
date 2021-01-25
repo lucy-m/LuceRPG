@@ -8,6 +8,7 @@ module IntentionSrl =
             match i with
             | Intention.Move  _-> 1uy
             | Intention.JoinGame -> 2uy
+            | Intention.LeaveGame -> 3uy
 
         let addtInfo =
             match i with
@@ -18,6 +19,7 @@ module IntentionSrl =
                     (ByteSrl.serialise a)
                 ]
             | Intention.JoinGame -> [||]
+            | Intention.LeaveGame -> [||]
 
         Array.append [|label|] addtInfo
 
@@ -42,6 +44,8 @@ module IntentionSrl =
                     objectBytes
             | 2uy ->
                 DesrlResult.create Intention.JoinGame 0
+            | 3uy ->
+                DesrlResult.create Intention.LeaveGame 0
             | _ ->
                 printfn "Unknown Intention tag %u" tag
                 Option.None

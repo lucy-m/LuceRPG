@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Compile Include="WorldEventsStore.Test.fs" />
+    <Compile Include="LastPingStore.Test.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
