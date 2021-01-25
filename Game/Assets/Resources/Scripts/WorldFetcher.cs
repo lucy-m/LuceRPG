@@ -1,11 +1,8 @@
-using System.Collections;
-using UnityEngine;
-using UnityEngine.Networking;
 using LuceRPG.Models;
-using LuceRPG.Serialisation;
-using LuceRPG.Utility;
-using System.Linq;
 using System;
+using System.Collections;
+using System.Linq;
+using UnityEngine;
 
 public class WorldFetcher : MonoBehaviour
 {
@@ -49,6 +46,6 @@ public class WorldFetcher : MonoBehaviour
             }
         }
 
-        return CommsService.Instance.JoinGame(OnLoad, OnUpdate);
+        return Registry.CommsService.JoinGame(OnLoad, OnUpdate);
     }
 }

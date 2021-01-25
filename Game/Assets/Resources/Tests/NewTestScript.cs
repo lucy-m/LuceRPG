@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using LuceRPG.Models;
 using NUnit.Framework;
 using UnityEngine;
@@ -11,7 +10,7 @@ public class NewTestScript
     [Test]
     public void NewTestScriptSimplePasses()
     {
-        var overlord = MonoBehaviour.Instantiate(
+        MonoBehaviour.Instantiate(
             Resources.Load<GameObject>("Prefabs/Overlord")
         );
         Assert.IsNotNull(WorldLoader.Instance);
@@ -22,16 +21,20 @@ public class NewTestScript
     [UnityTest]
     public IEnumerator NewTestScriptWithEnumeratorPasses()
     {
+        var testCommsService = new TestCommsService();
+        Registry.CommsService = testCommsService;
+
         var overlord = MonoBehaviour.Instantiate(
             Resources.Load<GameObject>("Prefabs/Overlord")
         );
-        var worldLoader = overlord.GetComponent<WorldLoader>();
         Assert.IsNotNull(overlord);
-        Assert.IsNotNull(worldLoader);
+
+        yield return null;
 
         var world = LuceRPG.Samples.SampleWorlds.world1;
+        var player = WorldObjectModule.create(WorldObjectModule.TypeModule.Model.Player, PointModule.create(4, 2));
 
-        worldLoader.LoadWorld("playerId", world);
+        testCommsService.OnLoad("player", LuceRPG.Samples.SampleWorlds.world1);
 
         // Use the Assert class to test conditions.
         // Use yield to skip a frame.

@@ -6,26 +6,22 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class CommsService : MonoBehaviour
+public interface ICommsService
 {
-    public static CommsService Instance = null;
+    IEnumerator JoinGame(
+        Action<string, WorldModule.Model> onLoad,
+        Action<GetSinceResultModule.Payload> onUpdate
+    );
 
+    IEnumerator SendIntention(IntentionModule.Type t);
+}
+
+public class CommsService : ICommsService
+{
     public float PollPeriod = 0.1f;
-    private string BaseUrl => ConfigLoader.Instance.Config.BaseUrl;
+    private string BaseUrl => Registry.ConfigLoader.Config.BaseUrl;
 
     private string _clientId = null;
-
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(GetComponent<CommsService>());
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
 
     public IEnumerator JoinGame(
         Action<string, WorldModule.Model> onLoad,
@@ -141,5 +137,26 @@ public class CommsService : MonoBehaviour
         {
             Debug.LogError("No client ID available");
         }
+    }
+}
+
+public class TestCommsService : ICommsService
+{
+    public Action<string, WorldModule.Model> OnLoad { get; private set; }
+    public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
+
+    public IEnumerator JoinGame(
+        Action<string, WorldModule.Model> onLoad,
+        Action<GetSinceResultModule.Payload> onUpdate
+    )
+    {
+        OnLoad = onLoad;
+        OnUpdate = onUpdate;
+        yield return null;
+    }
+
+    public IEnumerator SendIntention(IntentionModule.Type t)
+    {
+        yield return null;
     }
 }
