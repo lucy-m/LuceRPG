@@ -1,13 +1,12 @@
 ﻿using LuceRPG.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.FSharp.Collections;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LuceRPG.Server
+namespace LuceRPG.Server.Processors
 {
     public sealed class IntentionProcessor : IHostedService, IDisposable
     {
@@ -34,7 +33,7 @@ namespace LuceRPG.Server
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Intention processor starting");
+            _logger.LogInformation("Intention Processor starting");
             _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
 
             return Task.CompletedTask;
@@ -42,7 +41,7 @@ namespace LuceRPG.Server
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Intention processor stopping");
+            _logger.LogInformation("Intention Processor stopping");
             _timer?.Change(Timeout.Infinite, 0);
 
             return Task.CompletedTask;
