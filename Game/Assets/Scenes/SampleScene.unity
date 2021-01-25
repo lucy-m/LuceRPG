@@ -219,6 +219,7 @@ GameObject:
   - component: {fileID: 909970318}
   - component: {fileID: 909970319}
   - component: {fileID: 909970320}
+  - component: {fileID: 909970321}
   m_Layer: 0
   m_Name: Overlord
   m_TagString: Untagged
@@ -239,7 +240,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PollPeriod: 0.1
-  BaseUrl: https://localhost:5001/World/
 --- !u!4 &909970317
 Transform:
   m_ObjectHideFlags: 0
@@ -282,8 +282,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac66cb50f4db2c04f9225e5cb0ba4edd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PollPeriod: 0.2
-  ClientId: 
 --- !u!114 &909970320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -296,4 +294,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f27b3b829b47d4d4aa29c5f2ae1802ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BaseUrl: Https://localhost:5001/
+  PollPeriod: 0.1
+--- !u!114 &909970321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 909970315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 446f0453c3131154281dcf3bd2682bef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
