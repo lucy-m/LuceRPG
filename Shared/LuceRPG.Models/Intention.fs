@@ -4,6 +4,7 @@ module Intention =
     type Type =
         | Move of Id.WorldObject * Direction * byte
         | JoinGame
+        | LeaveGame
 
     type Payload =
         {

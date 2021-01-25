@@ -10,25 +10,26 @@ module IntentionProcessing =
             objectClientMap: ObjectClientMap
         }
 
-    let unchanged (clientObjectMap: ObjectClientMap) (world: World): ProcessResult =
+    let unchanged (objectClientMap: ObjectClientMap) (world: World): ProcessResult =
         {
             events = []
             world = world
-            objectClientMap = clientObjectMap
+            objectClientMap = objectClientMap
         }
 
     let processOne
-            (clientObjectMap: ObjectClientMap)
+            (objectClientMap: ObjectClientMap)
             (world: World)
             (intention: Intention)
             : ProcessResult =
 
-        let thisUnchanged = unchanged clientObjectMap world
+        let thisUnchanged = unchanged objectClientMap world
 
         match intention.value.t with
         | Intention.Move (id, dir, amount) ->
+            // May generate an event to move the object to its target location
             let clientOwnsObject =
-                clientObjectMap
+                objectClientMap
                 |> Map.tryFind id
                 |> Option.map (fun clientId -> clientId = intention.value.clientId)
                 |> Option.defaultValue false
@@ -54,18 +55,19 @@ module IntentionProcessing =
                         {
                             events = [event]
                             world = newWorld
-                            objectClientMap = clientObjectMap
+                            objectClientMap = objectClientMap
                         }
                     else thisUnchanged
                 else
                     thisUnchanged
 
         | Intention.JoinGame ->
+            // Generates event to add a player object to the world at the spawn point
             let spawnPoint = World.spawnPoint world
             let obj = WorldObject.create WorldObject.Type.Player spawnPoint |> WithId.create
 
             let newClientObjectMap =
-                clientObjectMap
+                objectClientMap
                 |> Map.add obj.id intention.value.clientId
 
             let newWorld = World.addObject obj world
@@ -77,6 +79,36 @@ module IntentionProcessing =
                 events = [event]
                 world = newWorld
                 objectClientMap = newClientObjectMap
+            }
+
+        | Intention.LeaveGame ->
+            // Generates events to remove all objects relating to the client ID
+            let clientObjects, updatedObjectClientMap =
+                objectClientMap
+                |> Map.partition (fun oId cId -> cId = intention.value.clientId)
+
+            let clientObjectsList =
+                clientObjects
+                |> Map.toList
+                |> List.map fst
+
+            let removeEvents =
+                clientObjectsList
+                |> List.map (fun e ->
+                    WorldEvent.Type.ObjectRemoved e
+                    |> WorldEvent.asResult intention.id
+                )
+
+            let updatedWorld =
+                clientObjectsList
+                |> List.fold (fun acc oId ->
+                    World.removeObject oId acc
+                ) world
+
+            {
+                events = removeEvents
+                world = updatedWorld
+                objectClientMap = updatedObjectClientMap
             }
 
     let processMany

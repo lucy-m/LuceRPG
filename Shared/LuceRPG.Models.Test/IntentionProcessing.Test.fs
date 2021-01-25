@@ -13,7 +13,7 @@ module IntentionProcessing =
         let spawnPoint = Point.create 2 9
         let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
-        let clientObjectMap = [player.id, clientId] |> Map.ofList
+        let objectClientMap = [player.id, clientId] |> Map.ofList
 
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
 
@@ -32,7 +32,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
 
-                let result = IntentionProcessing.processOne clientObjectMap world intention
+                let result = IntentionProcessing.processOne objectClientMap world intention
 
                 [<Test>]
                 let ``a moved event is created`` () =
@@ -51,7 +51,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``client object map is unchanged`` () =
-                    result.objectClientMap |> should equal clientObjectMap
+                    result.objectClientMap |> should equal objectClientMap
 
             [<TestFixture>]
             module ``when another client tries to move the player one square north`` =
@@ -60,7 +60,7 @@ module IntentionProcessing =
                     |> Intention.makePayload "other-client"
                     |> TestUtil.withId
 
-                let result = IntentionProcessing.processOne clientObjectMap world intention
+                let result = IntentionProcessing.processOne objectClientMap world intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -82,7 +82,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
 
-                let result = IntentionProcessing.processOne clientObjectMap world intention
+                let result = IntentionProcessing.processOne objectClientMap world intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -104,7 +104,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
 
-                let result = IntentionProcessing.processOne clientObjectMap world intention
+                let result = IntentionProcessing.processOne objectClientMap world intention
 
                 [<Test>]
                 let ``a moved event is created`` () =
@@ -129,7 +129,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
 
-                let result = IntentionProcessing.processOne clientObjectMap world intention
+                let result = IntentionProcessing.processOne objectClientMap world intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -200,3 +200,27 @@ module IntentionProcessing =
                 tEntry.IsSome |> should equal true
 
                 tEntry.Value |> should equal newClientId
+
+        [<TestFixture>]
+        module ``leave game`` =
+            let intention =
+                Intention.LeaveGame
+                |> Intention.makePayload clientId
+                |> WithId.create
+
+            let processResult = IntentionProcessing.processOne objectClientMap world intention
+
+            [<Test>]
+            let ``creates object removed event`` () =
+                let events = processResult.events |> Seq.toList
+
+                events |> List.length |> should equal 1
+                events.Head.resultOf |> should equal intention.id
+                events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
+
+            [<Test>]
+            let ``removes player object from world`` () =
+                processResult.world
+                |> World.containsObject player.id
+                |> should equal false
+
