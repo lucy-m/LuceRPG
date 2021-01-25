@@ -10,7 +10,6 @@ using System;
 public class WorldFetcher : MonoBehaviour
 {
     public float PollPeriod = 0.1f;
-    public string BaseUrl = "https://localhost:5001/World/";
 
     private void Start()
     {
