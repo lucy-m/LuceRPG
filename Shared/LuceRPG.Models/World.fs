@@ -18,7 +18,7 @@ module World =
         |> Map.toList
         |> List.map snd
 
-    let empty (bounds: Rect List) (playerSpawner: Point): Model =
+    let empty (bounds: Rect seq) (playerSpawner: Point): Model =
         let blocked =
             let spawnerPoints =
                 [
@@ -34,7 +34,7 @@ module World =
             |> Map.ofList
 
         {
-            bounds = bounds |> Set.ofList
+            bounds = bounds |> Set.ofSeq
             objects = Map.empty
             blocked = blocked
             playerSpawner = playerSpawner
@@ -149,9 +149,10 @@ module World =
     /// Adds many objects
     /// Blocking objects will be added first
     /// Invalid objects will be ignored
-    let addObjects (objs: WorldObject List) (world: Model): Model =
+    let addObjects (objs: WorldObject seq) (world: Model): Model =
         let blocking, nonBlocking =
             objs
+            |> List.ofSeq
             |> List.partition WorldObject.isBlocking
 
         let withItems =
@@ -160,7 +161,7 @@ module World =
 
         withItems
 
-    let createWithObjs (bounds: Rect List) (spawn: Point) (objs: WorldObject List): Model =
+    let createWithObjs (bounds: Rect seq) (spawn: Point) (objs: WorldObject seq): Model =
         let emptyWorld = empty bounds spawn
         addObjects objs emptyWorld
 
