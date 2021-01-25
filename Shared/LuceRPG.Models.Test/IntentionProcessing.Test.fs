@@ -5,12 +5,12 @@ open FsUnit
 
 [<TestFixture>]
 module IntentionProcessing =
+    let clientId = "client"
+    let bound = Rect.create 0 10 10 10
+    let spawnPoint = Point.create 2 9
 
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
-        let clientId = "client"
-        let bound = Rect.create 0 10 10 10
-        let spawnPoint = Point.create 2 9
         let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
         let objectClientMap = [player.id, clientId] |> Map.ofList
@@ -222,5 +222,53 @@ module IntentionProcessing =
             let ``removes player object from world`` () =
                 processResult.world
                 |> World.containsObject player.id
+                |> should equal false
+
+    [<TestFixture>]
+    module ``for a client that owns multiple objects`` =
+        let player1 = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
+        let player2 = WorldObject.create WorldObject.Type.Player (Point.create 3 3) |> TestUtil.withId
+
+        let objectClientMap =
+            [
+                player1.id, clientId
+                player2.id, clientId
+            ]
+            |> Map.ofList
+
+        let world = World.createWithObjs [bound] spawnPoint [player1; player2]
+
+        [<Test>]
+        let ``world create correctly`` () =
+            world |> World.containsObject player1.id |> should equal true
+            world |> World.containsObject player2.id |> should equal true
+
+        [<TestFixture>]
+        module ``leave game`` =
+            let intention =
+                Intention.LeaveGame
+                |> Intention.makePayload clientId
+                |> WithId.create
+
+            let processResult = IntentionProcessing.processOne objectClientMap world intention
+
+            [<Test>]
+            let ``creates object removed events`` () =
+                let events = processResult.events |> Seq.toList
+
+                events |> List.length |> should equal 2
+                events.Head.resultOf |> should equal intention.id
+                events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
+                events.Tail.Head.resultOf |> should equal intention.id
+                events.Tail.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
+
+            [<Test>]
+            let ``removes player objects from world`` () =
+                processResult.world
+                |> World.containsObject player1.id
+                |> should equal false
+
+                processResult.world
+                |> World.containsObject player2.id
                 |> should equal false
 
