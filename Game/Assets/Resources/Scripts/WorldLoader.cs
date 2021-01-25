@@ -11,6 +11,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject PathPrefab = null;
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
+    public GameObject CameraPrefab = null;
 
     private Dictionary<string, UniversalController> _controllers;
 
@@ -112,6 +113,7 @@ public class WorldLoader : MonoBehaviour
             {
                 Debug.Log($"Adding PC to {obj.id}");
                 go.AddComponent<PlayerController>();
+                Instantiate(CameraPrefab, go.transform);
             }
         }
     }

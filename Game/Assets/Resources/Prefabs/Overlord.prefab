@@ -62,6 +62,7 @@ MonoBehaviour:
   PathPrefab: {fileID: 8145506027414206273, guid: f23905c806685a34ab6772670663faba, type: 3}
   PlayerPrefab: {fileID: 1113982545424815417, guid: 467750d40a27da747b7cd92f3296bff7, type: 3}
   BackgroundPrefab: {fileID: 6923479140103614182, guid: c18f7e926c3647a4e850d1b0fcceb43c, type: 3}
+  CameraPrefab: {fileID: 4397631990221490018, guid: 9a171321d98dd374a8aa309e3588b60b, type: 3}
 --- !u!114 &6379862770123780934
 MonoBehaviour:
   m_ObjectHideFlags: 0
