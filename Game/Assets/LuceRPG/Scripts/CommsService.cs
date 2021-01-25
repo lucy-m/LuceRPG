@@ -3,7 +3,6 @@ using LuceRPG.Serialisation;
 using LuceRPG.Utility;
 using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -11,8 +10,8 @@ public class CommsService : MonoBehaviour
 {
     public static CommsService Instance = null;
 
-    public string BaseUrl = "Https://localhost:5001/";
     public float PollPeriod = 0.1f;
+    private string BaseUrl => ConfigLoader.Instance.Config.BaseUrl;
 
     private string _clientId = null;
 
@@ -33,7 +32,7 @@ public class CommsService : MonoBehaviour
         Action<GetSinceResultModule.Payload> onUpdate
     )
     {
-        Debug.Log("Attempting to load world");
+        Debug.Log($"Attempting to load world at {BaseUrl}");
         var webRequest = UnityWebRequest.Get(BaseUrl + "World/join");
         yield return webRequest.SendWebRequest();
 
