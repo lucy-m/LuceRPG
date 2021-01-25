@@ -22,7 +22,7 @@ namespace LuceRPG.Server
 
         public IEnumerable<WithId.Model<IntentionModule.Payload>> Cull()
         {
-            var staleThreshold = TimestampProvider.Now - 10_000L;
+            var staleThreshold = TimestampProvider.Now - TimeSpan.FromSeconds(10).Ticks;
 
             var culled = LastPingStore.cull(staleThreshold, _store);
             _store = culled.updated;

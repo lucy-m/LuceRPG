@@ -33,7 +33,7 @@ namespace LuceRPG.Server.Processors
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stale Client Processor starting");
-            _timer = new Timer(ProcessStaleClients, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+            _timer = new Timer(ProcessStaleClients, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
             return Task.CompletedTask;
         }
 
