@@ -1,3 +1,4 @@
+using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using Microsoft.FSharp.Collections;
 using NUnit.Framework;
@@ -86,17 +87,16 @@ public class WorldLoadTests
         // Player is loaded correctly
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
-        var expectedLocation = CoOrdTranslator.GetGameLocation(playerModel);
+        var expectedLocation = playerModel.GetGameLocation();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         var hasPlayerController = playerObject.TryGetComponent<PlayerController>(out _);
         Assert.That(hasPlayerController, Is.True);
 
-
         //Wall loads correctly
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
-        expectedLocation = CoOrdTranslator.GetGameLocation(wallModel);
+        expectedLocation = wallModel.GetGameLocation();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         hasPlayerController = wallObject.TryGetComponent<PlayerController>(out _);

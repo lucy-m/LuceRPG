@@ -1,3 +1,4 @@
+using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,26 +53,9 @@ public class UniversalController : MonoBehaviour
         if (worldEvent.t.IsMoved)
         {
             var moved = (WorldEventModule.Type.Moved)worldEvent.t;
+            var offset = DirectionUtil.AsVector3(moved.Item2, moved.Item3);
 
-            var direction = moved.Item2;
-            var amount = moved.Item3;
-
-            if (direction.IsNorth)
-            {
-                Target += new Vector3(0, amount);
-            }
-            else if (direction.IsSouth)
-            {
-                Target += new Vector3(0, -amount);
-            }
-            else if (direction.IsEast)
-            {
-                Target += new Vector3(amount, 0);
-            }
-            else if (direction.IsWest)
-            {
-                Target += new Vector3(-amount, 0);
-            }
+            Target += offset;
         }
         else if (worldEvent.t.IsObjectRemoved)
         {
