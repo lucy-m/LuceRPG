@@ -1,16 +1,45 @@
 using LuceRPG.Models;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UniversalController : MonoBehaviour
 {
-    public string Id = "";
+    private readonly static Dictionary<string, UniversalController> Controllers
+        = new Dictionary<string, UniversalController>();
+
+    private string _id = "";
+
+    public string Id
+    {
+        get => _id;
+        set
+        {
+            Controllers.Remove(_id);
+            Controllers[value] = this;
+
+            _id = value;
+        }
+    }
+
+    public static UniversalController GetById(string id)
+    {
+        if (Controllers.TryGetValue(id, out var uc))
+        {
+            return uc;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public float Speed = 4;
 
-    private Vector3 target;
+    public Vector3 Target { get; private set; }
 
     private void Start()
     {
-        target = transform.position;
+        Target = transform.position;
     }
 
     public void Apply(WorldEventModule.Model worldEvent)
@@ -24,19 +53,19 @@ public class UniversalController : MonoBehaviour
 
             if (direction.IsNorth)
             {
-                target += new Vector3(0, amount);
+                Target += new Vector3(0, amount);
             }
             else if (direction.IsSouth)
             {
-                target += new Vector3(0, -amount);
+                Target += new Vector3(0, -amount);
             }
             else if (direction.IsEast)
             {
-                target += new Vector3(amount, 0);
+                Target += new Vector3(amount, 0);
             }
             else if (direction.IsWest)
             {
-                target += new Vector3(-amount, 0);
+                Target += new Vector3(-amount, 0);
             }
         }
         else if (worldEvent.t.IsObjectRemoved)
@@ -47,12 +76,12 @@ public class UniversalController : MonoBehaviour
 
     private void Update()
     {
-        var newPosition = Vector3.MoveTowards(transform.position, target, Speed * Time.deltaTime);
+        var newPosition = Vector3.MoveTowards(transform.position, Target, Speed * Time.deltaTime);
         transform.position = newPosition;
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawCube(target, Vector3.one);
+        Gizmos.DrawCube(Target, Vector3.one);
     }
 }

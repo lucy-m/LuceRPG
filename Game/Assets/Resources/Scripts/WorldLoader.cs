@@ -13,8 +13,6 @@ public class WorldLoader : MonoBehaviour
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
 
-    private Dictionary<string, UniversalController> _controllers;
-
     private void Awake()
     {
         if (Instance != null)
@@ -62,7 +60,6 @@ public class WorldLoader : MonoBehaviour
             {
                 Debug.Log($"Setting UC ID to {obj.id}");
                 uc.Id = obj.id;
-                _controllers[obj.id] = uc;
             }
 
             if (WorldObjectModule.t(obj).IsPath)
@@ -82,8 +79,6 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(string playerId, WorldModule.Model world)
     {
-        _controllers = new Dictionary<string, UniversalController>();
-
         foreach (var bound in world.bounds)
         {
             var location = bound.GetGameLocation();
@@ -135,7 +130,8 @@ public class WorldLoader : MonoBehaviour
                 }
                 else
                 {
-                    if (_controllers.TryGetValue(objectId, out var uc))
+                    var uc = UniversalController.GetById(objectId);
+                    if (uc != null)
                     {
                         uc.Apply(worldEvent);
                     }
