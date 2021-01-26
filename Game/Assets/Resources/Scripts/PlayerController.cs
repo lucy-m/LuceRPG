@@ -19,8 +19,8 @@ public class PlayerController : MonoBehaviour
     {
         while (true)
         {
-            var vertIn = Input.GetAxis("Vertical");
-            var horzIn = Input.GetAxis("Horizontal");
+            var vertIn = Registry.InputProvider.GetVertIn();
+            var horzIn = Registry.InputProvider.GetHorzIn();
 
             if (vertIn > 0)
             {

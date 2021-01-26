@@ -3,6 +3,7 @@ using LuceRPG.Serialisation;
 using LuceRPG.Utility;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -144,6 +145,8 @@ public class TestCommsService : ICommsService
 {
     public Action<string, WorldModule.Model> OnLoad { get; private set; }
     public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
+    public IntentionModule.Type LastIntention { get; private set; }
+    public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
     public IEnumerator JoinGame(
         Action<string, WorldModule.Model> onLoad,
@@ -157,6 +160,8 @@ public class TestCommsService : ICommsService
 
     public IEnumerator SendIntention(IntentionModule.Type t)
     {
+        LastIntention = t;
+        AllIntentions.Add(t);
         yield return null;
     }
 }
