@@ -216,4 +216,34 @@ public class WorldLoadTests
 
         yield return null;
     }
+
+    [UnityTest]
+    public IEnumerator RemoveObjectWorldEventCorrectlyHandled()
+    {
+        var worldEvents = new List<WithTimestamp.Model<WorldEventModule.Model>>
+        {
+            WithTimestamp.create(1,
+                new WorldEventModule.Model(
+                        "intention1",
+                        WorldEventModule.Type.NewObjectRemoved(wallModel.id)
+                )
+            )
+        };
+        var getSinceResult =
+            GetSinceResultModule.Payload.NewEvents(ListModule.OfSeq(worldEvents));
+
+        testCommsService.OnUpdate(getSinceResult);
+
+        yield return null;
+
+        // wall object should be destroyed
+        Assert.That(wallObject == null, Is.True);
+
+        // universal controller should be unregistered
+        var uc = UniversalController.GetById(wallModel.id);
+        Assert.That(uc, Is.Null);
+
+        // player object is unaffected
+        Assert.That(playerObject != null, Is.True);
+    }
 }

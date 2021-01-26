@@ -42,6 +42,11 @@ public class UniversalController : MonoBehaviour
         Target = transform.position;
     }
 
+    private void OnDestroy()
+    {
+        Controllers.Remove(_id);
+    }
+
     public void Apply(WorldEventModule.Model worldEvent)
     {
         if (worldEvent.t.IsMoved)
