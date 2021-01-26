@@ -55,13 +55,13 @@ public class WorldLoader : MonoBehaviour
         {
             var go = Instantiate(prefab, location, Quaternion.identity);
 
-            var uc = go.GetComponent<UniversalController>();
-
-            if (uc != null)
+            if (!go.TryGetComponent<UniversalController>(out var uc))
             {
-                Debug.Log($"Setting UC ID to {obj.id}");
-                uc.Id = obj.id;
+                uc = go.AddComponent<UniversalController>();
             }
+
+            Debug.Log($"Setting UC ID to {obj.id}");
+            uc.Id = obj.id;
 
             if (WorldObjectModule.t(obj).IsPath)
             {
@@ -143,5 +143,9 @@ public class WorldLoader : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void CheckConsistency(WorldModule.Model world)
+    {
     }
 }
