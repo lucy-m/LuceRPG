@@ -130,7 +130,7 @@ public class ConsistencyCheckTests
     [UnityTest]
     public IEnumerator MoveObjectCorrect()
     {
-        WorldLoader.Instance.CheckConsistency(updatedWorld);
+        testCommsService.OnConsistencyCheck(updatedWorld);
 
         // should not move immediately
         Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetGameLocation()));
@@ -144,7 +144,7 @@ public class ConsistencyCheckTests
     [UnityTest]
     public IEnumerator SnapObjectCorrect()
     {
-        WorldLoader.Instance.CheckConsistency(updatedWorld);
+        testCommsService.OnConsistencyCheck(updatedWorld);
 
         // moves position and target to the new location
         Assert.That(objToSnap.transform.position, Is.EqualTo(updatedToSnap.GetGameLocation()));
@@ -156,7 +156,7 @@ public class ConsistencyCheckTests
     [UnityTest]
     public IEnumerator RemoveObjectCorrect()
     {
-        WorldLoader.Instance.CheckConsistency(updatedWorld);
+        testCommsService.OnConsistencyCheck(updatedWorld);
 
         // GameObjects are deleted at the end of a frame
         yield return null;
@@ -170,7 +170,7 @@ public class ConsistencyCheckTests
     [UnityTest]
     public IEnumerator AddObjectCorrect()
     {
-        WorldLoader.Instance.CheckConsistency(updatedWorld);
+        testCommsService.OnConsistencyCheck(updatedWorld);
 
         // obj should be created
         var newObj = UniversalController.GetById(modelToAdd.id);

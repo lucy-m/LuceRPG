@@ -204,6 +204,7 @@ public class TestCommsService : ICommsService
     {
         OnLoad = onLoad;
         OnUpdate = onUpdate;
+        OnConsistencyCheck = onConsistencyCheck;
         yield return null;
     }
 
