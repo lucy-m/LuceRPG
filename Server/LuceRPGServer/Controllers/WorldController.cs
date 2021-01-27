@@ -103,6 +103,16 @@ namespace LuceRPGServer.Controllers
             return File(serialised, RawBytesContentType);
         }
 
+        [HttpGet("allState")]
+        public ActionResult GetAllState(string clientId)
+        {
+            _logger.LogDebug($"Consistency check from {clientId}");
+            var result = _worldStore.CurrentWorld;
+            var serialised = WorldSrl.serialise(result);
+
+            return File(serialised, RawBytesContentType);
+        }
+
         [HttpGet("dump")]
         public string Dump()
         {
