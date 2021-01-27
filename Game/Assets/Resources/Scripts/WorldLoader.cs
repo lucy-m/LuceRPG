@@ -1,6 +1,7 @@
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -147,5 +148,35 @@ public class WorldLoader : MonoBehaviour
 
     public void CheckConsistency(WorldModule.Model world)
     {
+        // Check whether all game objects exist and are in the correct place
+        //   snap them to the location if not
+        foreach (var modelObj in WorldModule.objectList(world))
+        {
+            var uc = UniversalController.GetById(modelObj.id);
+
+            if (uc == null)
+            {
+                Debug.Log($"Adding missing object {modelObj.id}");
+                AddObject(modelObj);
+            }
+            else
+            {
+                var expectedLocation = modelObj.GetGameLocation();
+                uc.EnsureLocation(expectedLocation);
+            }
+        }
+
+        // Check whether no extra world objects exist
+        foreach (var gameObj in UniversalController.Controllers)
+        {
+            var gameObjId = gameObj.Key;
+            var isInModel = MapModule.ContainsKey(gameObjId, world.objects);
+
+            if (!isInModel)
+            {
+                Debug.Log($"Removing extra object {gameObjId}");
+                Destroy(gameObj.Value.gameObject);
+            }
+        }
     }
 }

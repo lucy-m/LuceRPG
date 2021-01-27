@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UniversalController : MonoBehaviour
 {
-    private readonly static Dictionary<string, UniversalController> Controllers
+    public readonly static Dictionary<string, UniversalController> Controllers
         = new Dictionary<string, UniversalController>();
 
     private string _id = "";
@@ -34,7 +34,7 @@ public class UniversalController : MonoBehaviour
         }
     }
 
-    public float Speed = 4;
+    private const float Speed = 4;
 
     public Vector3 Target { get; private set; }
 
@@ -60,6 +60,30 @@ public class UniversalController : MonoBehaviour
         else if (worldEvent.t.IsObjectRemoved)
         {
             Destroy(gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Sets an object's target to the location or immediately
+    ///   moves the object to the location if too far away
+    /// </summary>
+    /// <param name="location"></param>
+    public void EnsureLocation(Vector3 location)
+    {
+        var distance = Vector3.Distance(location, Target);
+
+        // If the object is close to its location then set the target
+        //   and move normally
+        if (distance < Speed)
+        {
+            Target = location;
+        }
+        // Else snap immediately to that location
+        else
+        {
+            Debug.Log($"Snapping object {Id} from {transform.position} to {location}");
+            transform.position = location;
+            Target = location;
         }
     }
 
