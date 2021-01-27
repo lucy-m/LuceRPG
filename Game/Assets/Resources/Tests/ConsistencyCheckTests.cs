@@ -1,9 +1,7 @@
 ﻿using LuceRPG.Game.Util;
 using LuceRPG.Models;
-using Microsoft.FSharp.Collections;
 using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
