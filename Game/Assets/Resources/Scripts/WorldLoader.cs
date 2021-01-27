@@ -1,5 +1,7 @@
+using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -54,13 +56,13 @@ public class WorldLoader : MonoBehaviour
         {
             var go = Instantiate(prefab, location, Quaternion.identity);
 
-            var uc = go.GetComponent<UniversalController>();
-
-            if (uc != null)
+            if (!go.TryGetComponent<UniversalController>(out var uc))
             {
-                Debug.Log($"Setting UC ID to {obj.id}");
-                uc.Id = obj.id;
+                uc = go.AddComponent<UniversalController>();
             }
+
+            Debug.Log($"Setting UC ID to {obj.id}");
+            uc.Id = obj.id;
 
             if (WorldObjectModule.t(obj).IsPath)
             {
@@ -140,6 +142,40 @@ public class WorldLoader : MonoBehaviour
                         Debug.LogError($"Could not process update for unknown object {objectId}");
                     }
                 }
+            }
+        }
+    }
+
+    public void CheckConsistency(WorldModule.Model world)
+    {
+        // Check whether all game objects exist and are in the correct place
+        //   snap them to the location if not
+        foreach (var modelObj in WorldModule.objectList(world))
+        {
+            var uc = UniversalController.GetById(modelObj.id);
+
+            if (uc == null)
+            {
+                Debug.Log($"Adding missing object {modelObj.id}");
+                AddObject(modelObj);
+            }
+            else
+            {
+                var expectedLocation = modelObj.GetGameLocation();
+                uc.EnsureLocation(expectedLocation);
+            }
+        }
+
+        // Check whether no extra world objects exist
+        foreach (var gameObj in UniversalController.Controllers)
+        {
+            var gameObjId = gameObj.Key;
+            var isInModel = MapModule.ContainsKey(gameObjId, world.objects);
+
+            if (!isInModel)
+            {
+                Debug.Log($"Removing extra object {gameObjId}");
+                Destroy(gameObj.Value.gameObject);
             }
         }
     }

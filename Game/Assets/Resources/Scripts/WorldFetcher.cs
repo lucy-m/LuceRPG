@@ -33,19 +33,24 @@ public class WorldFetcher : MonoBehaviour
             }
             else
             {
-                throw new NotImplementedException("Updating from entire world state is not yet supported");
+                var worldUpdate =
+                    ((GetSinceResultModule.Payload.World)update)
+                    .Item;
+
+                WorldLoader.Instance.CheckConsistency(worldUpdate);
             }
         }
 
         void OnLoad(string playerId, WorldModule.Model world)
         {
-            if (WorldLoader.Instance != null)
-            {
-                Debug.Log("Loading world");
-                WorldLoader.Instance.LoadWorld(playerId, world);
-            }
+            WorldLoader.Instance.LoadWorld(playerId, world);
         }
 
-        return Registry.CommsService.JoinGame(OnLoad, OnUpdate);
+        void OnConsistencyCheck(WorldModule.Model world)
+        {
+            WorldLoader.Instance.CheckConsistency(world);
+        }
+
+        return Registry.CommsService.JoinGame(OnLoad, OnUpdate, OnConsistencyCheck);
     }
 }

@@ -21,7 +21,7 @@ module SampleWorlds =
                 WorldObject.create WorldObject.Type.Wall (Point.create 9 -3)
                 WorldObject.create WorldObject.Type.Wall (Point.create -4 -1)
 
-                WorldObject.create (WorldObject.Type.Path (15,1)) (Point.create -2 -6)
+                WorldObject.create (WorldObject.Type.Path (1,5)) (Point.create 5 8)
             ]
             |> List.map (fun wo ->
                 WithId.create wo
