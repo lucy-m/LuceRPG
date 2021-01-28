@@ -14,7 +14,7 @@ module IntentionProcessing =
     module ``for a world with a single wall and player`` =
         let player = TestUtil.makePlayer (Point.create 1 3)
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
-        let objectClientMap = [player.id, clientId] |> Map.ofList
+        let objectClientMap = [player.id, clientId] |> Map.ofList |> Option.Some
         let now = 120L
 
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
@@ -265,7 +265,7 @@ module IntentionProcessing =
             let processResult =
                 IntentionProcessing.processOne
                     now
-                    Map.empty
+                    (Map.empty |> Option.Some)
                     Map.empty
                     world
                     intention
@@ -311,7 +311,7 @@ module IntentionProcessing =
                     )
 
                 let tEntry =
-                    processResult.objectClientMap
+                    processResult.objectClientMap.Value
                     |> Map.tryFind newPlayer.id
 
                 tEntry.IsSome |> should equal true
@@ -413,6 +413,7 @@ module IntentionProcessing =
                 player2.id, clientId
             ]
             |> Map.ofList
+            |> Option.Some
 
         let world = World.createWithObjs [bound] spawnPoint [player1; player2]
 
@@ -452,3 +453,30 @@ module IntentionProcessing =
                 |> World.containsObject player2.id
                 |> should equal false
 
+        [<TestFixture>]
+        module ``when objectClientMap is not provided`` =
+            let intentions =
+                [
+                    Intention.Move (player1.id, Direction.North, 1uy)
+                    Intention.Move (player2.id, Direction.North, 1uy)
+                ]
+                |> List.map (fun i ->
+                    i
+                    |> Intention.makePayload "not-the-client"
+                    |> WithId.create
+                    |> WithTimestamp.create 100L
+                )
+
+            let processResult =
+                IntentionProcessing.processMany
+                    100L
+                    Option.None
+                    Map.empty
+                    world
+                    intentions
+
+            [<Test>]
+            let ``all objects can be moved`` () =
+                processResult.events
+                |> Seq.length
+                |> should equal 2

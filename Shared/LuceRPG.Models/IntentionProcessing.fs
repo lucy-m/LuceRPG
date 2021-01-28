@@ -9,12 +9,12 @@ module IntentionProcessing =
             events: WorldEvent seq
             delayed: Intention WithTimestamp seq
             world: World
-            objectClientMap: ObjectClientMap
+            objectClientMap: ObjectClientMap Option
             objectBusyMap: ObjectBusyMap
         }
 
     let unchanged
-            (objectClientMap: ObjectClientMap)
+            (objectClientMap: ObjectClientMap Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             : ProcessResult =
@@ -28,23 +28,27 @@ module IntentionProcessing =
 
     let processOne
             (now: int64)
-            (objectClientMap: ObjectClientMap)
+            (tObjectClientMap: ObjectClientMap Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             (tsIntention: Intention WithTimestamp)
             : ProcessResult =
 
-        let thisUnchanged = unchanged objectClientMap objectBusyMap world
+        let thisUnchanged = unchanged tObjectClientMap objectBusyMap world
         let intention = tsIntention.value
 
         match intention.value.t with
         | Intention.Move (id, dir, amount) ->
             // May generate an event to move the object to its target location
             let clientOwnsObject =
-                objectClientMap
-                |> Map.tryFind id
-                |> Option.map (fun clientId -> clientId = intention.value.clientId)
-                |> Option.defaultValue false
+                tObjectClientMap
+                |> Option.map (fun objectClientMap ->
+                    objectClientMap
+                    |> Map.tryFind id
+                    |> Option.map (fun clientId -> clientId = intention.value.clientId)
+                    |> Option.defaultValue false
+                )
+                |> Option.defaultValue true
 
             if not clientOwnsObject
             then thisUnchanged
@@ -64,7 +68,7 @@ module IntentionProcessing =
                         events = []
                         delayed = [tsIntention]
                         world = world
-                        objectClientMap = objectClientMap
+                        objectClientMap = tObjectClientMap
                         objectBusyMap = objectBusyMap
                     }
                 else
@@ -116,7 +120,7 @@ module IntentionProcessing =
                                     events = [event]
                                     delayed = delayed
                                     world = newWorld
-                                    objectClientMap = objectClientMap
+                                    objectClientMap = tObjectClientMap
                                     objectBusyMap = newObjectBusyMap
                                 }
 
@@ -131,8 +135,11 @@ module IntentionProcessing =
                 |> WithId.create
 
             let newClientObjectMap =
-                objectClientMap
-                |> Map.add obj.id intention.value.clientId
+                tObjectClientMap
+                |> Option.map (fun objectClientMap ->
+                    objectClientMap
+                    |> Map.add obj.id intention.value.clientId
+                )
 
             let event =
                 WorldEvent.Type.ObjectAdded obj
@@ -149,26 +156,33 @@ module IntentionProcessing =
             }
 
         | Intention.LeaveGame ->
-            // Generates events to remove all objects relating to the client ID
-            let clientObjects, updatedObjectClientMap =
-                objectClientMap
-                |> Map.partition (fun oId cId -> cId = intention.value.clientId)
+            let updatedObjectClientMap, updatedBusyMap, removeEvents =
+                tObjectClientMap
+                |> Option.map (fun objectClientMap ->
+                    // Generates events to remove all objects relating to the client ID
+                    let clientObjects, updatedObjectClientMap =
+                        objectClientMap
+                        |> Map.partition (fun oId cId -> cId = intention.value.clientId)
 
-            let clientObjectsList =
-                clientObjects
-                |> Map.toList
-                |> List.map fst
+                    let clientObjectsList =
+                        clientObjects
+                        |> Map.toList
+                        |> List.map fst
 
-            let updatedBusyMap =
-                objectBusyMap
-                |> Map.filter (fun id until -> not(List.contains id clientObjectsList))
+                    let updatedBusyMap =
+                        objectBusyMap
+                        |> Map.filter (fun id until -> not(List.contains id clientObjectsList))
 
-            let removeEvents =
-                clientObjectsList
-                |> List.map (fun e ->
-                    WorldEvent.Type.ObjectRemoved e
-                    |> WorldEvent.asResult intention.id
+                    let removeEvents =
+                        clientObjectsList
+                        |> List.map (fun e ->
+                                WorldEvent.Type.ObjectRemoved e
+                                |> WorldEvent.asResult intention.id
+                        )
+
+                    Option.Some updatedObjectClientMap, updatedBusyMap, removeEvents
                 )
+                |> Option.defaultValue (Option.None, objectBusyMap, [])
 
             let updatedWorld =
                 removeEvents
@@ -188,7 +202,7 @@ module IntentionProcessing =
     /// Will ensure timestamps are processed in timestamp order
     let processMany
             (now: int64)
-            (objectClientMap: ObjectClientMap)
+            (objectClientMap: ObjectClientMap Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             (intentions: Intention WithTimestamp seq)
