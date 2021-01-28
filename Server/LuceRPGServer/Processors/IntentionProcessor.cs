@@ -77,6 +77,7 @@ namespace LuceRPG.Server.Processors
 
                 foreach (var i in processed.delayed)
                 {
+                    _logger.LogDebug($"Requeueing delayed intention {i.value.id}");
                     if (entriesMap.TryGetValue(i.value.id, out var entry))
                     {
                         _queue.Enqueue(i, entry.OnProcessed);
