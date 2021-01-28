@@ -70,29 +70,33 @@ module IntentionProcessing =
                     match tObj with
                     | Option.None -> thisUnchanged
                     | Option.Some obj ->
-                        // Teleport to final location if clear
-                        // Will do collision checking at a later date
-                        let newObj = WorldObject.moveObject dir (int amount) obj
-
-                        if not (World.canPlace newObj world)
+                        let travelTime = WorldObject.travelTime obj.value
+                        if travelTime <= 0L
                         then thisUnchanged
                         else
-                            let newWorld = World.addObject newObj world
-                            let event =
-                                WorldEvent.Type.Moved (id, dir, amount)
-                                |> WorldEvent.asResult intention.id
-                            let busyUntil = now + System.TimeSpan.FromMilliseconds(float(100)).Ticks
-                            let newObjectBusyMap =
-                                objectBusyMap
-                                |> Map.add id busyUntil
+                            // Teleport to final location if clear
+                            // Will do collision checking at a later date
+                            let newObj = WorldObject.moveObject dir (int amount) obj
 
-                            {
-                                events = [event]
-                                delayed = []
-                                world = newWorld
-                                objectClientMap = objectClientMap
-                                objectBusyMap = newObjectBusyMap
-                            }
+                            if not (World.canPlace newObj world)
+                            then thisUnchanged
+                            else
+                                let newWorld = World.addObject newObj world
+                                let event =
+                                    WorldEvent.Type.Moved (id, dir, amount)
+                                    |> WorldEvent.asResult intention.id
+                                let busyUntil = now + System.TimeSpan.FromMilliseconds(float(100)).Ticks
+                                let newObjectBusyMap =
+                                    objectBusyMap
+                                    |> Map.add id busyUntil
+
+                                {
+                                    events = [event]
+                                    delayed = []
+                                    world = newWorld
+                                    objectClientMap = objectClientMap
+                                    objectBusyMap = newObjectBusyMap
+                                }
 
         | Intention.JoinGame ->
             // Generates event to add a player object to the world at the spawn point

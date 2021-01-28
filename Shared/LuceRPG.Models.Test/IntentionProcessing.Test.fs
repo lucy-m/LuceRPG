@@ -20,6 +20,10 @@ module IntentionProcessing =
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
 
         let processFn = IntentionProcessing.processOne now objectClientMap Map.empty world
+        let makeIntention =
+                Intention.makePayload clientId
+                >> TestUtil.withId
+                >> WithTimestamp.create now
 
         [<Test>]
         let ``world created correctly`` () =
@@ -33,9 +37,7 @@ module IntentionProcessing =
             module ``when the player tries to move one square north`` =
                 let intention =
                     Intention.Move (player.id, Direction.North, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -89,9 +91,7 @@ module IntentionProcessing =
                 // player should be blocked by the wall in this case
                 let intention =
                     Intention.Move (player.id, Direction.East, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -112,9 +112,7 @@ module IntentionProcessing =
                 // player should teleport past the wall in this case
                 let intention =
                     Intention.Move (player.id, Direction.East, 4uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -138,9 +136,7 @@ module IntentionProcessing =
                 // player would move out of bounds from this move
                 let intention =
                     Intention.Move (player.id, Direction.South, 2uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -161,9 +157,7 @@ module IntentionProcessing =
                 let objectBusyMap = Map.ofList [(player.id, now + 20L)]
                 let intention =
                     Intention.Move (player.id, Direction.North, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create now
+                    |> makeIntention
 
                 let result =
                     IntentionProcessing.processOne
@@ -176,6 +170,18 @@ module IntentionProcessing =
                 [<Test>]
                 let ``intention is delayed`` () =
                     result.delayed |> should equal [intention]
+
+            [<TestFixture>]
+            module ``when the wall tries to move`` =
+                let intention =
+                    Intention.Move (wall.id, Direction.North, 1uy)
+                    |> makeIntention
+
+                let result = processFn intention
+
+                [<Test>]
+                let ``nothing happens`` () =
+                    result.events |> Seq.isEmpty |> should equal true
 
         [<TestFixture>]
         module ``join game`` =
