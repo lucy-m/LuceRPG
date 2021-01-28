@@ -62,7 +62,7 @@ namespace LuceRPG.Server.Processors
                 {
                     if (OnProcessed != null)
                     {
-                        var myEvents = events.Where(e => e.resultOf == Intention.id);
+                        var myEvents = events.Where(e => e.resultOf == Intention.value.id);
                         OnProcessed(myEvents);
                     }
                 }
