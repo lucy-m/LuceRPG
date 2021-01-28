@@ -46,7 +46,7 @@ module IntentionProcessing =
                     let worldEvents = result.events |> List.ofSeq
                     worldEvents.Length |> should equal 1
 
-                    let expected = WorldEvent.Moved (player.id, Direction.North, 1uy)
+                    let expected = WorldEvent.Moved (player.id, Direction.North)
                     worldEvents.Head.t |> should equal expected
 
                 [<Test>]
@@ -117,30 +117,6 @@ module IntentionProcessing =
                 let result = processFn intention
 
                 [<Test>]
-                let ``a moved event is created`` () =
-                    let worldEvents = result.events |> List.ofSeq
-                    worldEvents.Length |> should equal 1
-
-                    let expected = WorldEvent.Moved (player.id, Direction.East, 4uy)
-                    worldEvents.Head.t |> should equal expected
-
-                [<Test>]
-                let ``the player object is moved`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
-                    newPlayer.IsSome |> should equal true
-
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 5 3)
-
-            [<TestFixture>]
-            module ``when the player tries to move two squares south `` =
-                // player would move out of bounds from this move
-                let intention =
-                    Intention.Move (player.id, Direction.South, 2uy)
-                    |> makeIntention
-
-                let result = processFn intention
-
-                [<Test>]
                 let ``a moved event is not created`` () =
                     let worldEvents = result.events |> List.ofSeq
                     worldEvents.Length |> should equal 0
@@ -151,6 +127,32 @@ module IntentionProcessing =
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
+
+            [<TestFixture>]
+            module ``when the player tries to move two squares south `` =
+                // Player would move out of bounds from this move
+                //   but intention is partially applied to move one
+                //   square south
+                let intention =
+                    Intention.Move (player.id, Direction.South, 2uy)
+                    |> makeIntention
+
+                let result = processFn intention
+
+                [<Test>]
+                let ``a moved event is created`` () =
+                    let worldEvents = result.events |> List.ofSeq
+                    worldEvents.Length |> should equal 1
+
+                    let expected = WorldEvent.Moved (player.id, Direction.South)
+                    worldEvents.Head.t |> should equal expected
+
+                [<Test>]
+                let ``the player object is moved correctly`` () =
+                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    newPlayer.IsSome |> should equal true
+
+                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 2)
 
             [<TestFixture>]
             module ``when the player is busy`` =
@@ -376,7 +378,7 @@ module IntentionProcessing =
             let ``returns events in correct order`` () =
                 let expectedEvents =
                     [
-                        WorldEvent.Type.Moved (player.id, Direction.South, 1uy)
+                        WorldEvent.Type.Moved (player.id, Direction.South)
                         WorldEvent.Type.ObjectRemoved (player.id)
                     ]
 

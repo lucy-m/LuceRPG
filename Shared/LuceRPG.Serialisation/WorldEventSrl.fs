@@ -13,11 +13,10 @@ module WorldEventSrl =
 
         let addtInfo =
             match i with
-            | WorldEvent.Moved (id, d, a) ->
+            | WorldEvent.Moved (id, d) ->
                 Array.concat [
                     (StringSrl.serialise id)
                     (DirectionSrl.serialise d)
-                    (ByteSrl.serialise a)
                 ]
             | WorldEvent.ObjectAdded obj ->
                 WorldObjectSrl.serialise obj
@@ -36,11 +35,10 @@ module WorldEventSrl =
         let loadObj (tag: byte) (objectBytes: byte[]): WorldEvent.Type DesrlResult =
             match tag with
             | 1uy ->
-                DesrlUtil.getThree
+                DesrlUtil.getTwo
                     StringSrl.deserialise
                     DirectionSrl.deserialise
-                    ByteSrl.deserialise
-                    (fun id d a -> WorldEvent.Type.Moved (id, d,a))
+                    (fun id d -> WorldEvent.Type.Moved (id, d))
                     objectBytes
             | 2uy ->
                 WorldObjectSrl.deserialise objectBytes

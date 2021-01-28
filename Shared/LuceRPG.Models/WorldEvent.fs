@@ -2,7 +2,7 @@
 
 module WorldEvent =
     type Type =
-        | Moved of Id.WorldObject * Direction * byte
+        | Moved of Id.WorldObject * Direction
         | ObjectAdded of WorldObject
         | ObjectRemoved of Id.WorldObject
 
@@ -20,7 +20,7 @@ module WorldEvent =
 
     let getObjectId (t: Type): Id.WorldObject Option =
         match t with
-        | Type.Moved (id, _, _) -> id |> Option.Some
+        | Type.Moved (id, _) -> id |> Option.Some
         | Type.ObjectAdded o -> o.id |> Option.Some
         | Type.ObjectRemoved id -> id |> Option.Some
 

@@ -77,16 +77,14 @@ module IntentionProcessing =
                         if travelTime <= 0L
                         then thisUnchanged
                         else
-                            // Teleport to final location if clear
-                            // Will do collision checking at a later date
-                            let newObj = WorldObject.moveObject dir (int amount) obj
+                            let newObj = WorldObject.moveObject dir obj
 
                             if not (World.canPlace newObj world)
                             then thisUnchanged
                             else
                                 let newWorld = World.addObject newObj world
                                 let event =
-                                    WorldEvent.Type.Moved (id, dir, amount)
+                                    WorldEvent.Type.Moved (id, dir)
                                     |> WorldEvent.asResult intention.id
 
                                 let movementStart =
