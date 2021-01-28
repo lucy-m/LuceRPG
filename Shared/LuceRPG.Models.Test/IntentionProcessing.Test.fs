@@ -251,7 +251,15 @@ module IntentionProcessing =
                 |> WithId.create
                 |> WithTimestamp.create 100L
 
-            let processResult = processFn intention
+            let objectBusyMap = [player.id, now] |> Map.ofList
+
+            let processResult =
+                IntentionProcessing.processOne
+                    now
+                    objectClientMap
+                    objectBusyMap
+                    world
+                    intention
 
             [<Test>]
             let ``creates object removed event`` () =
@@ -265,6 +273,12 @@ module IntentionProcessing =
             let ``removes player object from world`` () =
                 processResult.world
                 |> World.containsObject player.id
+                |> should equal false
+
+            [<Test>]
+            let ``removes object from objectBusyMap`` () =
+                processResult.objectBusyMap
+                |> Map.containsKey player.id
                 |> should equal false
 
         [<TestFixture>]

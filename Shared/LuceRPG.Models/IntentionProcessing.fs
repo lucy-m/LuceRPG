@@ -127,6 +127,10 @@ module IntentionProcessing =
                 |> Map.toList
                 |> List.map fst
 
+            let updatedBusyMap =
+                objectBusyMap
+                |> Map.filter (fun id until -> not(List.contains id clientObjectsList))
+
             let removeEvents =
                 clientObjectsList
                 |> List.map (fun e ->
@@ -145,7 +149,7 @@ module IntentionProcessing =
                 delayed = []
                 world = updatedWorld
                 objectClientMap = updatedObjectClientMap
-                objectBusyMap = objectBusyMap
+                objectBusyMap = updatedBusyMap
             }
 
     /// Processes many intentions sequentially
