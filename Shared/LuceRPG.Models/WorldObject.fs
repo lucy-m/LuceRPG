@@ -67,4 +67,10 @@ module WorldObject =
                 }
         }
 
+    /// Time taken by the object to move one square
+    let travelTime (obj: Payload): int64 =
+        match obj.t with
+        | Type.Player -> System.TimeSpan.FromMilliseconds(float(300)).Ticks
+        | _ -> 0L
+
 type WorldObject = WorldObject.Model
