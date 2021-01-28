@@ -82,10 +82,11 @@ module IntentionProcessing =
                             if not (World.canPlace newObj world)
                             then thisUnchanged
                             else
-                                let newWorld = World.addObject newObj world
                                 let event =
                                     WorldEvent.Type.Moved (id, dir)
                                     |> WorldEvent.asResult intention.id
+
+                                let newWorld = EventApply.apply event world
 
                                 let movementStart =
                                     tBusyUntil
@@ -133,10 +134,11 @@ module IntentionProcessing =
                 objectClientMap
                 |> Map.add obj.id intention.value.clientId
 
-            let newWorld = World.addObject obj world
             let event =
                 WorldEvent.Type.ObjectAdded obj
                 |> WorldEvent.asResult intention.id
+
+            let newWorld = EventApply.apply event world
 
             {
                 events = [event]
@@ -169,9 +171,9 @@ module IntentionProcessing =
                 )
 
             let updatedWorld =
-                clientObjectsList
-                |> List.fold (fun acc oId ->
-                    World.removeObject oId acc
+                removeEvents
+                |> List.fold (fun acc e ->
+                    EventApply.apply e acc
                 ) world
 
             {
