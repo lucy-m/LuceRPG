@@ -111,19 +111,22 @@ module IntentionProcessing =
                 objectClientMap = updatedObjectClientMap
             }
 
+    /// Processes many intentions sequentially
+    /// Will ensure timestamps are processed in timestamp order
     let processMany
-            (clientObjectMap: Map<Id.WorldObject, Id.Client>)
+            (objectClientMap: Map<Id.WorldObject, Id.Client>)
             (world: World)
-            (intentions: Intention seq)
+            (intentions: Intention WithTimestamp seq)
             : ProcessResult =
-        let initial = unchanged clientObjectMap world
+        let initial = unchanged objectClientMap world
 
         intentions
+        |> Seq.sortBy (fun i -> i.timestamp)
         |> Seq.fold (fun acc i ->
-            let resultOne = processOne acc.objectClientMap acc.world i
+            let resultOne = processOne acc.objectClientMap acc.world i.value
 
             {
-                events = Seq.append resultOne.events acc.events
+                events = Seq.append acc.events resultOne.events
                 world = resultOne.world
                 objectClientMap = resultOne.objectClientMap
             }

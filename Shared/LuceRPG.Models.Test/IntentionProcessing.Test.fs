@@ -224,6 +224,49 @@ module IntentionProcessing =
                 |> World.containsObject player.id
                 |> should equal false
 
+        [<TestFixture>]
+        module ``for multiple intentions`` =
+            let intention1 =
+                Intention.Move (player.id, Direction.East, 1uy)
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 9L
+
+            let intention2 =
+                Intention.LeaveGame
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 10L
+
+            let intention3 =
+                Intention.Move (player.id, Direction.North, 1uy)
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 11L
+
+            let doProcess = IntentionProcessing.processMany objectClientMap world
+
+            let i123 = doProcess [intention1; intention2; intention3]
+            let i213 = doProcess [intention2; intention1; intention3]
+            let i321 = doProcess [intention3; intention2; intention1]
+
+            [<Test>]
+            let ``processes correctly regardless of input order`` () =
+                i123 |> should equal i213
+                i213 |> should equal i321
+
+            [<Test>]
+            let ``returns events in correct order`` () =
+                let expectedEvents =
+                    [
+                        WorldEvent.Type.Moved (player.id, Direction.East, 1uy)
+                        WorldEvent.Type.ObjectRemoved (player.id)
+                    ]
+
+                i123.events |> should equal expectedEvents
+                i213.events |> should equal expectedEvents
+                i321.events |> should equal expectedEvents
+
     [<TestFixture>]
     module ``for a client that owns multiple objects`` =
         let player1 = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
