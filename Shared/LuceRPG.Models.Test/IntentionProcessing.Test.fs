@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open FsUnit
+open IntentionProcessing
 
 [<TestFixture>]
 module IntentionProcessing =
@@ -235,7 +236,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``for multiple intentions`` =
             let intention1 =
-                Intention.Move (player.id, Direction.East, 1uy)
+                Intention.Move (player.id, Direction.South, 1uy)
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 9L
@@ -267,13 +268,16 @@ module IntentionProcessing =
             let ``returns events in correct order`` () =
                 let expectedEvents =
                     [
-                        WorldEvent.Type.Moved (player.id, Direction.East, 1uy)
+                        WorldEvent.Type.Moved (player.id, Direction.South, 1uy)
                         WorldEvent.Type.ObjectRemoved (player.id)
                     ]
 
-                i123.events |> should equal expectedEvents
-                i213.events |> should equal expectedEvents
-                i321.events |> should equal expectedEvents
+                let eventTypes (r: ProcessResult): WorldEvent.Type seq =
+                    r.events |> Seq.map (fun e -> e.t)
+
+                i123 |> eventTypes |> should equal expectedEvents
+                i213 |> eventTypes |> should equal expectedEvents
+                i321 |> eventTypes |> should equal expectedEvents
 
     [<TestFixture>]
     module ``for a client that owns multiple objects`` =
