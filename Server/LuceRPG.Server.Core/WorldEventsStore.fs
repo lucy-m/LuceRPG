@@ -13,6 +13,7 @@ module WorldEventsStore =
             recentEvents: WorldEvent WithTimestamp List
             world: World
             objectClientMap: IntentionProcessing.ObjectClientMap
+            objectBusyMap: IntentionProcessing.ObjectBusyMap
         }
 
     // So far the only way for ownership to be established is
@@ -24,6 +25,7 @@ module WorldEventsStore =
             recentEvents = []
             world = world
             objectClientMap = Map.empty
+            objectBusyMap = Map.empty
         }
 
     let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =
@@ -44,6 +46,7 @@ module WorldEventsStore =
             recentEvents = recentEvents
             world = result.world
             objectClientMap = result.objectClientMap
+            objectBusyMap = result.objectBusyMap
         }
 
     /// Returns recent events if available
@@ -62,11 +65,16 @@ module WorldEventsStore =
             state.recentEvents
             |> List.filter (fun e -> e.timestamp >= timestamp)
 
+        let culledBusyMap =
+            state.objectBusyMap
+            |> Map.filter (fun id until -> until >= timestamp)
+
         {
             lastCull = timestamp
             recentEvents = recentEvents
             world = state.world
             objectClientMap = state.objectClientMap
+            objectBusyMap = culledBusyMap
         }
 
 type WorldEventsStore = WorldEventsStore.Model

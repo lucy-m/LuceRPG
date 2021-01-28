@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open FsUnit
+open IntentionProcessing
 
 [<TestFixture>]
 module IntentionProcessing =
@@ -14,8 +15,11 @@ module IntentionProcessing =
         let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
         let objectClientMap = [player.id, clientId] |> Map.ofList
+        let now = 120L
 
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
+
+        let processFn = IntentionProcessing.processOne now objectClientMap Map.empty world
 
         [<Test>]
         let ``world created correctly`` () =
@@ -31,8 +35,9 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.North, 1uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
-                let result = IntentionProcessing.processOne objectClientMap world intention
+                let result = processFn intention
 
                 [<Test>]
                 let ``a moved event is created`` () =
@@ -53,14 +58,19 @@ module IntentionProcessing =
                 let ``client object map is unchanged`` () =
                     result.objectClientMap |> should equal objectClientMap
 
+                [<Test>]
+                let ``nothing is delayed`` () =
+                    result.delayed |> Seq.isEmpty |> should equal true
+
             [<TestFixture>]
             module ``when another client tries to move the player one square north`` =
                 let intention =
                     Intention.Move (player.id, Direction.North, 1uy)
                     |> Intention.makePayload "other-client"
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
-                let result = IntentionProcessing.processOne objectClientMap world intention
+                let result = processFn intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -81,8 +91,9 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.East, 1uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
-                let result = IntentionProcessing.processOne objectClientMap world intention
+                let result = processFn intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -103,8 +114,9 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.East, 4uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
-                let result = IntentionProcessing.processOne objectClientMap world intention
+                let result = processFn intention
 
                 [<Test>]
                 let ``a moved event is created`` () =
@@ -128,8 +140,9 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.South, 2uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
-                let result = IntentionProcessing.processOne objectClientMap world intention
+                let result = processFn intention
 
                 [<Test>]
                 let ``a moved event is not created`` () =
@@ -143,6 +156,27 @@ module IntentionProcessing =
 
                     newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
 
+            [<TestFixture>]
+            module ``when the player is busy`` =
+                let objectBusyMap = Map.ofList [(player.id, now + 20L)]
+                let intention =
+                    Intention.Move (player.id, Direction.North, 1uy)
+                    |> Intention.makePayload clientId
+                    |> TestUtil.withId
+                    |> WithTimestamp.create now
+
+                let result =
+                    IntentionProcessing.processOne
+                        now
+                        objectClientMap
+                        objectBusyMap
+                        world
+                        intention
+
+                [<Test>]
+                let ``intention is delayed`` () =
+                    result.delayed |> should equal [intention]
+
         [<TestFixture>]
         module ``join game`` =
             let newClientId = "new-client"
@@ -151,14 +185,22 @@ module IntentionProcessing =
                 Intention.JoinGame
                 |> Intention.makePayload newClientId
                 |> WithId.create
-            let processResult = IntentionProcessing.processOne Map.empty world intention
+                |> WithTimestamp.create 100L
+
+            let processResult =
+                IntentionProcessing.processOne
+                    now
+                    Map.empty
+                    Map.empty
+                    world
+                    intention
 
             [<Test>]
             let ``creates object added event`` () =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 1
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
 
             [<Test>]
@@ -207,15 +249,24 @@ module IntentionProcessing =
                 Intention.LeaveGame
                 |> Intention.makePayload clientId
                 |> WithId.create
+                |> WithTimestamp.create 100L
 
-            let processResult = IntentionProcessing.processOne objectClientMap world intention
+            let objectBusyMap = [player.id, now] |> Map.ofList
+
+            let processResult =
+                IntentionProcessing.processOne
+                    now
+                    objectClientMap
+                    objectBusyMap
+                    world
+                    intention
 
             [<Test>]
             let ``creates object removed event`` () =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 1
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
 
             [<Test>]
@@ -223,6 +274,58 @@ module IntentionProcessing =
                 processResult.world
                 |> World.containsObject player.id
                 |> should equal false
+
+            [<Test>]
+            let ``removes object from objectBusyMap`` () =
+                processResult.objectBusyMap
+                |> Map.containsKey player.id
+                |> should equal false
+
+        [<TestFixture>]
+        module ``for multiple intentions`` =
+            let intention1 =
+                Intention.Move (player.id, Direction.South, 1uy)
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 9L
+
+            let intention2 =
+                Intention.LeaveGame
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 10L
+
+            let intention3 =
+                Intention.Move (player.id, Direction.North, 1uy)
+                |> Intention.makePayload clientId
+                |> WithId.create
+                |> WithTimestamp.create 11L
+
+            let processFn = IntentionProcessing.processMany now objectClientMap Map.empty world
+
+            let i123 = processFn [intention1; intention2; intention3]
+            let i213 = processFn [intention2; intention1; intention3]
+            let i321 = processFn [intention3; intention2; intention1]
+
+            [<Test>]
+            let ``processes correctly regardless of input order`` () =
+                i123 |> should equal i213
+                i213 |> should equal i321
+
+            [<Test>]
+            let ``returns events in correct order`` () =
+                let expectedEvents =
+                    [
+                        WorldEvent.Type.Moved (player.id, Direction.South, 1uy)
+                        WorldEvent.Type.ObjectRemoved (player.id)
+                    ]
+
+                let eventTypes (r: ProcessResult): WorldEvent.Type seq =
+                    r.events |> Seq.map (fun e -> e.t)
+
+                i123 |> eventTypes |> should equal expectedEvents
+                i213 |> eventTypes |> should equal expectedEvents
+                i321 |> eventTypes |> should equal expectedEvents
 
     [<TestFixture>]
     module ``for a client that owns multiple objects`` =
@@ -249,17 +352,19 @@ module IntentionProcessing =
                 Intention.LeaveGame
                 |> Intention.makePayload clientId
                 |> WithId.create
+                |> WithTimestamp.create 100L
 
-            let processResult = IntentionProcessing.processOne objectClientMap world intention
+            let processResult =
+                IntentionProcessing.processOne 100L objectClientMap Map.empty world intention
 
             [<Test>]
             let ``creates object removed events`` () =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 2
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
-                events.Tail.Head.resultOf |> should equal intention.id
+                events.Tail.Head.resultOf |> should equal intention.value.id
                 events.Tail.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
 
             [<Test>]

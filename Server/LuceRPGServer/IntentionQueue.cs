@@ -7,29 +7,21 @@ namespace LuceRPG.Server
     public class IntentionQueue
     {
         private readonly Queue<(
-            WithId.Model<IntentionModule.Payload> Intention,
+            WithTimestamp.Model<WithId.Model<IntentionModule.Payload>> Intention,
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
         )> _queue;
 
         public IntentionQueue()
         {
             _queue = new Queue<(
-                WithId.Model<IntentionModule.Payload> Intention,
+                WithTimestamp.Model<WithId.Model<IntentionModule.Payload>> Intention,
                 Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
             )>();
         }
 
-        public void Enqueue(WithId.Model<IntentionModule.Payload> intention)
-        {
-            lock (_queue)
-            {
-                _queue.Enqueue((Intention: intention, OnProcessed: null));
-            }
-        }
-
         public void Enqueue(
-            WithId.Model<IntentionModule.Payload> intention,
-            Action<IEnumerable<WorldEventModule.Model>> onProcessed
+            WithTimestamp.Model<WithId.Model<IntentionModule.Payload>> intention,
+            Action<IEnumerable<WorldEventModule.Model>>? onProcessed = null
         )
         {
             lock (_queue)
@@ -38,8 +30,20 @@ namespace LuceRPG.Server
             }
         }
 
+        public void Enqueue(
+            WithId.Model<IntentionModule.Payload> intention,
+            Action<IEnumerable<WorldEventModule.Model>>? onProcessed = null
+        )
+        {
+            lock (_queue)
+            {
+                var timestamped = WithTimestamp.create(TimestampProvider.Now, intention);
+                _queue.Enqueue((Intention: timestamped, OnProcessed: onProcessed));
+            }
+        }
+
         public IEnumerable<(
-            WithId.Model<IntentionModule.Payload> Intention,
+            WithTimestamp.Model<WithId.Model<IntentionModule.Payload>> Intention,
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
         )> DequeueAll()
         {

@@ -50,20 +50,41 @@ namespace LuceRPG.Server.Processors
         private void ProcessIntentions(object? state)
         {
             var entries = _queue.DequeueAll().ToArray();
+            var entriesMap = entries.ToDictionary(e => e.Intention.value.id);
 
             if (entries.Length > 0)
             {
                 _logger.LogDebug($"Processing {entries.Length} intentions");
                 var intentions = entries.Select(e => e.Intention).ToArray();
-                var processed = IntentionProcessing.processMany(_store.ObjectClientMap, _store.CurrentWorld, intentions);
+
+                var processed = IntentionProcessing.processMany(
+                    TimestampProvider.Now,
+                    _store.ObjectClientMap,
+                    _store.ObjectBusyMap,
+                    _store.CurrentWorld,
+                    intentions
+                );
 
                 var events = processed.events.ToArray();
                 foreach (var (Intention, OnProcessed) in entries)
                 {
                     if (OnProcessed != null)
                     {
-                        var myEvents = events.Where(e => e.resultOf == Intention.id);
+                        var myEvents = events.Where(e => e.resultOf == Intention.value.id);
                         OnProcessed(myEvents);
+                    }
+                }
+
+                foreach (var i in processed.delayed)
+                {
+                    _logger.LogDebug($"Requeueing delayed intention {i.value.id}");
+                    if (entriesMap.TryGetValue(i.value.id, out var entry))
+                    {
+                        _queue.Enqueue(i, entry.OnProcessed);
+                    }
+                    else
+                    {
+                        _queue.Enqueue(i);
                     }
                 }
 

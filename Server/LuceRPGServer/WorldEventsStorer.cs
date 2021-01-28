@@ -15,6 +15,7 @@ namespace LuceRPG.Server
 
         public WorldModule.Model CurrentWorld => _store.world;
         public FSharpMap<string, string> ObjectClientMap => _store.objectClientMap;
+        public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
 
         public void Update(IntentionProcessing.ProcessResult result)
         {
