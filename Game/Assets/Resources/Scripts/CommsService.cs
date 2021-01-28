@@ -21,7 +21,7 @@ public interface ICommsService
 public class CommsService : ICommsService
 {
     public float PollPeriod = 0.1f;
-    public float ConsistencyCheckCycles = 150;
+    public int ConsistencyCheckFreq = 15;
     private string BaseUrl => Registry.ConfigLoader.Config.BaseUrl;
     private string Username => Registry.ConfigLoader.Config.Username;
     private string Password => Registry.ConfigLoader.Config.Password;
@@ -162,12 +162,16 @@ public class CommsService : ICommsService
     )
     {
         var lastTimestamp = initialTimestamp;
+        var lastConsistencyCheck = lastTimestamp;
+        var checkTicks = TimeSpan.FromSeconds(ConsistencyCheckFreq).Ticks;
 
-        for (var i = 1; true; i++)
+        while (true)
         {
-            if (i % ConsistencyCheckCycles == 0)
+            if (lastTimestamp - lastConsistencyCheck > checkTicks)
             {
                 yield return ConsistencyCheck(onConsistencyCheck);
+
+                lastConsistencyCheck += checkTicks;
             }
             else
             {

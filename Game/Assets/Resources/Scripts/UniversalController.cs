@@ -111,7 +111,7 @@ public class UniversalController : MonoBehaviour
 
         // If the object is close to its location then set the target
         //   and move normally
-        if (distance < _speed)
+        if (distance <= _speed)
         {
             Target = location;
         }

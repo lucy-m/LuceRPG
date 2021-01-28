@@ -15,6 +15,8 @@ public class WorldLoader : MonoBehaviour
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
 
+    private WorldModule.Model _world = null;
+
     private void Awake()
     {
         if (Instance != null)
@@ -82,6 +84,8 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(string playerId, WorldModule.Model world)
     {
+        _world = world;
+
         foreach (var bound in world.bounds)
         {
             var location = bound.GetGameLocation();
@@ -120,6 +124,8 @@ public class WorldLoader : MonoBehaviour
     {
         foreach (var worldEvent in worldEvents)
         {
+            _world = EventApply.apply(worldEvent, _world);
+
             var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
             if (tObjectId.HasValue())
             {
