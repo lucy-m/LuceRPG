@@ -24,18 +24,20 @@ namespace LuceRPGServer.Controllers
         private readonly IntentionQueue _queue;
         private readonly WorldEventsStorer _worldStore;
         private readonly LastPingStorer _pingStorer;
+        private readonly CredentialService _credentialService;
 
         public WorldController(
             ILogger<WorldController> logger,
             IntentionQueue queue,
             WorldEventsStorer store,
-            LastPingStorer pingStorer
-        )
+            LastPingStorer pingStorer,
+            CredentialService credentialService)
         {
             _logger = logger;
             _queue = queue;
             _worldStore = store;
             _pingStorer = pingStorer;
+            _credentialService = credentialService;
         }
 
         [HttpGet("join")]

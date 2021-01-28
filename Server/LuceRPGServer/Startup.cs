@@ -26,6 +26,8 @@ namespace LuceRPGServer
             services.AddSingleton(SampleWorlds.world1);
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
+            services.AddSingleton<CredentialService>();
+
             services.AddHostedService<IntentionProcessor>();
             services.AddHostedService<StaleClientProcessor>();
 
