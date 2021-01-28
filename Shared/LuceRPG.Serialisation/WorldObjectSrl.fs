@@ -8,14 +8,14 @@ module WorldObjectSrl =
             match t with
             | WorldObject.Type.Wall -> 1uy
             | WorldObject.Type.Path _ -> 2uy
-            | WorldObject.Type.Player -> 3uy
+            | WorldObject.Type.Player _ -> 3uy
 
         let addtInfo =
             match t with
             | WorldObject.Type.Wall -> [||]
             | WorldObject.Type.Path (w,h) ->
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
-            | WorldObject.Type.Player -> [||]
+            | WorldObject.Type.Player d -> PlayerDataSrl.serialise d
 
         Array.append [|label|] addtInfo
 
@@ -29,7 +29,9 @@ module WorldObjectSrl =
                     IntSrl.deserialise
                     (fun w h -> WorldObject.Type.Path (w,h))
                     objectBytes
-            | 3uy -> DesrlResult.create WorldObject.Type.Player 0
+            | 3uy ->
+                PlayerDataSrl.deserialise objectBytes
+                |> DesrlResult.map (fun d -> WorldObject.Type.Player d)
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None

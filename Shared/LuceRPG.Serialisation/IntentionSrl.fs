@@ -7,7 +7,7 @@ module IntentionSrl =
         let label =
             match i with
             | Intention.Move  _-> 1uy
-            | Intention.JoinGame -> 2uy
+            | Intention.JoinGame _ -> 2uy
             | Intention.LeaveGame -> 3uy
 
         let addtInfo =
@@ -18,7 +18,7 @@ module IntentionSrl =
                     (DirectionSrl.serialise d)
                     (ByteSrl.serialise a)
                 ]
-            | Intention.JoinGame -> [||]
+            | Intention.JoinGame username -> StringSrl.serialise username
             | Intention.LeaveGame -> [||]
 
         Array.append [|label|] addtInfo
@@ -43,7 +43,8 @@ module IntentionSrl =
                     (fun id d a -> Intention.Move (id, d, a))
                     objectBytes
             | 2uy ->
-                DesrlResult.create Intention.JoinGame 0
+                StringSrl.deserialise objectBytes
+                |> DesrlResult.map (fun s -> Intention.JoinGame s)
             | 3uy ->
                 DesrlResult.create Intention.LeaveGame 0
             | _ ->

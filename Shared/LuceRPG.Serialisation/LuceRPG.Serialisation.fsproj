@@ -18,6 +18,7 @@
     <Compile Include="PointSrl.fs" />
     <Compile Include="RectSrl.fs" />
     <Compile Include="DirectionSrl.fs" />
+    <Compile Include="PlayerDataSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
     <Compile Include="WorldEventSrl.fs" />
