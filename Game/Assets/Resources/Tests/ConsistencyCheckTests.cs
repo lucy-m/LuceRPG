@@ -42,33 +42,10 @@ public class ConsistencyCheckTests
 
         yield return null;
 
-        modelToMove =
-            WithId.create(
-                WorldObjectModule.create(
-                    WorldObjectModule.TypeModule.Model.Player, PointModule.create(0, 2)
-                )
-            );
-
-        modelToSnap =
-            WithId.create(
-                WorldObjectModule.create(
-                    WorldObjectModule.TypeModule.Model.Player, PointModule.create(2, 2)
-                )
-            );
-
-        modelToAdd =
-            WithId.create(
-                WorldObjectModule.create(
-                    WorldObjectModule.TypeModule.Model.Player, PointModule.create(4, 2)
-                )
-            );
-
-        modelToRemove =
-            WithId.create(
-                WorldObjectModule.create(
-                    WorldObjectModule.TypeModule.Model.Player, PointModule.create(6, 2)
-                )
-            );
+        modelToMove = TestUtil.MakePlayer(0, 2);
+        modelToSnap = TestUtil.MakePlayer(2, 2);
+        modelToAdd = TestUtil.MakePlayer(4, 2);
+        modelToRemove = TestUtil.MakePlayer(6, 2);
 
         var worldBounds = new RectModule.Model[]
         {

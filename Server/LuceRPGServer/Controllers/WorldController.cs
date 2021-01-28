@@ -58,7 +58,7 @@ namespace LuceRPGServer.Controllers
                 var clientId = Guid.NewGuid().ToString();
 
                 var intention = WithId.create(
-                    IntentionModule.makePayload(clientId, IntentionModule.Type.JoinGame)
+                    IntentionModule.makePayload(clientId, IntentionModule.Type.NewJoinGame(username))
                 );
 
                 void Action(IEnumerable<WorldEventModule.Model> events)
