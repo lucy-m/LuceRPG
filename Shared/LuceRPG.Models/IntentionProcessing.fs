@@ -49,9 +49,12 @@ module IntentionProcessing =
             if not clientOwnsObject
             then thisUnchanged
             else
-                let objectBusy =
+                let tBusyUntil =
                     objectBusyMap
                     |> Map.tryFind id
+
+                let objectBusy =
+                    tBusyUntil
                     |> Option.map (fun until -> until > now)
                     |> Option.defaultValue false
 
@@ -85,10 +88,19 @@ module IntentionProcessing =
                                 let event =
                                     WorldEvent.Type.Moved (id, dir, amount)
                                     |> WorldEvent.asResult intention.id
-                                let busyUntil = now + System.TimeSpan.FromMilliseconds(float(100)).Ticks
+
+                                let movementStart =
+                                    tBusyUntil
+                                    |> Option.map (fun busyUntil ->
+                                        max tsIntention.timestamp busyUntil
+                                    )
+                                    |> Option.defaultValue tsIntention.timestamp
+
+                                let movementEnd = movementStart + travelTime
+
                                 let newObjectBusyMap =
                                     objectBusyMap
-                                    |> Map.add id busyUntil
+                                    |> Map.add id movementEnd
 
                                 {
                                     events = [event]

@@ -155,21 +155,75 @@ module IntentionProcessing =
             [<TestFixture>]
             module ``when the player is busy`` =
                 let objectBusyMap = Map.ofList [(player.id, now + 20L)]
-                let intention =
-                    Intention.Move (player.id, Direction.North, 1uy)
-                    |> makeIntention
 
-                let result =
+                [<TestFixture>]
+                module ``processing an intention now`` =
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> makeIntention
+
+                    let result =
+                        IntentionProcessing.processOne
+                            now
+                            objectClientMap
+                            objectBusyMap
+                            world
+                            intention
+
+                    [<Test>]
+                    let ``intention is delayed`` () =
+                        result.delayed |> should equal [intention]
+
+            [<TestFixture>]
+            module ``when the player was busy`` =
+                let busyUntil = now - 20L
+                let objectBusyMap = Map.ofList [(player.id, busyUntil)]
+                let travelTime = WorldObject.travelTime player.value
+
+                let processFn =
                     IntentionProcessing.processOne
                         now
                         objectClientMap
                         objectBusyMap
                         world
-                        intention
 
-                [<Test>]
-                let ``intention is delayed`` () =
-                    result.delayed |> should equal [intention]
+                [<TestFixture>]
+                module ``processing an intention from during busy period`` =
+                    let timestamp = now - 30L
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> Intention.makePayload clientId
+                        |> TestUtil.withId
+                        |> WithTimestamp.create timestamp
+
+                    let result = processFn intention
+
+                    [<Test>]
+                    let ``player is busy starting from the end of the busy period`` () =
+                        let expectedEnd = busyUntil + travelTime
+
+                        result.objectBusyMap
+                        |> Map.find player.id
+                        |> should equal expectedEnd
+
+                [<TestFixture>]
+                module ``processing an intention from after busy period`` =
+                    let timestamp = now - 10L
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> Intention.makePayload clientId
+                        |> TestUtil.withId
+                        |> WithTimestamp.create timestamp
+
+                    let result = processFn intention
+
+                    [<Test>]
+                    let ``player is busy starting from the intention timestamp`` () =
+                        let expectedEnd = timestamp + travelTime
+
+                        result.objectBusyMap
+                        |> Map.find player.id
+                        |> should equal expectedEnd
 
             [<TestFixture>]
             module ``when the wall tries to move`` =
