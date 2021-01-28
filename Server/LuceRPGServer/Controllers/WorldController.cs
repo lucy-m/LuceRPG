@@ -41,54 +41,63 @@ namespace LuceRPGServer.Controllers
         }
 
         [HttpGet("join")]
-        public ActionResult JoinGame()
+        public ActionResult JoinGame(string username, string password)
         {
-            WithId.Model<WorldObjectModule.Payload>? playerObject = null;
-            bool intentionProcessed = false;
-            var clientId = Guid.NewGuid().ToString();
-
-            var intention = WithId.create(
-                IntentionModule.makePayload(clientId, IntentionModule.Type.JoinGame)
-            );
-
-            void Action(IEnumerable<WorldEventModule.Model> events)
+            if (!_credentialService.IsValid(username, password))
             {
-                var objectAdded =
-                    events
-                        .Where(e => e.t.IsObjectAdded)
-                        .Select(e => (WorldEventModule.Type.ObjectAdded)e.t);
-                var playerAdded = objectAdded.FirstOrDefault(a => a.Item.value.t.IsPlayer);
+                var result = GetJoinGameResultModule.Model.IncorrectCredentials;
+                var serialised = GetJoinGameResultSrl.serialise(result);
+                return File(serialised, RawBytesContentType);
+            }
+            else
+            {
+                WithId.Model<WorldObjectModule.Payload>? playerObject = null;
+                bool intentionProcessed = false;
+                var clientId = Guid.NewGuid().ToString();
 
-                if (playerAdded != null)
+                var intention = WithId.create(
+                    IntentionModule.makePayload(clientId, IntentionModule.Type.JoinGame)
+                );
+
+                void Action(IEnumerable<WorldEventModule.Model> events)
                 {
-                    playerObject = playerAdded.Item;
+                    var objectAdded =
+                        events
+                            .Where(e => e.t.IsObjectAdded)
+                            .Select(e => (WorldEventModule.Type.ObjectAdded)e.t);
+                    var playerAdded = objectAdded.FirstOrDefault(a => a.Item.value.t.IsPlayer);
+
+                    if (playerAdded != null)
+                    {
+                        playerObject = playerAdded.Item;
+                    }
+
+                    intentionProcessed = true;
                 }
 
-                intentionProcessed = true;
+                _queue.Enqueue(intention, Action);
+
+                var attempts = 0;
+                while (!intentionProcessed && attempts < MaxJoinGameAttempts)
+                {
+                    attempts++;
+                    Thread.Sleep(50);
+                }
+
+                _logger.LogDebug($"Join game result player ID {playerObject?.id}");
+
+                var joinGameResult = playerObject != null
+                    ? GetJoinGameResultModule.Model.NewSuccess(
+                        clientId,
+                        playerObject.id,
+                        WithTimestamp.create(TimestampProvider.Now, _worldStore.CurrentWorld)
+                    )
+                    : GetJoinGameResultModule.Model.NewFailure("Could not join game");
+
+                var serialised = GetJoinGameResultSrl.serialise(joinGameResult);
+
+                return File(serialised, RawBytesContentType);
             }
-
-            _queue.Enqueue(intention, Action);
-
-            var attempts = 0;
-            while (!intentionProcessed && attempts < MaxJoinGameAttempts)
-            {
-                attempts++;
-                Thread.Sleep(50);
-            }
-
-            _logger.LogDebug($"Join game result player ID {playerObject?.id}");
-
-            var joinGameResult = playerObject != null
-                ? GetJoinGameResultModule.Model.NewSuccess(
-                    clientId,
-                    playerObject.id,
-                    WithTimestamp.create(TimestampProvider.Now, _worldStore.CurrentWorld)
-                )
-                : GetJoinGameResultModule.Model.NewFailure("Could not join game");
-
-            var serialised = GetJoinGameResultSrl.serialise(joinGameResult);
-
-            return File(serialised, RawBytesContentType);
         }
 
         [HttpGet("since")]
