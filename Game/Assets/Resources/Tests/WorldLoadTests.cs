@@ -142,7 +142,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                     "intention1",
-                    WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.North, 1)
+                    WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.North)
                 )
             )
         };

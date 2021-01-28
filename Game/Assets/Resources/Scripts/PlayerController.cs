@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
 
             if (horzIn < 0)
             {
-                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.West, 1);
+                var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.West, 8);
                 IntentionDispatcher.Instance.Dispatch(intention);
                 yield return new WaitForSeconds(InputDelay);
             }

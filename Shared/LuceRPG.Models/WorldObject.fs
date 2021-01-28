@@ -56,8 +56,8 @@ module WorldObject =
 
         blocked
 
-    let moveObject (direction: Direction) (obj: Model): Model =
-        let newTopLeft = Direction.movePoint direction 1 obj.value.topLeft
+    let moveObjectN (direction: Direction) (amount: int) (obj: Model): Model =
+        let newTopLeft = Direction.movePoint direction amount obj.value.topLeft
 
         {
             obj with
@@ -66,6 +66,9 @@ module WorldObject =
                         topLeft = newTopLeft
                 }
         }
+
+    let moveObject (direction: Direction) (obj: Model): Model =
+        moveObjectN direction 1 obj
 
     /// Time taken by the object to move one square
     let travelTime (obj: Payload): int64 =
