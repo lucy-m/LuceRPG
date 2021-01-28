@@ -154,6 +154,19 @@ module IntentionProcessing =
 
                     newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 2)
 
+                [<Test>]
+                let ``the rest of the move intention is delayed`` () =
+                    let delayed = result.delayed |> List.ofSeq
+
+                    let expected =
+                        Intention.Move (player.id, Direction.South, 1uy)
+                        |> Intention.makePayload clientId
+                        |> WithId.useId intention.value.id
+                        |> WithTimestamp.create intention.timestamp
+
+                    delayed.Length |> should equal 1
+                    delayed |> should equal [expected]
+
             [<TestFixture>]
             module ``when the player is busy`` =
                 let objectBusyMap = Map.ofList [(player.id, now + 20L)]

@@ -100,9 +100,20 @@ module IntentionProcessing =
                                     objectBusyMap
                                     |> Map.add id movementEnd
 
+                                let delayed =
+                                    if amount = 1uy
+                                    then []
+                                    else
+                                        let intention =
+                                            Intention.Move (id, dir, amount - 1uy)
+                                            |> Intention.makePayload intention.value.clientId
+                                            |> WithId.useId intention.id
+                                            |> WithTimestamp.create tsIntention.timestamp
+                                        [intention]
+
                                 {
                                     events = [event]
-                                    delayed = []
+                                    delayed = delayed
                                     world = newWorld
                                     objectClientMap = objectClientMap
                                     objectBusyMap = newObjectBusyMap
