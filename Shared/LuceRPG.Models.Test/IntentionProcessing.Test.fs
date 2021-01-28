@@ -12,7 +12,7 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
-        let player = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
+        let player = TestUtil.makePlayer (Point.create 1 3)
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
         let objectClientMap = [player.id, clientId] |> Map.ofList
         let now = 120L
@@ -257,7 +257,7 @@ module IntentionProcessing =
             let newClientId = "new-client"
 
             let intention =
-                Intention.JoinGame
+                Intention.JoinGame "username"
                 |> Intention.makePayload newClientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
@@ -285,7 +285,7 @@ module IntentionProcessing =
                     |> List.find (
                         fun p ->
                             p.id <> player.id
-                            && WorldObject.t p = WorldObject.Type.Player
+                            && WorldObject.isPlayer p
                     )
 
                 newPlayer
@@ -307,7 +307,7 @@ module IntentionProcessing =
                     |> List.find (
                         fun p ->
                             p.id <> player.id
-                            && WorldObject.t p = WorldObject.Type.Player
+                            && WorldObject.isPlayer p
                     )
 
                 let tEntry =
@@ -404,8 +404,8 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``for a client that owns multiple objects`` =
-        let player1 = WorldObject.create WorldObject.Type.Player (Point.create 1 3) |> TestUtil.withId
-        let player2 = WorldObject.create WorldObject.Type.Player (Point.create 3 3) |> TestUtil.withId
+        let player1 = TestUtil.makePlayer (Point.create 1 3)
+        let player2 = TestUtil.makePlayer (Point.create 3 3)
 
         let objectClientMap =
             [

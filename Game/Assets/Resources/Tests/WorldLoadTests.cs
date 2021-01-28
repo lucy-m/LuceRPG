@@ -35,12 +35,7 @@ public class WorldLoadTests
 
         yield return null;
 
-        playerModel =
-            WithId.create(
-                WorldObjectModule.create(
-                    WorldObjectModule.TypeModule.Model.Player, PointModule.create(4, 8)
-                )
-            );
+        playerModel = TestUtil.MakePlayer(4, 8);
 
         wallModel =
             WithId.create(WorldObjectModule.create(
@@ -189,9 +184,7 @@ public class WorldLoadTests
     [UnityTest]
     public IEnumerator AddObjectWorldEventCorrectlyHandled()
     {
-        var newPlayerModel = WithId.create(WorldObjectModule.create(
-                WorldObjectModule.TypeModule.Model.Player, PointModule.create(5, 4)
-            ));
+        var newPlayerModel = TestUtil.MakePlayer(5, 4);
 
         var worldEvents = new List<WithTimestamp.Model<WorldEventModule.Model>>
         {

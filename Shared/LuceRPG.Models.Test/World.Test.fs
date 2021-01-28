@@ -120,9 +120,7 @@ module World =
 
             [<Test>]
             let ``player can be added on top of the spawn point`` () =
-                let player =
-                    WorldObject.create WorldObject.Type.Player bounds.topLeft
-                    |> WithId.create
+                let player = TestUtil.makePlayer bounds.topLeft
 
                 let withPlayer = World.addObject player emptyWorld
 

@@ -70,7 +70,6 @@ module World =
         let points = WorldObject.getPoints obj.value
 
         let isNotBlocked =
-            let isPlayer = obj.value.t = WorldObject.Type.Player
             let blockedPoints =
                 points
                 |> List.choose (fun p -> getBlocker p world)
@@ -79,7 +78,7 @@ module World =
                     // objects are blocked by other objects with a differing id
                     | BlockedType.Object o -> o.id <> obj.id
                     // players are not blocked by spawn points
-                    | BlockedType.SpawnPoint _ -> not isPlayer
+                    | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj)
                 )
 
             blockedPoints |> List.isEmpty

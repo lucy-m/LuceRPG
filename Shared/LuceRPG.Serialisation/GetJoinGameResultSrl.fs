@@ -9,6 +9,7 @@ module GetJoinGameResultSrl =
             match result with
             | GetJoinGameResult.Success _ -> 1uy
             | GetJoinGameResult.Failure _ -> 2uy
+            | GetJoinGameResult.IncorrectCredentials -> 3uy
 
         let addtInfo =
             match result with
@@ -19,6 +20,7 @@ module GetJoinGameResultSrl =
                     (WithTimestampSrl.serialise WorldSrl.serialise w)
                 ]
             | GetJoinGameResult.Failure s -> StringSrl.serialise s
+            | GetJoinGameResult.IncorrectCredentials -> [||]
 
         Array.append [|label|] addtInfo
 
@@ -35,6 +37,7 @@ module GetJoinGameResultSrl =
             | 2uy ->
                 StringSrl.deserialise objectBytes
                 |> DesrlResult.map (fun s -> GetJoinGameResult.Failure s)
+            | 3uy -> DesrlResult.create GetJoinGameResult.IncorrectCredentials 0
             | _ ->
                 printfn "Unknown GetJoinGameResult tag %u" tag
                 Option.None

@@ -119,10 +119,15 @@ module IntentionProcessing =
                                     objectBusyMap = newObjectBusyMap
                                 }
 
-        | Intention.JoinGame ->
+        | Intention.JoinGame username ->
             // Generates event to add a player object to the world at the spawn point
             let spawnPoint = World.spawnPoint world
-            let obj = WorldObject.create WorldObject.Type.Player spawnPoint |> WithId.create
+            let playerData = PlayerData.create username
+            let obj =
+                WorldObject.create
+                    (WorldObject.Type.Player playerData)
+                    spawnPoint
+                |> WithId.create
 
             let newClientObjectMap =
                 objectClientMap

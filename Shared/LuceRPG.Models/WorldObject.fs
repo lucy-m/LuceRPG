@@ -5,7 +5,7 @@ module WorldObject =
         type Model =
             | Wall
             | Path of int * int
-            | Player
+            | Player of PlayerData
 
     type Type = Type.Model
 
@@ -30,7 +30,7 @@ module WorldObject =
         match obj.value.t with
         | Type.Wall -> true
         | Type.Path _ -> false
-        | Type.Player -> false
+        | Type.Player _ -> false
 
     let size (obj: Payload): Point =
         let p2x2 = Point.create 2 2
@@ -38,7 +38,7 @@ module WorldObject =
         match obj.t with
         | Type.Wall -> p2x2
         | Type.Path (w,h) -> Point.create w h
-        | Type.Player -> p2x2
+        | Type.Player _ -> p2x2
 
     let getPoints (obj: Payload): Point List =
         let objSize = size obj
@@ -73,7 +73,12 @@ module WorldObject =
     /// Time taken by the object to move one square
     let travelTime (obj: Payload): int64 =
         match obj.t with
-        | Type.Player -> System.TimeSpan.FromMilliseconds(float(300)).Ticks
+        | Type.Player _ -> System.TimeSpan.FromMilliseconds(float(300)).Ticks
         | _ -> 0L
+
+    let isPlayer (obj: Model): bool =
+        match t obj with
+        | Type.Player _ -> true
+        | _ -> false
 
 type WorldObject = WorldObject.Model

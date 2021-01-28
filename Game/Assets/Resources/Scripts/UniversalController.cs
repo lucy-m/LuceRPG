@@ -1,12 +1,15 @@
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UniversalController : MonoBehaviour
 {
     public readonly static Dictionary<string, UniversalController> Controllers
         = new Dictionary<string, UniversalController>();
+
+    private const string UnitNameTag = "UnitName";
 
     private string _id = "";
     private WorldObjectModule.Payload _model;
@@ -35,6 +38,26 @@ public class UniversalController : MonoBehaviour
                 (WorldObjectModule.travelTime(_model) / System.TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1000.0f / travelTime;
             Debug.Log($"Setting speed for {Id} to {_speed}, travel time {travelTime}");
+
+            if (_model.t.IsPlayer)
+            {
+                var asPlayer = ((WorldObjectModule.TypeModule.Model.Player)_model.t).Item;
+                var name = asPlayer.name;
+
+                var unitNameGo =
+                    gameObject
+                        .GetComponentsInChildren<TextMesh>()
+                        .FirstOrDefault(tm => tm.gameObject.CompareTag(UnitNameTag));
+
+                if (unitNameGo == null)
+                {
+                    Debug.LogWarning($"Could not set player name  {name} as no unit name component found");
+                }
+                else
+                {
+                    unitNameGo.text = name;
+                }
+            }
         }
     }
 
