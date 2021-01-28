@@ -31,6 +31,7 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.North, 1uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
                 let result = IntentionProcessing.processOne objectClientMap world intention
 
@@ -59,6 +60,7 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.North, 1uy)
                     |> Intention.makePayload "other-client"
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
                 let result = IntentionProcessing.processOne objectClientMap world intention
 
@@ -81,6 +83,7 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.East, 1uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
                 let result = IntentionProcessing.processOne objectClientMap world intention
 
@@ -103,6 +106,7 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.East, 4uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
                 let result = IntentionProcessing.processOne objectClientMap world intention
 
@@ -128,6 +132,7 @@ module IntentionProcessing =
                     Intention.Move (player.id, Direction.South, 2uy)
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
+                    |> WithTimestamp.create 100L
 
                 let result = IntentionProcessing.processOne objectClientMap world intention
 
@@ -151,6 +156,8 @@ module IntentionProcessing =
                 Intention.JoinGame
                 |> Intention.makePayload newClientId
                 |> WithId.create
+                |> WithTimestamp.create 100L
+
             let processResult = IntentionProcessing.processOne Map.empty world intention
 
             [<Test>]
@@ -158,7 +165,7 @@ module IntentionProcessing =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 1
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
 
             [<Test>]
@@ -207,6 +214,7 @@ module IntentionProcessing =
                 Intention.LeaveGame
                 |> Intention.makePayload clientId
                 |> WithId.create
+                |> WithTimestamp.create 100L
 
             let processResult = IntentionProcessing.processOne objectClientMap world intention
 
@@ -215,7 +223,7 @@ module IntentionProcessing =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 1
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
 
             [<Test>]
@@ -292,6 +300,7 @@ module IntentionProcessing =
                 Intention.LeaveGame
                 |> Intention.makePayload clientId
                 |> WithId.create
+                |> WithTimestamp.create 100L
 
             let processResult = IntentionProcessing.processOne objectClientMap world intention
 
@@ -300,9 +309,9 @@ module IntentionProcessing =
                 let events = processResult.events |> Seq.toList
 
                 events |> List.length |> should equal 2
-                events.Head.resultOf |> should equal intention.id
+                events.Head.resultOf |> should equal intention.value.id
                 events.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
-                events.Tail.Head.resultOf |> should equal intention.id
+                events.Tail.Head.resultOf |> should equal intention.value.id
                 events.Tail.Head.t |> should be (ofCase <@WorldEvent.ObjectRemoved@>)
 
             [<Test>]

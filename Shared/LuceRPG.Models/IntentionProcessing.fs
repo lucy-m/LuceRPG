@@ -6,6 +6,7 @@ module IntentionProcessing =
     type ProcessResult =
         {
             events: WorldEvent seq
+            delayed: Intention WithTimestamp seq
             world: World
             objectClientMap: ObjectClientMap
         }
@@ -13,6 +14,7 @@ module IntentionProcessing =
     let unchanged (objectClientMap: ObjectClientMap) (world: World): ProcessResult =
         {
             events = []
+            delayed = []
             world = world
             objectClientMap = objectClientMap
         }
@@ -20,10 +22,11 @@ module IntentionProcessing =
     let processOne
             (objectClientMap: ObjectClientMap)
             (world: World)
-            (intention: Intention)
+            (tsIntention: Intention WithTimestamp)
             : ProcessResult =
 
         let thisUnchanged = unchanged objectClientMap world
+        let intention = tsIntention.value
 
         match intention.value.t with
         | Intention.Move (id, dir, amount) ->
@@ -54,6 +57,7 @@ module IntentionProcessing =
 
                         {
                             events = [event]
+                            delayed = []
                             world = newWorld
                             objectClientMap = objectClientMap
                         }
@@ -77,6 +81,7 @@ module IntentionProcessing =
 
             {
                 events = [event]
+                delayed = []
                 world = newWorld
                 objectClientMap = newClientObjectMap
             }
@@ -107,6 +112,7 @@ module IntentionProcessing =
 
             {
                 events = removeEvents
+                delayed = []
                 world = updatedWorld
                 objectClientMap = updatedObjectClientMap
             }
@@ -123,10 +129,11 @@ module IntentionProcessing =
         intentions
         |> Seq.sortBy (fun i -> i.timestamp)
         |> Seq.fold (fun acc i ->
-            let resultOne = processOne acc.objectClientMap acc.world i.value
+            let resultOne = processOne acc.objectClientMap acc.world i
 
             {
                 events = Seq.append acc.events resultOne.events
+                delayed = Seq.append acc.delayed resultOne.delayed
                 world = resultOne.world
                 objectClientMap = resultOne.objectClientMap
             }
