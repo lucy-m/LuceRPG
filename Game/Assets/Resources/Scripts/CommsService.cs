@@ -23,6 +23,8 @@ public class CommsService : ICommsService
     public float PollPeriod = 0.1f;
     public float ConsistencyCheckCycles = 150;
     private string BaseUrl => Registry.ConfigLoader.Config.BaseUrl;
+    private string Username => Registry.ConfigLoader.Config.Username;
+    private string Password => Registry.ConfigLoader.Config.Password;
 
     private string _clientId = null;
 
@@ -32,8 +34,14 @@ public class CommsService : ICommsService
         Action<WorldModule.Model> onConsistencyCheck
     )
     {
+        var url =
+            BaseUrl
+            + "World/join"
+            + "?username=" + Username
+            + "&password=" + Password;
+
         Debug.Log($"Attempting to load world at {BaseUrl}");
-        var webRequest = UnityWebRequest.Get(BaseUrl + "World/join");
+        var webRequest = UnityWebRequest.Get(url);
         yield return webRequest.SendWebRequest();
 
         if (webRequest.result == UnityWebRequest.Result.Success)
@@ -61,6 +69,10 @@ public class CommsService : ICommsService
                     onLoad(playerId, tsWorld.value);
 
                     yield return FetchUpdates(tsWorld.timestamp, onUpdate, onConsistencyCheck);
+                }
+                else if (result.IsIncorrectCredentials)
+                {
+                    Debug.LogError("Credentials are incorrect, please update your config.json");
                 }
                 else
                 {

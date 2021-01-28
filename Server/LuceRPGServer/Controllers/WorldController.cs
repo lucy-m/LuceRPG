@@ -51,6 +51,8 @@ namespace LuceRPGServer.Controllers
             }
             else
             {
+                _logger.LogInformation($"Request to join game from {username}");
+
                 WithId.Model<WorldObjectModule.Payload>? playerObject = null;
                 bool intentionProcessed = false;
                 var clientId = Guid.NewGuid().ToString();

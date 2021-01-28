@@ -6,6 +6,8 @@ using UnityEngine;
 public class Config
 {
     public string BaseUrl;
+    public string Username;
+    public string Password;
 }
 
 public interface IConfigLoader
@@ -22,7 +24,12 @@ public class ConfigLoader : IConfigLoader
         if (!File.Exists(configPath))
         {
             Debug.Log("Creating new config file");
-            Config = new Config { BaseUrl = "http://localhost:5000/" };
+            Config = new Config
+            {
+                BaseUrl = "http://localhost:5000/",
+                Username = "???",
+                Password = "???"
+            };
             var asString = JsonUtility.ToJson(Config, true);
             File.WriteAllText(configPath, asString);
         }
