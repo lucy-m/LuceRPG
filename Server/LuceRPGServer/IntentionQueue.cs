@@ -20,6 +20,17 @@ namespace LuceRPG.Server
         }
 
         public void Enqueue(
+            WithTimestamp.Model<WithId.Model<IntentionModule.Payload>> intention,
+            Action<IEnumerable<WorldEventModule.Model>>? onProcessed = null
+        )
+        {
+            lock (_queue)
+            {
+                _queue.Enqueue((Intention: intention, OnProcessed: onProcessed));
+            }
+        }
+
+        public void Enqueue(
             WithId.Model<IntentionModule.Payload> intention,
             Action<IEnumerable<WorldEventModule.Model>>? onProcessed = null
         )

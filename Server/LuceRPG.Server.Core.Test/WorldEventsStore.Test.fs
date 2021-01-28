@@ -30,6 +30,7 @@ module WorldEventsStore =
 
         let events = [firstEvent; secondEvent]
         let world = World.empty [] Point.zero
+        let objectBusyMap = ["obj1", 1000L; "obj2", 1200L] |> Map.ofList
 
         let store: WorldEventsStore =
             {
@@ -37,6 +38,7 @@ module WorldEventsStore =
                 recentEvents = events
                 world = world
                 objectClientMap = Map.empty
+                objectBusyMap = objectBusyMap
             }
 
         [<TestFixture>]
@@ -82,12 +84,15 @@ module WorldEventsStore =
             let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
             let event = WorldEvent.Moved (objId, Direction.South, 1uy) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
+            let objectBusyMap = Map.ofList ["obj1", 100L]
 
             let processResult: IntentionProcessing.ProcessResult =
                 {
                     events = [event]
+                    delayed = []
                     world = newWorld
                     objectClientMap = objectClientMap
+                    objectBusyMap = objectBusyMap
                 }
 
             let now = 1400L
@@ -117,7 +122,7 @@ module WorldEventsStore =
             let culledStore = WorldEventsStore.cull cullTimestamp store
 
             [<Test>]
-            let ``removes old events`` =
+            let ``removes old events`` () =
                 culledStore.recentEvents
                 |> should be (equivalent [secondEvent])
 
@@ -127,9 +132,17 @@ module WorldEventsStore =
                 |> should equal cullTimestamp
 
             [<Test>]
-            let ``world is unchanged`` =
+            let ``world is unchanged`` () =
                 culledStore.world
                 |> should equal store.world
+
+            [<Test>]
+            let ``updates object busy map`` () =
+                let expected = ["obj2", 1200L]
+
+                culledStore.objectBusyMap
+                |> Map.toList
+                |> should equal expected
 
     [<TestFixture>]
     module ``culled store`` =
@@ -148,6 +161,7 @@ module WorldEventsStore =
                 recentEvents = [event]
                 world = world
                 objectClientMap = Map.empty
+                objectBusyMap = Map.empty
             }
 
         [<Test>]
