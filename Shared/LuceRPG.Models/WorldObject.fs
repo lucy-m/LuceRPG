@@ -56,7 +56,7 @@ module WorldObject =
 
         blocked
 
-    let moveObject (direction: Direction) (amount: int) (obj: Model): Model =
+    let moveObjectN (direction: Direction) (amount: int) (obj: Model): Model =
         let newTopLeft = Direction.movePoint direction amount obj.value.topLeft
 
         {
@@ -66,5 +66,14 @@ module WorldObject =
                         topLeft = newTopLeft
                 }
         }
+
+    let moveObject (direction: Direction) (obj: Model): Model =
+        moveObjectN direction 1 obj
+
+    /// Time taken by the object to move one square
+    let travelTime (obj: Payload): int64 =
+        match obj.t with
+        | Type.Player -> System.TimeSpan.FromMilliseconds(float(300)).Ticks
+        | _ -> 0L
 
 type WorldObject = WorldObject.Model

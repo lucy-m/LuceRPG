@@ -63,6 +63,7 @@ public class WorldLoader : MonoBehaviour
 
             Debug.Log($"Setting UC ID to {obj.id}");
             uc.Id = obj.id;
+            uc.Model = obj.value;
 
             if (WorldObjectModule.t(obj).IsPath)
             {

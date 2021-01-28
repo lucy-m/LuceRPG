@@ -9,6 +9,8 @@ public class UniversalController : MonoBehaviour
         = new Dictionary<string, UniversalController>();
 
     private string _id = "";
+    private WorldObjectModule.Payload _model;
+    private float _speed = 0;
 
     public string Id
     {
@@ -19,6 +21,20 @@ public class UniversalController : MonoBehaviour
             Controllers[value] = this;
 
             _id = value;
+        }
+    }
+
+    public WorldObjectModule.Payload Model
+    {
+        get => _model;
+        set
+        {
+            _model = value;
+
+            var travelTime = _model == null ? 0 :
+                (WorldObjectModule.travelTime(_model) / System.TimeSpan.TicksPerMillisecond);
+            _speed = travelTime == 0 ? 0 : 1000.0f / travelTime;
+            Debug.Log($"Setting speed for {Id} to {_speed}, travel time {travelTime}");
         }
     }
 
@@ -33,8 +49,6 @@ public class UniversalController : MonoBehaviour
             return null;
         }
     }
-
-    private const float Speed = 4;
 
     public Vector3 Target { get; private set; }
 
@@ -53,7 +67,7 @@ public class UniversalController : MonoBehaviour
         if (worldEvent.t.IsMoved)
         {
             var moved = (WorldEventModule.Type.Moved)worldEvent.t;
-            var offset = DirectionUtil.AsVector3(moved.Item2, moved.Item3);
+            var offset = DirectionUtil.AsVector3(moved.Item2);
 
             Target += offset;
         }
@@ -74,7 +88,7 @@ public class UniversalController : MonoBehaviour
 
         // If the object is close to its location then set the target
         //   and move normally
-        if (distance < Speed)
+        if (distance < _speed)
         {
             Target = location;
         }
@@ -89,7 +103,7 @@ public class UniversalController : MonoBehaviour
 
     private void Update()
     {
-        var newPosition = Vector3.MoveTowards(transform.position, Target, Speed * Time.deltaTime);
+        var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
         transform.position = newPosition;
     }
 

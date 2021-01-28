@@ -20,6 +20,10 @@ module IntentionProcessing =
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
 
         let processFn = IntentionProcessing.processOne now objectClientMap Map.empty world
+        let makeIntention =
+                Intention.makePayload clientId
+                >> TestUtil.withId
+                >> WithTimestamp.create now
 
         [<Test>]
         let ``world created correctly`` () =
@@ -33,9 +37,7 @@ module IntentionProcessing =
             module ``when the player tries to move one square north`` =
                 let intention =
                     Intention.Move (player.id, Direction.North, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -44,7 +46,7 @@ module IntentionProcessing =
                     let worldEvents = result.events |> List.ofSeq
                     worldEvents.Length |> should equal 1
 
-                    let expected = WorldEvent.Moved (player.id, Direction.North, 1uy)
+                    let expected = WorldEvent.Moved (player.id, Direction.North)
                     worldEvents.Head.t |> should equal expected
 
                 [<Test>]
@@ -89,9 +91,7 @@ module IntentionProcessing =
                 // player should be blocked by the wall in this case
                 let intention =
                     Intention.Move (player.id, Direction.East, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -112,35 +112,7 @@ module IntentionProcessing =
                 // player should teleport past the wall in this case
                 let intention =
                     Intention.Move (player.id, Direction.East, 4uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
-
-                let result = processFn intention
-
-                [<Test>]
-                let ``a moved event is created`` () =
-                    let worldEvents = result.events |> List.ofSeq
-                    worldEvents.Length |> should equal 1
-
-                    let expected = WorldEvent.Moved (player.id, Direction.East, 4uy)
-                    worldEvents.Head.t |> should equal expected
-
-                [<Test>]
-                let ``the player object is moved`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
-                    newPlayer.IsSome |> should equal true
-
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 5 3)
-
-            [<TestFixture>]
-            module ``when the player tries to move two squares south `` =
-                // player would move out of bounds from this move
-                let intention =
-                    Intention.Move (player.id, Direction.South, 2uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create 100L
+                    |> makeIntention
 
                 let result = processFn intention
 
@@ -157,25 +129,128 @@ module IntentionProcessing =
                     newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
 
             [<TestFixture>]
+            module ``when the player tries to move two squares south `` =
+                // Player would move out of bounds from this move
+                //   but intention is partially applied to move one
+                //   square south
+                let intention =
+                    Intention.Move (player.id, Direction.South, 2uy)
+                    |> makeIntention
+
+                let result = processFn intention
+
+                [<Test>]
+                let ``a moved event is created`` () =
+                    let worldEvents = result.events |> List.ofSeq
+                    worldEvents.Length |> should equal 1
+
+                    let expected = WorldEvent.Moved (player.id, Direction.South)
+                    worldEvents.Head.t |> should equal expected
+
+                [<Test>]
+                let ``the player object is moved correctly`` () =
+                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    newPlayer.IsSome |> should equal true
+
+                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 2)
+
+                [<Test>]
+                let ``the rest of the move intention is delayed`` () =
+                    let delayed = result.delayed |> List.ofSeq
+
+                    let expected =
+                        Intention.Move (player.id, Direction.South, 1uy)
+                        |> Intention.makePayload clientId
+                        |> WithId.useId intention.value.id
+                        |> WithTimestamp.create intention.timestamp
+
+                    delayed.Length |> should equal 1
+                    delayed |> should equal [expected]
+
+            [<TestFixture>]
             module ``when the player is busy`` =
                 let objectBusyMap = Map.ofList [(player.id, now + 20L)]
-                let intention =
-                    Intention.Move (player.id, Direction.North, 1uy)
-                    |> Intention.makePayload clientId
-                    |> TestUtil.withId
-                    |> WithTimestamp.create now
 
-                let result =
+                [<TestFixture>]
+                module ``processing an intention now`` =
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> makeIntention
+
+                    let result =
+                        IntentionProcessing.processOne
+                            now
+                            objectClientMap
+                            objectBusyMap
+                            world
+                            intention
+
+                    [<Test>]
+                    let ``intention is delayed`` () =
+                        result.delayed |> should equal [intention]
+
+            [<TestFixture>]
+            module ``when the player was busy`` =
+                let busyUntil = now - 20L
+                let objectBusyMap = Map.ofList [(player.id, busyUntil)]
+                let travelTime = WorldObject.travelTime player.value
+
+                let processFn =
                     IntentionProcessing.processOne
                         now
                         objectClientMap
                         objectBusyMap
                         world
-                        intention
+
+                [<TestFixture>]
+                module ``processing an intention from during busy period`` =
+                    let timestamp = now - 30L
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> Intention.makePayload clientId
+                        |> TestUtil.withId
+                        |> WithTimestamp.create timestamp
+
+                    let result = processFn intention
+
+                    [<Test>]
+                    let ``player is busy starting from the end of the busy period`` () =
+                        let expectedEnd = busyUntil + travelTime
+
+                        result.objectBusyMap
+                        |> Map.find player.id
+                        |> should equal expectedEnd
+
+                [<TestFixture>]
+                module ``processing an intention from after busy period`` =
+                    let timestamp = now - 10L
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> Intention.makePayload clientId
+                        |> TestUtil.withId
+                        |> WithTimestamp.create timestamp
+
+                    let result = processFn intention
+
+                    [<Test>]
+                    let ``player is busy starting from the intention timestamp`` () =
+                        let expectedEnd = timestamp + travelTime
+
+                        result.objectBusyMap
+                        |> Map.find player.id
+                        |> should equal expectedEnd
+
+            [<TestFixture>]
+            module ``when the wall tries to move`` =
+                let intention =
+                    Intention.Move (wall.id, Direction.North, 1uy)
+                    |> makeIntention
+
+                let result = processFn intention
 
                 [<Test>]
-                let ``intention is delayed`` () =
-                    result.delayed |> should equal [intention]
+                let ``nothing happens`` () =
+                    result.events |> Seq.isEmpty |> should equal true
 
         [<TestFixture>]
         module ``join game`` =
@@ -316,7 +391,7 @@ module IntentionProcessing =
             let ``returns events in correct order`` () =
                 let expectedEvents =
                     [
-                        WorldEvent.Type.Moved (player.id, Direction.South, 1uy)
+                        WorldEvent.Type.Moved (player.id, Direction.South)
                         WorldEvent.Type.ObjectRemoved (player.id)
                     ]
 

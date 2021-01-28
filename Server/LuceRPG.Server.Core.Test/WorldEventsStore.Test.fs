@@ -19,13 +19,13 @@ module WorldEventsStore =
         let firstEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                value = WorldEvent.Moved (objId, Direction.North, 1uy) |> makeEvent
+                value = WorldEvent.Moved (objId, Direction.North) |> makeEvent
             }
 
         let secondEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1200L
-                value = WorldEvent.Moved (objId, Direction.East, 1uy) |> makeEvent
+                value = WorldEvent.Moved (objId, Direction.East) |> makeEvent
             }
 
         let events = [firstEvent; secondEvent]
@@ -82,7 +82,7 @@ module WorldEventsStore =
         [<TestFixture>]
         module ``adding a process result`` =
             let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
-            let event = WorldEvent.Moved (objId, Direction.South, 1uy) |> makeEvent
+            let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
             let objectBusyMap = Map.ofList ["obj1", 100L]
 
@@ -150,7 +150,7 @@ module WorldEventsStore =
         let event: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
-                value = WorldEvent.Moved (objId, Direction.North, 1uy) |> makeEvent
+                value = WorldEvent.Moved (objId, Direction.North) |> makeEvent
             }
 
         let cullTime = 800L

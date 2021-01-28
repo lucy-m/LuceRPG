@@ -90,8 +90,8 @@ public class ConsistencyCheckTests
         objToSnap = UniversalController.GetById(modelToSnap.id);
         objToRemove = UniversalController.GetById(modelToRemove.id);
 
-        updatedToMove = WorldObjectModule.moveObject(DirectionModule.Model.North, 1, modelToMove);
-        updatedToSnap = WorldObjectModule.moveObject(DirectionModule.Model.North, 8, modelToSnap);
+        updatedToMove = WorldObjectModule.moveObject(DirectionModule.Model.North, modelToMove);
+        updatedToSnap = WorldObjectModule.moveObjectN(DirectionModule.Model.North, 8, modelToSnap);
 
         var updatedObjects = new WithId.Model<WorldObjectModule.Payload>[]
         {
