@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LuceRPG.Server
+namespace LuceRPG.Utility
 {
     public static class TimestampProvider
     {

@@ -171,7 +171,12 @@ public class CommsService : ICommsService
             }
             else
             {
+                var prior = TimestampProvider.Now;
                 yield return FetchUpdate(lastTimestamp, onUpdate, ts => lastTimestamp = ts);
+                var post = TimestampProvider.Now;
+
+                var ping = TimeSpan.FromTicks(post - prior).Milliseconds;
+                UIStatsOverlay.Instance.SetPingMs(ping);
             }
 
             yield return new WaitForSeconds(PollPeriod);
