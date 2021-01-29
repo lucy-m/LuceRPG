@@ -15,7 +15,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
 
-    private WorldModule.Model _world = null;
+    public WorldModule.Model World { get; private set; }
 
     private void Awake()
     {
@@ -84,7 +84,7 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(string playerId, WorldModule.Model world)
     {
-        _world = world;
+        World = world;
 
         foreach (var bound in world.bounds)
         {
@@ -120,11 +120,20 @@ public class WorldLoader : MonoBehaviour
         }
     }
 
-    public void ApplyUpdate(IEnumerable<WorldEventModule.Model> worldEvents)
+    public void ApplyUpdate(
+        IEnumerable<WorldEventModule.Model> worldEvents,
+        bool applyIgnored
+    )
     {
         foreach (var worldEvent in worldEvents)
         {
-            _world = EventApply.apply(worldEvent, _world);
+            if (!applyIgnored && OptimisticIntentionProcessor.Instance.ShouldIgnore(worldEvent.resultOf))
+            {
+                Debug.Log($"Ignoring event from intention {worldEvent.resultOf}");
+                continue;
+            }
+
+            World = EventApply.apply(worldEvent, World);
 
             var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
             if (tObjectId.HasValue())

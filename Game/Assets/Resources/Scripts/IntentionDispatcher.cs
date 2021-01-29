@@ -19,6 +19,8 @@ public class IntentionDispatcher : MonoBehaviour
 
     public void Dispatch(IntentionModule.Type t)
     {
-        StartCoroutine(Registry.CommsService.SendIntention(t));
+        var id = OptimisticIntentionProcessor.Instance.Process(t);
+
+        StartCoroutine(Registry.CommsService.SendIntention(id, t));
     }
 }

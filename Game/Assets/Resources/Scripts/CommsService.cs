@@ -15,7 +15,7 @@ public interface ICommsService
         Action<WorldModule.Model> onConsistencyCheck
     );
 
-    IEnumerator SendIntention(IntentionModule.Type t);
+    IEnumerator SendIntention(string id, IntentionModule.Type t);
 }
 
 public class CommsService : ICommsService
@@ -182,11 +182,11 @@ public class CommsService : ICommsService
         }
     }
 
-    public IEnumerator SendIntention(IntentionModule.Type t)
+    public IEnumerator SendIntention(string id, IntentionModule.Type t)
     {
         if (_clientId != null)
         {
-            var intention = WithId.create(IntentionModule.makePayload(_clientId, t));
+            var intention = WithId.useId(id, IntentionModule.makePayload(_clientId, t));
 
             var bytes = IntentionSrl.serialise(intention);
             var webRequest = UnityWebRequest.Put(BaseUrl + "World/intention", bytes);
@@ -224,7 +224,7 @@ public class TestCommsService : ICommsService
         yield return null;
     }
 
-    public IEnumerator SendIntention(IntentionModule.Type t)
+    public IEnumerator SendIntention(string id, IntentionModule.Type t)
     {
         LastIntention = t;
         AllIntentions.Add(t);
