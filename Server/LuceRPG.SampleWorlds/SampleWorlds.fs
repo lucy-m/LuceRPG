@@ -6,7 +6,7 @@ module SampleWorlds =
     let world1: World =
         let bounds =
             [
-                Rect.create 0 0 14 8
+                Rect.create 0 0 44 8
                 Rect.create 4 8 3 8
                 Rect.create -6 0 6 11
             ]
