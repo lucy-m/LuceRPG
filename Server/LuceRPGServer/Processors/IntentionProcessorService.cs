@@ -2,28 +2,32 @@
 using LuceRPG.Utility;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LuceRPG.Server.Processors
 {
     public sealed class IntentionProcessor
     {
+        private readonly ILogger<IntentionProcessor> _logger;
         private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
-        private readonly ILogger<IntentionProcessor> _logger;
+        private readonly ITimestampProvider _timestampProvider;
 
-        public IntentionProcessor(WorldEventsStorer store, IntentionQueue queue, ILogger<IntentionProcessor> logger)
+        public IntentionProcessor(
+            ILogger<IntentionProcessor> logger,
+            WorldEventsStorer store,
+            IntentionQueue queue,
+            ITimestampProvider timestampProvider)
         {
             _store = store;
             _queue = queue;
             _logger = logger;
+            _timestampProvider = timestampProvider;
         }
 
-        public void ProcessAt(long timestamp)
+        public void Process()
         {
+            var timestamp = _timestampProvider.Now;
             var entries = _queue.DequeueAll().ToArray();
             var entriesMap = entries.ToDictionary(e => e.Intention.tsIntention.value.id);
 
@@ -68,42 +72,20 @@ namespace LuceRPG.Server.Processors
         }
     }
 
-    public sealed class IntentionProcessorService : IHostedService, IDisposable
+    public sealed class IntentionProcessorService : ProcessorHostService
     {
-        private readonly ILogger<IntentionProcessorService> _logger;
         private readonly IntentionProcessor _intentionProcessor;
-        private Timer? _timer;
 
-        public IntentionProcessorService(ILogger<IntentionProcessorService> logger, IntentionProcessor intentionProcessor)
+        public IntentionProcessorService(
+            ILogger<ProcessorHostService> logger, IntentionProcessor intentionProcessor)
+            : base(logger)
         {
-            _logger = logger;
             _intentionProcessor = intentionProcessor;
         }
 
-        public void Dispose()
+        protected override void DoProcess()
         {
-            _timer?.Dispose();
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Intention Processor starting");
-            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Intention Processor stopping");
-            _timer?.Change(Timeout.Infinite, 0);
-
-            return Task.CompletedTask;
-        }
-
-        private void ProcessIntentions(object? state)
-        {
-            _intentionProcessor.ProcessAt(TimestampProvider.Now);
+            _intentionProcessor.Process();
         }
     }
 }

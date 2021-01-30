@@ -7,17 +7,20 @@ namespace LuceRPG.Server
 {
     public class IntentionQueue
     {
+        private readonly ITimestampProvider _timestampProvider;
+
         private readonly Queue<(
             IntentionProcessing.IndexedIntentionModule.Model Intention,
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
         )> _queue;
 
-        public IntentionQueue()
+        public IntentionQueue(ITimestampProvider timestampProvider)
         {
             _queue = new Queue<(
                 IntentionProcessing.IndexedIntentionModule.Model Intention,
                 Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
             )>();
+            _timestampProvider = timestampProvider;
         }
 
         public void Enqueue(
@@ -38,7 +41,7 @@ namespace LuceRPG.Server
         {
             lock (_queue)
             {
-                var timestamped = WithTimestamp.create(TimestampProvider.Now, intention);
+                var timestamped = WithTimestamp.create(_timestampProvider.Now, intention);
                 var indexed = IntentionProcessing.IndexedIntentionModule.create(timestamped);
 
                 _queue.Enqueue((Intention: indexed, OnProcessed: onProcessed));

@@ -24,20 +24,23 @@ namespace LuceRPGServer.Controllers
         private readonly IntentionQueue _queue;
         private readonly WorldEventsStorer _worldStore;
         private readonly LastPingStorer _pingStorer;
-        private readonly CredentialService _credentialService;
+        private readonly ICredentialService _credentialService;
+        private readonly ITimestampProvider _timestampProvider;
 
         public WorldController(
             ILogger<WorldController> logger,
             IntentionQueue queue,
             WorldEventsStorer store,
             LastPingStorer pingStorer,
-            CredentialService credentialService)
+            ICredentialService credentialService,
+            ITimestampProvider timestampProvider)
         {
             _logger = logger;
             _queue = queue;
             _worldStore = store;
             _pingStorer = pingStorer;
             _credentialService = credentialService;
+            _timestampProvider = timestampProvider;
         }
 
         [HttpGet("join")]
@@ -93,7 +96,7 @@ namespace LuceRPGServer.Controllers
                     ? GetJoinGameResultModule.Model.NewSuccess(
                         clientId,
                         playerObject.id,
-                        WithTimestamp.create(TimestampProvider.Now, _worldStore.CurrentWorld)
+                        WithTimestamp.create(_timestampProvider.Now, _worldStore.CurrentWorld)
                     )
                     : GetJoinGameResultModule.Model.NewFailure("Could not join game");
 
@@ -106,11 +109,8 @@ namespace LuceRPGServer.Controllers
         [HttpGet("since")]
         public ActionResult GetSince(long timestamp, string clientId)
         {
-            // lag simulation
-            Thread.Sleep(300);
-
             var result = _worldStore.GetSince(timestamp);
-            var newTimestamp = TimestampProvider.Now;
+            var newTimestamp = _timestampProvider.Now;
 
             _pingStorer.Update(clientId, newTimestamp);
             var timestampedResult = new WithTimestamp.Model<GetSinceResultModule.Payload>(newTimestamp, result);

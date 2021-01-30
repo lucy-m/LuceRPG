@@ -20,6 +20,9 @@
     <Reference Include="LuceRPG.Models">
       <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
     </Reference>
+    <Reference Include="LuceRPG.Utility">
+      <HintPath>..\..\Shared\LuceRPG.Extensions\bin\Release\netstandard2.0\LuceRPG.Utility.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

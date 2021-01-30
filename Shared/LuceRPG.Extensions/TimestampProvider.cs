@@ -2,8 +2,18 @@
 
 namespace LuceRPG.Utility
 {
-    public static class TimestampProvider
+    public interface ITimestampProvider
     {
-        public static long Now => DateTime.UtcNow.Ticks;
+        long Now { get; }
+    }
+
+    public class TimestampProvider : ITimestampProvider
+    {
+        public long Now => DateTime.UtcNow.Ticks;
+    }
+
+    public class TestTimestampProvider : ITimestampProvider
+    {
+        public long Now { get; set; }
     }
 }
