@@ -14,6 +14,11 @@ namespace LuceRPG.Server
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
         )> _queue;
 
+        public Queue<(
+            IntentionProcessing.IndexedIntentionModule.Model Intention,
+            Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
+        )> Queue => _queue;
+
         public IntentionQueue(ITimestampProvider timestampProvider)
         {
             _queue = new Queue<(
