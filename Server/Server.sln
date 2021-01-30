@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LuceRPG.Server", "LuceRPGSe
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Samples", "LuceRPG.SampleWorlds\LuceRPG.Samples.fsproj", "{EACD2B1F-AACD-4DA6-9265-389C27F5B375}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Server.Core", "LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj", "{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Server.Core", "LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj", "{BBF0CF0F-6722-4D1D-8D00-173A25624C3B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LuceRPG.Server.Core.Test", "LuceRPG.Server.Core.Test\LuceRPG.Server.Core.Test.fsproj", "{122A5B52-8581-4BD6-9F1D-60606C628847}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Server.Core.Test", "LuceRPG.Server.Core.Test\LuceRPG.Server.Core.Test.fsproj", "{122A5B52-8581-4BD6-9F1D-60606C628847}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuceRPG.Server.Test", "LuceRPG.Server.Test\LuceRPG.Server.Test.csproj", "{ED0B87EF-13FE-472B-880B-12B3F444A9A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{122A5B52-8581-4BD6-9F1D-60606C628847}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{122A5B52-8581-4BD6-9F1D-60606C628847}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{122A5B52-8581-4BD6-9F1D-60606C628847}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED0B87EF-13FE-472B-880B-12B3F444A9A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED0B87EF-13FE-472B-880B-12B3F444A9A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED0B87EF-13FE-472B-880B-12B3F444A9A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED0B87EF-13FE-472B-880B-12B3F444A9A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
