@@ -19,8 +19,11 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     private FSharpMap<string, long> _objectBusyMap
         = MapModule.Empty<string, long>();
 
-    private readonly Queue<WithTimestamp.Model<WithId.Model<IntentionModule.Payload>>> _delayed
-        = new Queue<WithTimestamp.Model<WithId.Model<IntentionModule.Payload>>>();
+    private readonly Queue<IntentionProcessing.IndexedIntentionModule.Model> _delayed
+        = new Queue<IntentionProcessing.IndexedIntentionModule.Model>();
+
+    private readonly Dictionary<string, Dictionary<int, WorldEventModule.Model>> _eventsProduced
+        = new Dictionary<string, Dictionary<int, WorldEventModule.Model>>();
 
     private void Awake()
     {
@@ -44,6 +47,28 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         return _intentions.TryGetValue(intentionId, out _);
     }
 
+    public void CheckEvent(WorldEventModule.Model e)
+    {
+        if (_eventsProduced.TryGetValue(e.resultOf, out var indexDict))
+        {
+            if (indexDict.TryGetValue(e.index, out var optimisticEvent))
+            {
+                if (!e.t.Equals(optimisticEvent.t))
+                {
+                    Debug.LogError($"Non-matching events produced from intention {e.resultOf} at index {e.index}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Extra event produced from intention {e.resultOf} at index {e.index}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Event produced from intention {e.resultOf} not applied optimistically");
+        }
+    }
+
     /// <summary>
     ///
     /// </summary>
@@ -55,11 +80,11 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         var payload = IntentionModule.makePayload("", intention);
         var withId = WithId.create(payload);
         var withTimestamp = WithTimestamp.create(timestamp, withId);
+        var indexed = IntentionProcessing.IndexedIntentionModule.create(withTimestamp);
+
         _intentions[withId.id] = timestamp;
 
-        DoProcess(new List<WithTimestamp.Model<WithId.Model<IntentionModule.Payload>>> { withTimestamp });
-
-        Debug.Log($"Intention {withId.id} optimistically applied");
+        DoProcess(new List<IntentionProcessing.IndexedIntentionModule.Model> { indexed });
 
         return withId.id;
     }
@@ -68,7 +93,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     {
         while (true)
         {
-            var intentions = _delayed.ToArray().OrderBy(i => i.timestamp);
+            var intentions = _delayed.ToArray().OrderBy(i => i.tsIntention.timestamp);
             _delayed.Clear();
 
             DoProcess(intentions);
@@ -78,7 +103,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     }
 
     private void DoProcess(
-        IEnumerable<WithTimestamp.Model<WithId.Model<IntentionModule.Payload>>> intentions
+        IEnumerable<IntentionProcessing.IndexedIntentionModule.Model> intentions
     )
     {
         var processResult = IntentionProcessing.processMany(
@@ -92,6 +117,17 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         _objectBusyMap = processResult.objectBusyMap;
 
         WorldLoader.Instance.ApplyUpdate(processResult.events, true);
+
+        foreach (var e in processResult.events)
+        {
+            if (!_eventsProduced.TryGetValue(e.resultOf, out var indexDict))
+            {
+                _eventsProduced[e.resultOf] = new Dictionary<int, WorldEventModule.Model>();
+                indexDict = _eventsProduced[e.resultOf];
+            }
+
+            indexDict[e.index] = e;
+        }
 
         foreach (var d in processResult.delayed)
         {

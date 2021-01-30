@@ -12,7 +12,7 @@ module WorldEventsStore =
 
     let makeEvent (t: WorldEvent.Type): WorldEvent =
         let intentionId = System.Guid.NewGuid.ToString()
-        WorldEvent.asResult intentionId t
+        WorldEvent.asResult intentionId 0 t
 
     [<TestFixture>]
     module ``unculled store with two events`` =
@@ -114,7 +114,7 @@ module WorldEventsStore =
 
             [<Test>]
             let ``objectClientMap is updated`` () =
-                newStore.objectClientMap |> should equal objectClientMap
+                newStore.objectClientMap |> should equal objectClientMap.Value
 
         [<TestFixture>]
         module ``culling`` =

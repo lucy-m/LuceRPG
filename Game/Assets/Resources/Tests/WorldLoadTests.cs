@@ -137,6 +137,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                     "intention1",
+                    0,
                     WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.North)
                 )
             )
@@ -191,6 +192,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                         "intention1",
+                        0,
                         WorldEventModule.Type.NewObjectAdded(newPlayerModel)
                 )
             )
@@ -218,6 +220,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                         "intention1",
+                        0,
                         WorldEventModule.Type.NewObjectRemoved(wallModel.id)
                 )
             )

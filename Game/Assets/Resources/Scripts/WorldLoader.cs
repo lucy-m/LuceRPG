@@ -129,7 +129,7 @@ public class WorldLoader : MonoBehaviour
         {
             if (!applyIgnored && OptimisticIntentionProcessor.Instance.ShouldIgnore(worldEvent.resultOf))
             {
-                Debug.Log($"Ignoring event from intention {worldEvent.resultOf}");
+                OptimisticIntentionProcessor.Instance.CheckEvent(worldEvent);
                 continue;
             }
 
