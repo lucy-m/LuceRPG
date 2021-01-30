@@ -45,6 +45,7 @@ namespace LuceRPGServer.Controllers
         {
             if (!_credentialService.IsValid(username, password))
             {
+                _logger.LogWarning($"Invalid credentials submitted {username} {password}");
                 var result = GetJoinGameResultModule.Model.IncorrectCredentials;
                 var serialised = GetJoinGameResultSrl.serialise(result);
                 return File(serialised, RawBytesContentType);
@@ -105,6 +106,9 @@ namespace LuceRPGServer.Controllers
         [HttpGet("since")]
         public ActionResult GetSince(long timestamp, string clientId)
         {
+            // lag simulation
+            Thread.Sleep(300);
+
             var result = _worldStore.GetSince(timestamp);
             var newTimestamp = TimestampProvider.Now;
 
