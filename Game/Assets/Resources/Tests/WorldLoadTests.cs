@@ -118,7 +118,8 @@ public class WorldLoadTests
         Assert.True(moveIntention.Item2.IsSouth);
 
         // After player input delay
-        yield return new WaitForSeconds(pc.InputDelay);
+        yield return pc.SpinWhileBusy();
+        yield return null;
 
         // Next intention is move right
         Assert.True(testCommsService.LastIntention.IsMove);

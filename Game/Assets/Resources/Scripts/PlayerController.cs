@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private IEnumerator SpinWhileBusy()
+    public IEnumerator SpinWhileBusy()
     {
         var busyUntil = OptimisticIntentionProcessor.Instance.BusyUntil(_uc.Id);
 
