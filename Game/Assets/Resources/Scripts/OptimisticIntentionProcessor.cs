@@ -26,7 +26,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     private readonly Dictionary<string, Dictionary<int, WorldEventModule.Model>> _eventsProduced
         = new Dictionary<string, Dictionary<int, WorldEventModule.Model>>();
 
-    private readonly ITimestampProvider _timestampProvider = new TimestampProvider();
+    private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
     private void Awake()
     {
@@ -93,7 +93,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     /// <returns>ID used for the intention</returns>
     public string Process(IntentionModule.Type intention)
     {
-        var timestamp = _timestampProvider.Now;
+        var timestamp = TimestampProvider.Now;
         var payload = IntentionModule.makePayload("", intention);
         var withId = WithId.create(payload);
         var withTimestamp = WithTimestamp.create(timestamp, withId);

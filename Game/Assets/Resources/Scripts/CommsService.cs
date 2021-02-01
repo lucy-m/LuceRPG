@@ -28,7 +28,7 @@ public class CommsService : ICommsService
 
     private string _clientId = null;
 
-    private readonly ITimestampProvider _timestampProvider = new TimestampProvider();
+    private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
     public IEnumerator JoinGame(
         Action<string, WorldModule.Model> onLoad,
@@ -177,9 +177,9 @@ public class CommsService : ICommsService
             }
             else
             {
-                var prior = _timestampProvider.Now;
+                var prior = TimestampProvider.Now;
                 yield return FetchUpdate(lastTimestamp, onUpdate, ts => lastTimestamp = ts);
-                var post = _timestampProvider.Now;
+                var post = TimestampProvider.Now;
 
                 var ping = TimeSpan.FromTicks(post - prior).Milliseconds;
                 UIStatsOverlay.Instance.SetPingMs(ping);
@@ -216,6 +216,7 @@ public class TestCommsService : ICommsService
     public Action<string, WorldModule.Model> OnLoad { get; private set; }
     public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
     public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
+    public string LastIntentionId { get; private set; }
     public IntentionModule.Type LastIntention { get; private set; }
     public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
@@ -234,6 +235,7 @@ public class TestCommsService : ICommsService
     public IEnumerator SendIntention(string id, IntentionModule.Type t)
     {
         LastIntention = t;
+        LastIntentionId = id;
         AllIntentions.Add(t);
         yield return null;
     }

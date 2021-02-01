@@ -1,5 +1,6 @@
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
+using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
 using NUnit.Framework;
 using System.Collections;
@@ -11,6 +12,7 @@ public class WorldLoadTests
 {
     private TestCommsService testCommsService;
     private TestInputProvider testInputProvider;
+    private TestTimestampProvider testTimestampProvider;
     private GameObject overlord;
     private WithId.Model<WorldObjectModule.Payload> playerModel;
     private WithId.Model<WorldObjectModule.Payload> wallModel;
@@ -24,8 +26,10 @@ public class WorldLoadTests
         Debug.Log("Running set up");
         testCommsService = new TestCommsService();
         testInputProvider = new TestInputProvider();
+        testTimestampProvider = new TestTimestampProvider();
         Registry.CommsService = testCommsService;
         Registry.InputProvider = testInputProvider;
+        Registry.TimestampProvider = testTimestampProvider;
 
         overlord = MonoBehaviour.Instantiate(
             Resources.Load<GameObject>("Prefabs/Overlord")
@@ -117,8 +121,10 @@ public class WorldLoadTests
         Assert.AreEqual(playerModel.id, moveIntention.Item1);
         Assert.True(moveIntention.Item2.IsSouth);
 
-        // After player input delay
-        yield return pc.SpinWhileBusy();
+        // After player not busy
+        var playerBusyUntil = OptimisticIntentionProcessor.Instance.BusyUntil(playerModel.id);
+        Assert.That(playerBusyUntil.HasValue, Is.True);
+        testTimestampProvider.Now = playerBusyUntil.Value;
         yield return null;
 
         // Next intention is move right
@@ -128,6 +134,32 @@ public class WorldLoadTests
         Assert.True(moveIntention.Item2.IsEast);
 
         Assert.AreEqual(2, testCommsService.AllIntentions.Count);
+
+        // After player not busy
+        playerBusyUntil = OptimisticIntentionProcessor.Instance.BusyUntil(playerModel.id);
+        Assert.That(playerBusyUntil.HasValue, Is.True);
+        testTimestampProvider.Now = playerBusyUntil.Value;
+        yield return null;
+
+        // Inputs removed
+        testInputProvider.HorzIn = 0;
+        testInputProvider.VertIn = 0;
+
+        var priorTarget = playerObject.Target;
+
+        // Event returned from server with same id
+        var serverEventT = WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.East);
+        var serverEvent = WorldEventModule.asResult(testCommsService.LastIntentionId, 0, serverEventT);
+        var tsEvent = WithTimestamp.create(testTimestampProvider.Now, serverEvent);
+        var eventList = ListModule.OfSeq(new WithTimestamp.Model<WorldEventModule.Model>[] { tsEvent });
+        var getSinceResult = GetSinceResultModule.Payload.NewEvents(eventList);
+
+        testCommsService.OnUpdate(getSinceResult);
+        yield return null;
+
+        // Player is not moved, event is ignored
+        var postTarget = playerObject.Target;
+        Assert.That(postTarget, Is.EqualTo(priorTarget));
     }
 
     [UnityTest]

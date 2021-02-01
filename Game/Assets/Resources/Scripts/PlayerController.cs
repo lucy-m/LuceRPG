@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 {
     private UniversalController _uc;
 
-    private readonly ITimestampProvider _timestampProvider = new TimestampProvider();
+    private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
     // Start is called before the first frame update
     private void Start()
@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            while (_timestampProvider.Now < busyUntil.Value)
+            while (TimestampProvider.Now < busyUntil.Value)
             {
                 yield return null;
             }
