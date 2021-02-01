@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using LuceRPG.Utility;
+using LuceRPG.Game.Models;
 
 public class OptimisticIntentionProcessor : MonoBehaviour
 {
     public static OptimisticIntentionProcessor Instance = null;
-    public float PollPeriod = 0.1f;
+    public float PollPeriod = 0.01f;
 
     private readonly Dictionary<string, long> _intentions
         = new Dictionary<string, long>();
@@ -24,6 +25,8 @@ public class OptimisticIntentionProcessor : MonoBehaviour
 
     private readonly Dictionary<string, Dictionary<int, WorldEventModule.Model>> _eventsProduced
         = new Dictionary<string, Dictionary<int, WorldEventModule.Model>>();
+
+    private readonly ITimestampProvider _timestampProvider = new TimestampProvider();
 
     private void Awake()
     {
@@ -42,7 +45,21 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         StartCoroutine(ProcessDelayed());
     }
 
-    public bool ShouldIgnore(string intentionId)
+    public long? BusyUntil(string objectId)
+    {
+        var timestamp = MapModule.TryFind(objectId, _objectBusyMap);
+
+        if (timestamp.HasValue())
+        {
+            return timestamp.Value;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public bool DidProcess(string intentionId)
     {
         return _intentions.TryGetValue(intentionId, out _);
     }
@@ -76,7 +93,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     /// <returns>ID used for the intention</returns>
     public string Process(IntentionModule.Type intention)
     {
-        var timestamp = TimestampProvider.Now;
+        var timestamp = _timestampProvider.Now;
         var payload = IntentionModule.makePayload("", intention);
         var withId = WithId.create(payload);
         var withTimestamp = WithTimestamp.create(timestamp, withId);
@@ -116,7 +133,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
 
         _objectBusyMap = processResult.objectBusyMap;
 
-        WorldLoader.Instance.ApplyUpdate(processResult.events, true);
+        WorldLoader.Instance.ApplyUpdate(processResult.events, UpdateSource.Game);
 
         foreach (var e in processResult.events)
         {

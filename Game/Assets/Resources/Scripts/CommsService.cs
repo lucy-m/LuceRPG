@@ -28,6 +28,8 @@ public class CommsService : ICommsService
 
     private string _clientId = null;
 
+    private readonly ITimestampProvider _timestampProvider = new TimestampProvider();
+
     public IEnumerator JoinGame(
         Action<string, WorldModule.Model> onLoad,
         Action<GetSinceResultModule.Payload> onUpdate,
@@ -175,9 +177,9 @@ public class CommsService : ICommsService
             }
             else
             {
-                var prior = TimestampProvider.Now;
+                var prior = _timestampProvider.Now;
                 yield return FetchUpdate(lastTimestamp, onUpdate, ts => lastTimestamp = ts);
-                var post = TimestampProvider.Now;
+                var post = _timestampProvider.Now;
 
                 var ping = TimeSpan.FromTicks(post - prior).Milliseconds;
                 UIStatsOverlay.Instance.SetPingMs(ping);

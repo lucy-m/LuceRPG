@@ -1,3 +1,4 @@
+using LuceRPG.Game.Models;
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using LuceRPG.Utility;
@@ -122,12 +123,13 @@ public class WorldLoader : MonoBehaviour
 
     public void ApplyUpdate(
         IEnumerable<WorldEventModule.Model> worldEvents,
-        bool applyIgnored
+        UpdateSource source
     )
     {
         foreach (var worldEvent in worldEvents)
         {
-            if (!applyIgnored && OptimisticIntentionProcessor.Instance.ShouldIgnore(worldEvent.resultOf))
+            if (source == UpdateSource.Server
+                && OptimisticIntentionProcessor.Instance.DidProcess(worldEvent.resultOf))
             {
                 OptimisticIntentionProcessor.Instance.CheckEvent(worldEvent);
                 continue;

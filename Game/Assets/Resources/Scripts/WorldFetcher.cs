@@ -1,3 +1,4 @@
+using LuceRPG.Game.Models;
 using LuceRPG.Models;
 using System;
 using System.Collections;
@@ -28,7 +29,7 @@ public class WorldFetcher : MonoBehaviour
                 if (events.Any())
                 {
                     Debug.Log($"Updating world with {events.Length} events");
-                    WorldLoader.Instance.ApplyUpdate(events, false);
+                    WorldLoader.Instance.ApplyUpdate(events, UpdateSource.Server);
                 }
             }
             else
