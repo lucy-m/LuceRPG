@@ -28,7 +28,6 @@ public class WorldFetcher : MonoBehaviour
 
                 if (events.Any())
                 {
-                    Debug.Log($"Updating world with {events.Length} events");
                     WorldLoader.Instance.ApplyUpdate(events, UpdateSource.Server);
                 }
             }
