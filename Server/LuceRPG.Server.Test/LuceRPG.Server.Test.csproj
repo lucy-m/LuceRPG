@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LuceRPGServer\LuceRPG.Server.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LuceRPG.Models">
+      <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
+    </Reference>
+    <Reference Include="LuceRPG.Serialisation">
+      <HintPath>..\..\Shared\LuceRPG.Serialisation\bin\Release\netstandard2.0\LuceRPG.Serialisation.dll</HintPath>
+    </Reference>
+    <Reference Include="LuceRPG.Utility">
+      <HintPath>..\..\Shared\LuceRPG.Extensions\bin\Release\netstandard2.0\LuceRPG.Utility.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

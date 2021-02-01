@@ -5,7 +5,12 @@ using System.IO;
 
 namespace LuceRPG.Server
 {
-    public class CredentialService
+    public interface ICredentialService
+    {
+        bool IsValid(string username, string password);
+    }
+
+    public class CredentialService : ICredentialService
     {
         private class Credential
         {
@@ -47,6 +52,16 @@ namespace LuceRPG.Server
             {
                 return false;
             }
+        }
+    }
+
+    public class TestCredentialService : ICredentialService
+    {
+        public bool IsValidReturn = false;
+
+        public bool IsValid(string username, string password)
+        {
+            return IsValidReturn;
         }
     }
 }

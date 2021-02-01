@@ -1,4 +1,6 @@
 using LuceRPG.Models;
+using LuceRPG.Utility;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -6,7 +8,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private UniversalController _uc;
-    public float InputDelay = 0.3f;
+
+    private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
     // Start is called before the first frame update
     private void Start()
@@ -26,31 +29,48 @@ public class PlayerController : MonoBehaviour
             {
                 var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.North, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
-                yield return new WaitForSeconds(InputDelay);
+                yield return SpinWhileBusy();
             }
 
             if (vertIn < 0)
             {
                 var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.South, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
-                yield return new WaitForSeconds(InputDelay);
+                yield return SpinWhileBusy();
             }
 
             if (horzIn > 0)
             {
                 var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.East, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
-                yield return new WaitForSeconds(InputDelay);
+                yield return SpinWhileBusy();
             }
 
             if (horzIn < 0)
             {
                 var intention = IntentionModule.Type.NewMove(_uc.Id, DirectionModule.Model.West, 1);
                 IntentionDispatcher.Instance.Dispatch(intention);
-                yield return new WaitForSeconds(InputDelay);
+                yield return SpinWhileBusy();
             }
 
             yield return null;
+        }
+    }
+
+    public IEnumerator SpinWhileBusy()
+    {
+        var busyUntil = OptimisticIntentionProcessor.Instance.BusyUntil(_uc.Id);
+
+        if (!busyUntil.HasValue)
+        {
+            yield return null;
+        }
+        else
+        {
+            while (TimestampProvider.Now < busyUntil.Value)
+            {
+                yield return null;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using LuceRPG.Game.Models;
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using LuceRPG.Utility;
@@ -14,6 +15,8 @@ public class WorldLoader : MonoBehaviour
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
+
+    public WorldModule.Model World { get; private set; }
 
     private void Awake()
     {
@@ -82,6 +85,8 @@ public class WorldLoader : MonoBehaviour
 
     public void LoadWorld(string playerId, WorldModule.Model world)
     {
+        World = world;
+
         foreach (var bound in world.bounds)
         {
             var location = bound.GetGameLocation();
@@ -116,10 +121,22 @@ public class WorldLoader : MonoBehaviour
         }
     }
 
-    public void ApplyUpdate(IEnumerable<WorldEventModule.Model> worldEvents)
+    public void ApplyUpdate(
+        IEnumerable<WorldEventModule.Model> worldEvents,
+        UpdateSource source
+    )
     {
         foreach (var worldEvent in worldEvents)
         {
+            if (source == UpdateSource.Server
+                && OptimisticIntentionProcessor.Instance.DidProcess(worldEvent.resultOf))
+            {
+                OptimisticIntentionProcessor.Instance.CheckEvent(worldEvent);
+                continue;
+            }
+
+            World = EventApply.apply(worldEvent, World);
+
             var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
             if (tObjectId.HasValue())
             {

@@ -40,12 +40,13 @@ module WorldEventsStore =
             |> List.ofSeq
 
         let recentEvents = state.recentEvents @ storedEvents
+        let objectClientMap = result.objectClientMap |> Option.defaultValue state.objectClientMap
 
         {
             lastCull = state.lastCull
             recentEvents = recentEvents
             world = result.world
-            objectClientMap = result.objectClientMap
+            objectClientMap = objectClientMap
             objectBusyMap = result.objectBusyMap
         }
 

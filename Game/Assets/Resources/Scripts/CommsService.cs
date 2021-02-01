@@ -15,18 +15,20 @@ public interface ICommsService
         Action<WorldModule.Model> onConsistencyCheck
     );
 
-    IEnumerator SendIntention(IntentionModule.Type t);
+    IEnumerator SendIntention(string id, IntentionModule.Type t);
 }
 
 public class CommsService : ICommsService
 {
     public float PollPeriod = 0.1f;
-    public float ConsistencyCheckCycles = 150;
+    public int ConsistencyCheckFreq = 15;
     private string BaseUrl => Registry.ConfigLoader.Config.BaseUrl;
     private string Username => Registry.ConfigLoader.Config.Username;
     private string Password => Registry.ConfigLoader.Config.Password;
 
     private string _clientId = null;
+
+    private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
     public IEnumerator JoinGame(
         Action<string, WorldModule.Model> onLoad,
@@ -162,12 +164,16 @@ public class CommsService : ICommsService
     )
     {
         var lastTimestamp = initialTimestamp;
+        var lastConsistencyCheck = lastTimestamp;
+        var checkTicks = TimeSpan.FromSeconds(ConsistencyCheckFreq).Ticks;
 
-        for (var i = 1; true; i++)
+        while (true)
         {
-            if (i % ConsistencyCheckCycles == 0)
+            if (lastTimestamp - lastConsistencyCheck > checkTicks)
             {
                 yield return ConsistencyCheck(onConsistencyCheck);
+
+                lastConsistencyCheck += checkTicks;
             }
             else
             {
@@ -183,11 +189,11 @@ public class CommsService : ICommsService
         }
     }
 
-    public IEnumerator SendIntention(IntentionModule.Type t)
+    public IEnumerator SendIntention(string id, IntentionModule.Type t)
     {
         if (_clientId != null)
         {
-            var intention = WithId.create(IntentionModule.makePayload(_clientId, t));
+            var intention = WithId.useId(id, IntentionModule.makePayload(_clientId, t));
 
             var bytes = IntentionSrl.serialise(intention);
             var webRequest = UnityWebRequest.Put(BaseUrl + "World/intention", bytes);
@@ -210,6 +216,7 @@ public class TestCommsService : ICommsService
     public Action<string, WorldModule.Model> OnLoad { get; private set; }
     public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
     public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
+    public string LastIntentionId { get; private set; }
     public IntentionModule.Type LastIntention { get; private set; }
     public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
@@ -225,9 +232,10 @@ public class TestCommsService : ICommsService
         yield return null;
     }
 
-    public IEnumerator SendIntention(IntentionModule.Type t)
+    public IEnumerator SendIntention(string id, IntentionModule.Type t)
     {
         LastIntention = t;
+        LastIntentionId = id;
         AllIntentions.Add(t);
         yield return null;
     }

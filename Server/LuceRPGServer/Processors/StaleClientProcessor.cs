@@ -1,53 +1,34 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using LuceRPG.Utility;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LuceRPG.Server.Processors
 {
-    public sealed class StaleClientProcessor : IHostedService, IDisposable
+    public class StaleClientProcessor
     {
         private readonly ILogger<StaleClientProcessor> _logger;
         private readonly LastPingStorer _pingStore;
         private readonly IntentionQueue _queue;
-        private Timer? _timer;
+        private readonly ITimestampProvider _timestampProvider;
 
         public StaleClientProcessor(
             ILogger<StaleClientProcessor> logger,
             IntentionQueue queue,
-            LastPingStorer pingStore
-        )
+            LastPingStorer pingStore,
+            ITimestampProvider timestampProvider)
         {
             _logger = logger;
             _queue = queue;
             _pingStore = pingStore;
+            _timestampProvider = timestampProvider;
         }
 
-        public void Dispose()
+        public void ProcessStaleClients(int staleThresholdSec)
         {
-            _timer?.Dispose();
-        }
+            var staleThreshold = _timestampProvider.Now - TimeSpan.FromSeconds(staleThresholdSec).Ticks;
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Stale Client Processor starting");
-            _timer = new Timer(ProcessStaleClients, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellation)
-        {
-            _logger.LogInformation("Stale Client Processor stopping");
-            _timer?.Change(Timeout.Infinite, 0);
-
-            return Task.CompletedTask;
-        }
-
-        private void ProcessStaleClients(object? state)
-        {
-            var leaveIntentions = _pingStore.Cull().ToArray();
+            var leaveIntentions = _pingStore.Cull(staleThreshold).ToArray();
 
             if (leaveIntentions.Any())
             {
@@ -57,6 +38,22 @@ namespace LuceRPG.Server.Processors
                     _queue.Enqueue(i);
                 }
             }
+        }
+    }
+
+    public sealed class StaleClientProcessorService : ProcessorHostService
+    {
+        private readonly StaleClientProcessor _staleClientProcessor;
+
+        public StaleClientProcessorService(ILogger<ProcessorHostService> logger, StaleClientProcessor staleClientProcessor)
+            : base(logger)
+        {
+            _staleClientProcessor = staleClientProcessor;
+        }
+
+        protected override void DoProcess()
+        {
+            _staleClientProcessor.ProcessStaleClients(10);
         }
     }
 }

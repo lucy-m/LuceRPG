@@ -1,6 +1,7 @@
 using LuceRPG.Samples;
 using LuceRPG.Server;
 using LuceRPG.Server.Processors;
+using LuceRPG.Utility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,10 +27,13 @@ namespace LuceRPGServer
             services.AddSingleton(SampleWorlds.world1);
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
-            services.AddSingleton<CredentialService>();
+            services.AddSingleton<ICredentialService, CredentialService>();
+            services.AddSingleton<IntentionProcessor>();
+            services.AddSingleton<StaleClientProcessor>();
+            services.AddSingleton<ITimestampProvider, TimestampProvider>();
 
-            services.AddHostedService<IntentionProcessor>();
-            services.AddHostedService<StaleClientProcessor>();
+            services.AddHostedService<IntentionProcessorService>();
+            services.AddHostedService<StaleClientProcessorService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

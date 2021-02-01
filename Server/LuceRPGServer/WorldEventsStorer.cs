@@ -8,10 +8,14 @@ namespace LuceRPG.Server
     public sealed class WorldEventsStorer
     {
         private WorldEventsStoreModule.Model _store;
+        private readonly ITimestampProvider _timestampProvider;
 
-        public WorldEventsStorer(WorldModule.Model initialWorld)
+        public WorldEventsStorer(
+            WorldModule.Model initialWorld,
+            ITimestampProvider timestampProvider)
         {
             _store = WorldEventsStoreModule.create(initialWorld);
+            _timestampProvider = timestampProvider;
         }
 
         public WorldModule.Model CurrentWorld => _store.world;
@@ -20,7 +24,7 @@ namespace LuceRPG.Server
 
         public void Update(IntentionProcessing.ProcessResult result)
         {
-            var newStore = WorldEventsStoreModule.addResult(result, TimestampProvider.Now, _store);
+            var newStore = WorldEventsStoreModule.addResult(result, _timestampProvider.Now, _store);
             _store = newStore;
         }
 

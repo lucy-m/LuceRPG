@@ -21,10 +21,10 @@ namespace LuceRPG.Server
             _store = _store.Add(clientId, timestamp);
         }
 
-        public IEnumerable<WithId.Model<IntentionModule.Payload>> Cull()
+        public IEnumerable<WithId.Model<IntentionModule.Payload>> Cull(
+            long staleThreshold
+        )
         {
-            var staleThreshold = TimestampProvider.Now - TimeSpan.FromSeconds(10).Ticks;
-
             var culled = LastPingStore.cull(staleThreshold, _store);
             _store = culled.updated;
 

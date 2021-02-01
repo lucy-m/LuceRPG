@@ -12,7 +12,7 @@ module WorldEventsStore =
 
     let makeEvent (t: WorldEvent.Type): WorldEvent =
         let intentionId = System.Guid.NewGuid.ToString()
-        WorldEvent.asResult intentionId t
+        WorldEvent.asResult intentionId 0 t
 
     [<TestFixture>]
     module ``unculled store with two events`` =
@@ -83,7 +83,7 @@ module WorldEventsStore =
         module ``adding a process result`` =
             let newWorld = World.empty [Rect.create 0 0 4 4] Point.zero
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
-            let objectClientMap = Map.ofList ["obj1", "client1"]
+            let objectClientMap = Map.ofList ["obj1", "client1"] |> Option.Some
             let objectBusyMap = Map.ofList ["obj1", 100L]
 
             let processResult: IntentionProcessing.ProcessResult =
@@ -114,7 +114,7 @@ module WorldEventsStore =
 
             [<Test>]
             let ``objectClientMap is updated`` () =
-                newStore.objectClientMap |> should equal objectClientMap
+                newStore.objectClientMap |> should equal objectClientMap.Value
 
         [<TestFixture>]
         module ``culling`` =

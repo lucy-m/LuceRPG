@@ -2,56 +2,34 @@
 using LuceRPG.Utility;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LuceRPG.Server.Processors
 {
-    public sealed class IntentionProcessor : IHostedService, IDisposable
+    public sealed class IntentionProcessor
     {
         private readonly ILogger<IntentionProcessor> _logger;
         private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
-        private Timer? _timer;
+        private readonly ITimestampProvider _timestampProvider;
 
         public IntentionProcessor(
             ILogger<IntentionProcessor> logger,
+            WorldEventsStorer store,
             IntentionQueue queue,
-            WorldEventsStorer store
-        )
+            ITimestampProvider timestampProvider)
         {
-            _logger = logger;
-            _queue = queue;
             _store = store;
+            _queue = queue;
+            _logger = logger;
+            _timestampProvider = timestampProvider;
         }
 
-        public void Dispose()
+        public void Process()
         {
-            _timer?.Dispose();
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Intention Processor starting");
-            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Intention Processor stopping");
-            _timer?.Change(Timeout.Infinite, 0);
-
-            return Task.CompletedTask;
-        }
-
-        private void ProcessIntentions(object? state)
-        {
+            var timestamp = _timestampProvider.Now;
             var entries = _queue.DequeueAll().ToArray();
-            var entriesMap = entries.ToDictionary(e => e.Intention.value.id);
+            var entriesMap = entries.ToDictionary(e => e.Intention.tsIntention.value.id);
 
             if (entries.Length > 0)
             {
@@ -59,7 +37,7 @@ namespace LuceRPG.Server.Processors
                 var intentions = entries.Select(e => e.Intention).ToArray();
 
                 var processed = IntentionProcessing.processMany(
-                    TimestampProvider.Now,
+                    timestamp,
                     _store.ObjectClientMap,
                     _store.ObjectBusyMap,
                     _store.CurrentWorld,
@@ -71,15 +49,15 @@ namespace LuceRPG.Server.Processors
                 {
                     if (OnProcessed != null)
                     {
-                        var myEvents = events.Where(e => e.resultOf == Intention.value.id);
+                        var myEvents = events.Where(e => e.resultOf == Intention.tsIntention.value.id);
                         OnProcessed(myEvents);
                     }
                 }
 
                 foreach (var i in processed.delayed)
                 {
-                    _logger.LogDebug($"Requeueing delayed intention {i.value.id}");
-                    if (entriesMap.TryGetValue(i.value.id, out var entry))
+                    _logger.LogDebug($"Requeueing delayed intention {i.tsIntention.value.id} at index {i.index}");
+                    if (entriesMap.TryGetValue(i.tsIntention.value.id, out var entry))
                     {
                         _queue.Enqueue(i, entry.OnProcessed);
                     }
@@ -91,6 +69,23 @@ namespace LuceRPG.Server.Processors
 
                 _store.Update(processed);
             }
+        }
+    }
+
+    public sealed class IntentionProcessorService : ProcessorHostService
+    {
+        private readonly IntentionProcessor _intentionProcessor;
+
+        public IntentionProcessorService(
+            ILogger<ProcessorHostService> logger, IntentionProcessor intentionProcessor)
+            : base(logger)
+        {
+            _intentionProcessor = intentionProcessor;
+        }
+
+        protected override void DoProcess()
+        {
+            _intentionProcessor.Process();
         }
     }
 }
