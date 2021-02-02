@@ -4,29 +4,6 @@ open LuceRPG.Models
 
 module ToLogString =
 
-    let formatPayload (timestamp: int64) (eventType: string) (payload: string seq): string =
-        let timestampStr = sprintf "%i" timestamp
-        let payloadStr = payload |> String.concat ","
-
-        seq { timestampStr; eventType; payloadStr }
-        |> String.concat ","
-
-    let direction (d: Direction): string =
-        match d with
-        | Direction.North -> "N"
-        | Direction.South -> "S"
-        | Direction.East -> "E"
-        | Direction.West -> "W"
-
-    let worldEventType (t: WorldEvent.Type): string =
-        match t with
-        | WorldEvent.Type.Moved (id, dir) ->
-            sprintf "Moved %s %s" (direction dir) id
-        | WorldEvent.Type.ObjectAdded o ->
-            sprintf "Added %s" o.id
-        | WorldEvent.Type.ObjectRemoved id ->
-            sprintf "Removed %s" id
-
     let processResult
             (timestamp: int64)
             (result: IntentionProcessing.ProcessResult)
@@ -36,26 +13,17 @@ module ToLogString =
 
         let events =
             result.events
-            |> Seq.map (fun e ->
-                let resultOf = sprintf "Result of %s" e.resultOf
-                let index = sprintf "Index %i" e.index
-                let t = worldEventType e.t
-
-                seq { "Event"; resultOf; index; t}
-            )
+            |> Seq.map WorldEventPayload.create
+            |> Seq.map (fun p -> FormatPayload.format p "Events")
 
         let delayed =
             result.delayed
-            |> Seq.map (fun d ->
-                let id = sprintf "Id %s" d.tsIntention.value.id
-                let index = sprintf "Index %i" d.index
-
-                seq { "Delayed"; id; index }
-            )
+            |> Seq.map IndexedIntentionPayload.create
+            |> Seq.map (fun p -> FormatPayload.format p "Delayed")
 
         let logs =
-            (Seq.append events delayed)
-            |> Seq.map (formatPayload timestamp typeStr)
+            Seq.append events delayed
+            |> Seq.map (fun f ->  f typeStr timestamp)
 
         logs
 
@@ -70,4 +38,4 @@ module ToLogString =
             sprintf "Username %s" username
         }
 
-        formatPayload timestamp "Client Joined" payload
+        FormatPayload.format payload "Joined" "Client Joined" timestamp

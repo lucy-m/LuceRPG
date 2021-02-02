@@ -17,4 +17,11 @@ module Direction =
 
         Point.add offset point
 
+    let asLetter (d: Model): char =
+        match d with
+        | North -> 'N'
+        | South -> 'S'
+        | East -> 'E'
+        | West -> 'W'
+
 type Direction = Direction.Model
