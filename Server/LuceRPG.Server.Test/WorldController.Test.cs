@@ -56,8 +56,9 @@ namespace LuceRPG.Server.Test
             worldStorer = new WorldEventsStorer(initialWorld, timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
             pingStorer = new LastPingStorer();
+            var logService = new TestCsvLogService();
 
-            intentionProcessor = new IntentionProcessor(new NullLogger<IntentionProcessor>(), worldStorer, intentionQueue, timestampProvider);
+            intentionProcessor = new IntentionProcessor(new NullLogger<IntentionProcessor>(), worldStorer, intentionQueue, logService, timestampProvider);
             staleClientProcessor = new StaleClientProcessor(new NullLogger<StaleClientProcessor>(), intentionQueue, pingStorer, timestampProvider);
             credentialService = new TestCredentialService();
 
@@ -66,7 +67,7 @@ namespace LuceRPG.Server.Test
             var controllerContext = new ControllerContext() { HttpContext = httpContext };
 
             worldController = new WorldController(new NullLogger<WorldController>(), intentionQueue,
-                worldStorer, pingStorer, credentialService, timestampProvider)
+                worldStorer, pingStorer, credentialService, timestampProvider, logService)
             {
                 ControllerContext = controllerContext
             };

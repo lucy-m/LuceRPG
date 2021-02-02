@@ -5,10 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="LogPayloads\FormatFields.fs" />
+    <Compile Include="LogPayloads\WorldEventFields.fs" />
+    <Compile Include="LogPayloads\WorldDiffFields.fs" />
+    <Compile Include="LogPayloads\IndexedIntentionFields.fs" />
+    <Compile Include="LogPayloads\ClientLogEntryFormatter.fs" />
     <Compile Include="ASCIIWorld.fs" />
     <Compile Include="WorldEventsStore.fs" />
     <Compile Include="LastPingStore.fs" />
-    <Compile Include="Library.fs" />
+    <Compile Include="ToLogString.fs" />
   </ItemGroup>
 
   <ItemGroup>

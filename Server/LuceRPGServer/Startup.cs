@@ -31,6 +31,7 @@ namespace LuceRPGServer
             services.AddSingleton<IntentionProcessor>();
             services.AddSingleton<StaleClientProcessor>();
             services.AddSingleton<ITimestampProvider, TimestampProvider>();
+            services.AddSingleton<ICsvLogService, CsvLogService>();
 
             services.AddHostedService<IntentionProcessorService>();
             services.AddHostedService<StaleClientProcessorService>();
@@ -58,6 +59,9 @@ namespace LuceRPGServer
             {
                 endpoints.MapControllers();
             });
+
+            // sets up log directory
+            app.ApplicationServices.GetService<ICsvLogService>();
         }
     }
 }

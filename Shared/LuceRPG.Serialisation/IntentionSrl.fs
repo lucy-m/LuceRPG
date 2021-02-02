@@ -32,6 +32,12 @@ module IntentionSrl =
     let serialise (i: Intention): byte[] =
         WithIdSrl.serialise serialisePayload i
 
+    let serialiseIndexed (ii: IndexedIntention): byte[] =
+        let index = IntSrl.serialise ii.index
+        let tsIntention = WithTimestampSrl.serialise serialise ii.tsIntention
+
+        Array.append index tsIntention
+
     let deserialiseType (bytes: byte[]): Intention.Type DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): Intention.Type DesrlResult =
             match tag with
@@ -63,4 +69,11 @@ module IntentionSrl =
     let deserialise (bytes: byte[]): Intention DesrlResult =
         WithIdSrl.deserialise
             deserialisePayload
+            bytes
+
+    let deserialiseIndexed (bytes: byte[]): IndexedIntention DesrlResult =
+        DesrlUtil.getTwo
+            IntSrl.deserialise
+            (WithTimestampSrl.deserialise deserialise)
+            IndexedIntention.useIndex
             bytes

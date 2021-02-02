@@ -16,10 +16,12 @@
     <Compile Include="Intention.fs" />
     <Compile Include="WorldEvent.fs" />
     <Compile Include="World.fs" />
+    <Compile Include="WorldDiff.fs" />
     <Compile Include="EventApply.fs" />
     <Compile Include="IntentionProcessing.fs" />
     <Compile Include="GetSinceResult.fs" />
     <Compile Include="GetJoinGameResult.fs" />
+    <Compile Include="ClientLogEntry.fs" />
   </ItemGroup>
 
 </Project>

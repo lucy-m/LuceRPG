@@ -13,14 +13,20 @@ public class Config
 public interface IConfigLoader
 {
     Config Config { get; }
+
+    void SaveConfig();
 }
 
 public class ConfigLoader : IConfigLoader
 {
     public Config Config { get; private set; }
 
+    private readonly string _configPath;
+
     public ConfigLoader(string configPath)
     {
+        _configPath = configPath;
+
         if (!File.Exists(configPath))
         {
             Debug.Log("Creating new config file");
@@ -30,8 +36,7 @@ public class ConfigLoader : IConfigLoader
                 Username = "???",
                 Password = "???"
             };
-            var asString = JsonUtility.ToJson(Config, true);
-            File.WriteAllText(configPath, asString);
+            SaveConfig();
         }
         else
         {
@@ -39,5 +44,11 @@ public class ConfigLoader : IConfigLoader
             var asString = File.ReadAllText(configPath);
             Config = JsonUtility.FromJson<Config>(asString);
         }
+    }
+
+    public void SaveConfig()
+    {
+        var asString = JsonUtility.ToJson(Config, true);
+        File.WriteAllText(_configPath, asString);
     }
 }

@@ -20,13 +20,14 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     private FSharpMap<string, long> _objectBusyMap
         = MapModule.Empty<string, long>();
 
-    private readonly Queue<IntentionProcessing.IndexedIntentionModule.Model> _delayed
-        = new Queue<IntentionProcessing.IndexedIntentionModule.Model>();
+    private readonly Queue<IndexedIntentionModule.Model> _delayed
+        = new Queue<IndexedIntentionModule.Model>();
 
     private readonly Dictionary<string, Dictionary<int, WorldEventModule.Model>> _eventsProduced
         = new Dictionary<string, Dictionary<int, WorldEventModule.Model>>();
 
     private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
+    private ICommsService CommsService => Registry.CommsService;
 
     private void Awake()
     {
@@ -97,11 +98,11 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         var payload = IntentionModule.makePayload("", intention);
         var withId = WithId.create(payload);
         var withTimestamp = WithTimestamp.create(timestamp, withId);
-        var indexed = IntentionProcessing.IndexedIntentionModule.create(withTimestamp);
+        var indexed = IndexedIntentionModule.create(withTimestamp);
 
         _intentions[withId.id] = timestamp;
 
-        DoProcess(new List<IntentionProcessing.IndexedIntentionModule.Model> { indexed });
+        DoProcess(new List<IndexedIntentionModule.Model> { indexed });
 
         return withId.id;
     }
@@ -120,7 +121,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
     }
 
     private void DoProcess(
-        IEnumerable<IntentionProcessing.IndexedIntentionModule.Model> intentions
+        IEnumerable<IndexedIntentionModule.Model> intentions
     )
     {
         var processResult = IntentionProcessing.processMany(
@@ -130,6 +131,9 @@ public class OptimisticIntentionProcessor : MonoBehaviour
             WorldLoader.Instance.World,
             intentions
         );
+
+        var logs = ClientLogEntryModule.createFromProcessResult(processResult);
+        LogDispatcher.Instance.AddLog(logs);
 
         _objectBusyMap = processResult.objectBusyMap;
 

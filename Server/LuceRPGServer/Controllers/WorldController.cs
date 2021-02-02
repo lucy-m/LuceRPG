@@ -6,7 +6,9 @@ using LuceRPG.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +28,7 @@ namespace LuceRPGServer.Controllers
         private readonly LastPingStorer _pingStorer;
         private readonly ICredentialService _credentialService;
         private readonly ITimestampProvider _timestampProvider;
+        private readonly ICsvLogService _logService;
 
         public WorldController(
             ILogger<WorldController> logger,
@@ -33,7 +36,9 @@ namespace LuceRPGServer.Controllers
             WorldEventsStorer store,
             LastPingStorer pingStorer,
             ICredentialService credentialService,
-            ITimestampProvider timestampProvider)
+            ITimestampProvider timestampProvider,
+            ICsvLogService logService
+        )
         {
             _logger = logger;
             _queue = queue;
@@ -41,6 +46,7 @@ namespace LuceRPGServer.Controllers
             _pingStorer = pingStorer;
             _credentialService = credentialService;
             _timestampProvider = timestampProvider;
+            _logService = logService;
         }
 
         [HttpGet("join")]
@@ -60,6 +66,8 @@ namespace LuceRPGServer.Controllers
                 WithId.Model<WorldObjectModule.Payload>? playerObject = null;
                 bool intentionProcessed = false;
                 var clientId = Guid.NewGuid().ToString();
+
+                _logService.EstablishLog(clientId, username);
 
                 var intention = WithId.create(
                     IntentionModule.makePayload(clientId, IntentionModule.Type.NewJoinGame(username))
@@ -144,15 +152,12 @@ namespace LuceRPGServer.Controllers
         [HttpPut("intention")]
         public async Task Intention()
         {
-            var buffer = new byte[200];
-            var read = await Request.Body.ReadAsync(buffer);
+            using var stream = Request.BodyReader.AsStream();
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
 
-            if (read == buffer.Length)
-            {
-                throw new Exception("Intention received was larger than the buffer size");
-            }
-
-            var intention = IntentionSrl.deserialise(buffer);
+            var intention = IntentionSrl.deserialise(bytes);
 
             if (intention.HasValue())
             {
@@ -161,6 +166,25 @@ namespace LuceRPGServer.Controllers
             else
             {
                 _logger.LogWarning("Unable to deserialise intention");
+            }
+        }
+
+        [HttpPut("logs")]
+        public async Task PutLogs(string clientId)
+        {
+            using var stream = Request.BodyReader.AsStream();
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            var bytes = memoryStream.ToArray();
+
+            _logger.LogInformation($"Got {bytes.Length} bytes as logs from {clientId}");
+
+            var logs = ClientLogEntrySrl.deserialiseLog(bytes.ToArray());
+
+            if (logs.HasValue())
+            {
+                _logService.AddClientLogs(clientId, logs.Value.value);
             }
         }
     }
