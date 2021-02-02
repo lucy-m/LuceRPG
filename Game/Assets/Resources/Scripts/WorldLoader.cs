@@ -5,6 +5,7 @@ using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WorldLoader : MonoBehaviour
@@ -131,6 +132,8 @@ public class WorldLoader : MonoBehaviour
             if (source == UpdateSource.Server
                 && OptimisticIntentionProcessor.Instance.DidProcess(worldEvent.resultOf))
             {
+                var log = ClientLogEntryModule.Payload.NewUpdateIgnored(worldEvent);
+                LogDispatcher.Instance.AddLog(log);
                 OptimisticIntentionProcessor.Instance.CheckEvent(worldEvent);
                 continue;
             }
@@ -166,6 +169,14 @@ public class WorldLoader : MonoBehaviour
 
     public void CheckConsistency(WorldModule.Model world)
     {
+        var diff = WorldDiffModule.diff(world, World).ToArray();
+        if (diff.Any())
+        {
+            Debug.LogError($"Consistency check failed with {diff.Length} results");
+            var logs = ClientLogEntryModule.Payload.NewConsistencyCheckFailed(ListModule.OfSeq(diff));
+            LogDispatcher.Instance.AddLog(logs);
+        }
+
         // Check whether all game objects exist and are in the correct place
         //   snap them to the location if not
         foreach (var modelObj in WorldModule.objectList(world))

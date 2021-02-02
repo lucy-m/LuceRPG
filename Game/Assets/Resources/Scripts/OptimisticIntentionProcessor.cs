@@ -133,10 +133,7 @@ public class OptimisticIntentionProcessor : MonoBehaviour
         );
 
         var logs = ClientLogEntryModule.createFromProcessResult(processResult);
-        var tsLogs = WithTimestamp.create(TimestampProvider.Now, logs);
-        var asEnum = new List<WithTimestamp.Model<ClientLogEntryModule.Payload>>() { tsLogs };
-
-        StartCoroutine(CommsService.SendLogs(asEnum));
+        LogDispatcher.Instance.AddLog(logs);
 
         _objectBusyMap = processResult.objectBusyMap;
 

@@ -6,7 +6,9 @@ using LuceRPG.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -150,15 +152,12 @@ namespace LuceRPGServer.Controllers
         [HttpPut("intention")]
         public async Task Intention()
         {
-            var buffer = new byte[200];
-            var read = await Request.Body.ReadAsync(buffer);
+            using var stream = Request.BodyReader.AsStream();
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
 
-            if (read == buffer.Length)
-            {
-                throw new Exception("Intention received was larger than the buffer size");
-            }
-
-            var intention = IntentionSrl.deserialise(buffer);
+            var intention = IntentionSrl.deserialise(bytes);
 
             if (intention.HasValue())
             {
@@ -173,15 +172,15 @@ namespace LuceRPGServer.Controllers
         [HttpPut("logs")]
         public async Task PutLogs(string clientId)
         {
-            var buffer = new byte[1000];
-            var read = await Request.Body.ReadAsync(buffer);
+            using var stream = Request.BodyReader.AsStream();
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
 
-            if (read == buffer.Length)
-            {
-                throw new Exception("Logs received were larger than the buffer size");
-            }
+            var bytes = memoryStream.ToArray();
 
-            var logs = ClientLogEntrySrl.deserialiseLog(buffer);
+            _logger.LogInformation($"Got {bytes.Length} bytes as logs from {clientId}");
+
+            var logs = ClientLogEntrySrl.deserialiseLog(bytes.ToArray());
 
             if (logs.HasValue())
             {
