@@ -6,14 +6,14 @@ module WorldEvent =
         | ObjectAdded of WorldObject
         | ObjectRemoved of Id.WorldObject
 
-    type Payload =
+    type Model =
         {
             resultOf: Id.Intention
             index: int
             t: Type
         }
 
-    let asResult (intention: Id.Intention) (index: int) (t: Type): Payload =
+    let asResult (intention: Id.Intention) (index: int) (t: Type): Model =
         {
             resultOf = intention
             index = index
@@ -26,4 +26,4 @@ module WorldEvent =
         | Type.ObjectAdded o -> o.id |> Option.Some
         | Type.ObjectRemoved id -> id |> Option.Some
 
-type WorldEvent = WorldEvent.Payload
+type WorldEvent = WorldEvent.Model
