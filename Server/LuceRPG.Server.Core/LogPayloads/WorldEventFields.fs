@@ -2,7 +2,7 @@
 
 open LuceRPG.Models
 
-module WorldEventPayload =
+module WorldEventFields =
 
     let create (e: WorldEvent.Model): string seq =
 

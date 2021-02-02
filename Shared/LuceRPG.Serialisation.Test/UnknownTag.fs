@@ -35,4 +35,4 @@ module UnknownTag =
 
         [<Test>]
         let clientLogEntrySrl () =
-            unknownTag ClientLogEntry.deserialise 100uy
+            unknownTag ClientLogEntrySrl.deserialise 100uy

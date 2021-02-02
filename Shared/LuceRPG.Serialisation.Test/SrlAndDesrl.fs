@@ -163,6 +163,6 @@ module SrlAndDesrl =
         [<Test>]
         let clientLogEntrySrl () =
             let checkFn =
-                srlAndDesrl ClientLogEntry.serialise ClientLogEntry.deserialise
+                srlAndDesrl ClientLogEntrySrl.serialise ClientLogEntrySrl.deserialise
 
             doCheck checkFn

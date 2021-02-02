@@ -7,7 +7,7 @@ module WorldDiff =
         | MissingBound of Rect
         | ExtraObject of Id.WorldObject
         | MissingObject of Id.WorldObject
-        | UnmatchingObject of WorldObject * WorldObject
+        | UnmatchingObjectPosition of Id.WorldObject * Point * Point
 
     type Model = DiffType List
 
@@ -72,9 +72,27 @@ module WorldDiff =
                     (fromObj, toObj)
                 )
                 |> List.filter (fun (fromObj, toObj) -> fromObj <> toObj)
-                |> List.map DiffType.UnmatchingObject
 
-            Seq.concat [extraObjects; missingObjects; unmatchingObjects]
+            let unmatchingPositions =
+                unmatchingObjects
+                |> List.filter (fun (fromObj, toObj) ->
+                    WorldObject.topLeft fromObj
+                    <> WorldObject.topLeft toObj
+                )
+                |> List.map (fun (fromObj, toObj) ->
+                    DiffType.UnmatchingObjectPosition
+                        (
+                            fromObj.id,
+                            WorldObject.topLeft fromObj,
+                            WorldObject.topLeft toObj
+                        )
+                )
+
+            Seq.concat [
+                extraObjects;
+                missingObjects;
+                unmatchingPositions
+            ]
 
         Seq.concat [spawnPoint; bounds; objects]
 

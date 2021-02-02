@@ -75,7 +75,8 @@ module WorldDiff =
             [
                 WorldDiff.DiffType.ExtraObject extraObject.id
                 WorldDiff.DiffType.MissingObject missingObject.id
-                WorldDiff.DiffType.UnmatchingObject (unmatchingObject1, unmatchingObject2)
+                WorldDiff.DiffType.UnmatchingObjectPosition
+                    (unmatchingObject1.id, Point.create 6 10, Point.create 8 10)
             ]
 
         diff |> should equal expected

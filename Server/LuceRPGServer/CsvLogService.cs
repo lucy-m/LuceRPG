@@ -13,6 +13,11 @@ namespace LuceRPG.Server
         void EstablishLog(string clientId, string username);
 
         void AddProcessResult(IntentionProcessing.ProcessResult result);
+
+        void AddClientLogs(
+            string clientId,
+            IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs
+        );
     }
 
     public class CsvLogService : ICsvLogService
@@ -69,10 +74,32 @@ namespace LuceRPG.Server
         {
             System.IO.File.AppendAllLines(ServerLogPath, logs);
         }
+
+        public void AddClientLogs(
+            string clientId,
+            IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs
+        )
+        {
+            if (_clientFileMap.TryGetValue(clientId, out var fileName))
+            {
+                var filePath = Directory + fileName;
+
+                var lines =
+                    logs
+                    .OrderBy(l => l.timestamp)
+                    .SelectMany(l => ClientLogEntryFormatter.create(l));
+
+                System.IO.File.AppendAllLines(filePath, lines);
+            }
+        }
     }
 
     public class TestCsvLogService : ICsvLogService
     {
+        public void AddClientLogs(string clientId, IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+        {
+        }
+
         public void AddProcessResult(IntentionProcessing.ProcessResult result)
         {
         }

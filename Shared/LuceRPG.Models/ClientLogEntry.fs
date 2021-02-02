@@ -1,13 +1,16 @@
 ﻿namespace LuceRPG.Models
 
 module ClientLogEntry =
-    type Model =
+    type Payload =
         | ProcessResult of WorldEvent List * IndexedIntention List
         | UpdateIgnored of WorldEvent
         | ConsistencyCheckFailed of WorldDiff
 
-    let createFromProcessResult (processResult: IntentionProcessing.ProcessResult): Model =
-        Model.ProcessResult
+    type Model = Payload WithTimestamp
+
+    let createFromProcessResult (processResult: IntentionProcessing.ProcessResult): Payload =
+        ProcessResult
             (processResult.events |> Seq.toList, processResult.delayed |> Seq.toList)
 
-type LogEntry = ClientLogEntry.Model
+type ClientLogEntry = ClientLogEntry.Model
+type ClientLog = ClientLogEntry List

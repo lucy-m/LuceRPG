@@ -12,7 +12,7 @@ module WorldDiffSrl =
             | WorldDiff.DiffType.MissingBound _ -> 3uy
             | WorldDiff.DiffType.ExtraObject _ -> 4uy
             | WorldDiff.DiffType.MissingObject _ -> 5uy
-            | WorldDiff.DiffType.UnmatchingObject _ -> 6uy
+            | WorldDiff.DiffType.UnmatchingObjectPosition _ -> 6uy
 
         let addtInfo =
             match diffType with
@@ -21,11 +21,12 @@ module WorldDiffSrl =
             | WorldDiff.DiffType.MissingBound r -> RectSrl.serialise r
             | WorldDiff.DiffType.ExtraObject id -> StringSrl.serialise id
             | WorldDiff.DiffType.MissingObject id -> StringSrl.serialise id
-            | WorldDiff.DiffType.UnmatchingObject (obj1, obj2) ->
-                let s1 = WorldObjectSrl.serialise obj1
-                let s2 = WorldObjectSrl.serialise obj2
+            | WorldDiff.DiffType.UnmatchingObjectPosition (id, p1, p2) ->
+                let id = StringSrl.serialise id
+                let p1 = PointSrl.serialise p1
+                let p2 = PointSrl.serialise p2
 
-                Array.append s1 s2
+                Array.concat [id; p1; p2]
 
         Array.append [|label|] addtInfo
 
@@ -50,10 +51,13 @@ module WorldDiffSrl =
                 StringSrl.deserialise objectBytes
                 |> DesrlResult.map WorldDiff.DiffType.MissingObject
             | 6uy ->
-                DesrlUtil.getTwo
-                    WorldObjectSrl.deserialise
-                    WorldObjectSrl.deserialise
-                    (fun obj1 obj2 -> WorldDiff.DiffType.UnmatchingObject(obj1, obj2))
+                DesrlUtil.getThree
+                    StringSrl.deserialise
+                    PointSrl.deserialise
+                    PointSrl.deserialise
+                    (fun id p1 p2 ->
+                        WorldDiff.DiffType.UnmatchingObjectPosition(id, p1, p2)
+                    )
                     objectBytes
             | _ ->
                 printfn "Unknown WorldDiff DiffType tag %u" tag

@@ -2,18 +2,18 @@
 
 open LuceRPG.Models
 
-module ClientLogEntry =
+module ClientLogEntrySrl =
 
-    let serialise (logEntry: LogEntry): byte[] =
+    let serialisePayload (logEntry: ClientLogEntry.Payload): byte[] =
         let label =
             match logEntry with
-            | LogEntry.ProcessResult _ -> 1uy
-            | LogEntry.UpdateIgnored _ -> 2uy
-            | LogEntry.ConsistencyCheckFailed _ -> 3uy
+            | ClientLogEntry.ProcessResult _ -> 1uy
+            | ClientLogEntry.UpdateIgnored _ -> 2uy
+            | ClientLogEntry.ConsistencyCheckFailed _ -> 3uy
 
         let addtInfo =
             match logEntry with
-            | LogEntry.ProcessResult (es, is) ->
+            | ClientLogEntry.ProcessResult (es, is) ->
                 let worldEvents =
                     ListSrl.serialise WorldEventSrl.serialise es
                 let intentions =
@@ -21,15 +21,18 @@ module ClientLogEntry =
 
                 Array.append worldEvents intentions
 
-            | LogEntry.UpdateIgnored e ->
+            | ClientLogEntry.UpdateIgnored e ->
                 WorldEventSrl.serialise e
-            | LogEntry.ConsistencyCheckFailed d ->
+            | ClientLogEntry.ConsistencyCheckFailed d ->
                 WorldDiffSrl.serialise d
 
         Array.append [|label|] addtInfo
 
-    let deserialise (bytes: byte[]): LogEntry DesrlResult =
-        let loadObj (tag: byte) (objectBytes: byte[]): LogEntry DesrlResult =
+    let serialise (logEntry: ClientLogEntry): byte[] =
+        WithTimestampSrl.serialise serialisePayload logEntry
+
+    let deserialisePayload (bytes: byte[]): ClientLogEntry.Payload DesrlResult =
+        let loadObj (tag: byte) (objectBytes: byte[]): ClientLogEntry.Payload DesrlResult =
             match tag with
             | 1uy ->
                 DesrlUtil.getTwo
@@ -48,3 +51,6 @@ module ClientLogEntry =
                 Option.None
 
         DesrlUtil.getTagged loadObj bytes
+
+    let deserialise (bytes: byte[]): ClientLogEntry DesrlResult =
+        WithTimestampSrl.deserialise deserialisePayload bytes

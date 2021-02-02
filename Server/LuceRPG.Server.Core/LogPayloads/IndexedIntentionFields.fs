@@ -2,7 +2,7 @@
 
 open LuceRPG.Models
 
-module IndexedIntentionPayload =
+module IndexedIntentionFields =
 
     let create (ii: IndexedIntention): string seq =
         let id = sprintf "Id %s" ii.tsIntention.value.id

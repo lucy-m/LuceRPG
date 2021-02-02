@@ -1,15 +1,15 @@
 ﻿namespace LuceRPG.Server.Core
 
-module FormatPayload =
+module FormatFields =
 
     let format
-            (payload: string seq)
+            (fields: string seq)
             (subType: string)
             (eventType: string)
             (timestamp: int64)
             : string =
         let timestampStr = sprintf "%i" timestamp
-        let payloadStr = payload |> String.concat ","
+        let payloadStr = fields |> String.concat ","
 
         seq { timestampStr; eventType; subType; payloadStr }
         |> String.concat ","

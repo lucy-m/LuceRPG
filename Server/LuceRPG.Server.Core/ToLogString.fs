@@ -9,33 +9,34 @@ module ToLogString =
             (result: IntentionProcessing.ProcessResult)
             : string seq =
 
-        let typeStr = "Process Result"
+        let eventType = "Process Result"
 
         let events =
             result.events
-            |> Seq.map WorldEventPayload.create
-            |> Seq.map (fun p -> FormatPayload.format p "Events")
+            |> Seq.map WorldEventFields.create
+            |> Seq.map (fun p -> p, "Event")
 
         let delayed =
             result.delayed
-            |> Seq.map IndexedIntentionPayload.create
-            |> Seq.map (fun p -> FormatPayload.format p "Delayed")
+            |> Seq.map IndexedIntentionFields.create
+            |> Seq.map (fun p -> p, "Delayed")
 
-        let logs =
-            Seq.append events delayed
-            |> Seq.map (fun f ->  f typeStr timestamp)
-
-        logs
+        Seq.append events delayed
+        |> Seq.map (fun (fields, subType) ->
+            FormatFields.format fields subType eventType timestamp
+        )
 
     let clientJoined
             (timestamp: int64)
             (clientId: string)
             (username: string)
             : string =
-
         let payload = seq {
             sprintf "ClientId %s" clientId
             sprintf "Username %s" username
         }
 
-        FormatPayload.format payload "Joined" "Client Joined" timestamp
+        FormatFields.format payload "Joined" "Client Joined" timestamp
+
+    let clientLog (entry: ClientLogEntry): string seq =
+        ClientLogEntryFormatter.create entry
