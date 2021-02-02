@@ -21,3 +21,25 @@ module Intention =
     type Model = Payload WithId
 
 type Intention = Intention.Model
+
+module IndexedIntention =
+    type Model =
+        {
+            tsIntention: Intention WithTimestamp
+            index: int
+        }
+
+    let create (tsIntention: Intention WithTimestamp): Model =
+        {
+            tsIntention = tsIntention
+            index = 0
+        }
+
+    let useIndex (index: int) (tsIntention: Intention WithTimestamp): Model =
+        {
+            tsIntention = tsIntention
+            index = index
+        }
+
+type IndexedIntention = IndexedIntention.Model
+

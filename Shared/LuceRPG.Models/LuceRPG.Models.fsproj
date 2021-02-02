@@ -21,6 +21,7 @@
     <Compile Include="IntentionProcessing.fs" />
     <Compile Include="GetSinceResult.fs" />
     <Compile Include="GetJoinGameResult.fs" />
+    <Compile Include="ClientLogEntry.fs" />
   </ItemGroup>
 
 </Project>

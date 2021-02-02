@@ -9,6 +9,8 @@ module WorldDiff =
         | MissingObject of Id.WorldObject
         | UnmatchingObject of WorldObject * WorldObject
 
+    type Model = DiffType List
+
     let diff (fromWorld: World) (toWorld: World): DiffType seq =
         let spawnPoint =
             if fromWorld.playerSpawner <> toWorld.playerSpawner
@@ -75,3 +77,5 @@ module WorldDiff =
             Seq.concat [extraObjects; missingObjects; unmatchingObjects]
 
         Seq.concat [spawnPoint; bounds; objects]
+
+type WorldDiff = WorldDiff.Model

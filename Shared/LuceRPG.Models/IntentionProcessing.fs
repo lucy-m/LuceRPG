@@ -4,27 +4,6 @@ module IntentionProcessing =
     type ObjectClientMap = Map<Id.WorldObject, Id.Client>
     type ObjectBusyMap = Map<Id.WorldObject, int64>
 
-    module IndexedIntention =
-        type Model =
-            {
-                tsIntention: Intention WithTimestamp
-                index: int
-            }
-
-        let create (tsIntention: Intention WithTimestamp): Model =
-            {
-                tsIntention = tsIntention
-                index = 0
-            }
-
-        let useIndex (index: int) (tsIntention: Intention WithTimestamp): Model =
-            {
-                tsIntention = tsIntention
-                index = index
-            }
-
-    type IndexedIntention = IndexedIntention.Model
-
     type ProcessResult =
         {
             events: WorldEvent seq

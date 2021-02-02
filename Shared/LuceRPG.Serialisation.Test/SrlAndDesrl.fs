@@ -110,6 +110,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let indexedIntentionSrl () =
+            let checkFn =
+                srlAndDesrl IntentionSrl.serialiseIndexed IntentionSrl.deserialiseIndexed
+
+            doCheck checkFn
+
+        [<Test>]
         let worldEventSrl () =
             let checkFn =
                 srlAndDesrl WorldEventSrl.serialise WorldEventSrl.deserialise
@@ -124,6 +131,20 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let worldDiffDiffTypeSrl () =
+            let checkFn =
+                srlAndDesrl WorldDiffSrl.serialiseDiffType WorldDiffSrl.deserialiseDiffType
+
+            doCheck checkFn
+
+        [<Test>]
+        let worldDiffSrl () =
+            let checkFn =
+                srlAndDesrl WorldDiffSrl.serialise WorldDiffSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let getSinceResultSrl () =
             let checkFn =
                 srlAndDesrl GetSinceResultSrl.serialise GetSinceResultSrl.deserialise
@@ -132,10 +153,16 @@ module SrlAndDesrl =
 
         [<Test>]
         let getJoinGameResultSrl () =
-            let checkFn (r: GetJoinGameResult): bool =
+            let checkFn =
                 srlAndDesrl
                     GetJoinGameResultSrl.serialise
                     GetJoinGameResultSrl.deserialise
-                    r
+
+            doCheck checkFn
+
+        [<Test>]
+        let clientLogEntrySrl () =
+            let checkFn =
+                srlAndDesrl ClientLogEntry.serialise ClientLogEntry.deserialise
 
             doCheck checkFn
