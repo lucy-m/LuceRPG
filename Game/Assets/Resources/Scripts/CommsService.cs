@@ -12,13 +12,10 @@ public interface ICommsService
 {
     IEnumerator FetchUpdates(Action<GetSinceResultModule.Payload> onUpdate, Action<WorldModule.Model> onConsistencyCheck);
 
-    IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
+    IEnumerator LoadGame(
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     );
-
-    IEnumerator LoadGame(Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad);
 
     IEnumerator SendIntention(string id, IntentionModule.Type t);
 
@@ -37,71 +34,9 @@ public class CommsService : ICommsService
 
     private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
-    public IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
-    )
-    {
-        var url =
-            BaseUrl
-            + "World/join"
-            + "?username=" + Username
-            + "&password=" + Password;
-
-        Debug.Log($"Attempting to load world at {BaseUrl}");
-        var webRequest = UnityWebRequest.Get(url);
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result == UnityWebRequest.Result.Success)
-        {
-            var bytes = webRequest.downloadHandler.data;
-
-            var tResult = GetJoinGameResultSrl.deserialise(bytes);
-
-            if (tResult.HasValue())
-            {
-                var result = tResult.Value.value;
-
-                if (result.IsSuccess)
-                {
-                    var success = (GetJoinGameResultModule.Model.Success)result;
-
-                    var clientId = success.Item1;
-                    var playerId = success.Item2;
-                    var tsWorld = success.Item3;
-
-                    Debug.Log($"Client {clientId} joined with player ID {playerId}");
-
-                    _clientId = clientId;
-
-                    onLoad(playerId, tsWorld.value);
-
-                    yield return FetchUpdates(onUpdate, onConsistencyCheck);
-                }
-                else if (result.IsIncorrectCredentials)
-                {
-                    Debug.LogError("Credentials are incorrect, please update your config.json");
-                }
-                else
-                {
-                    var failure = (GetJoinGameResultModule.Model.Failure)result;
-                    Debug.LogError($"Could not join world {failure.Item}");
-                }
-            }
-            else
-            {
-                Debug.LogError("Could not deserialise world");
-            }
-        }
-        else
-        {
-            Debug.LogError("Web request error " + webRequest.error);
-        }
-    }
-
     public IEnumerator LoadGame(
-        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     )
     {
         var url =
@@ -140,22 +75,22 @@ public class CommsService : ICommsService
                 }
                 else if (result.IsIncorrectCredentials)
                 {
-                    Debug.LogError("Credentials are incorrect, please update your config.json");
+                    onError("Credentials are incorrect, please update your config.json");
                 }
                 else
                 {
                     var failure = (GetJoinGameResultModule.Model.Failure)result;
-                    Debug.LogError($"Could not join world {failure.Item}");
+                    onError($"Could not join world {failure.Item}");
                 }
             }
             else
             {
-                Debug.LogError("Could not deserialise world");
+                onError("Could not deserialise world");
             }
         }
         else
         {
-            Debug.LogError("Web request error " + webRequest.error);
+            onError("Web request error " + webRequest.error);
         }
     }
 
@@ -304,19 +239,10 @@ public class TestCommsService : ICommsService
         yield return null;
     }
 
-    public IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
+    public IEnumerator LoadGame(
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     )
-    {
-        OnLoad = onLoad;
-        OnUpdate = onUpdate;
-        OnConsistencyCheck = onConsistencyCheck;
-        yield return null;
-    }
-
-    public IEnumerator LoadGame(Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad)
     {
         yield return null;
     }

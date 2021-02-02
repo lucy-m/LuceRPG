@@ -11,6 +11,7 @@ public class WelcomeScreen : MonoBehaviour
     public InputField UsernameControl;
     public InputField PasswordControl;
     public Button JoinGameButton;
+    public Text ErrorDisplay;
 
     public Config Config => Registry.ConfigLoader.Config;
 
@@ -21,6 +22,7 @@ public class WelcomeScreen : MonoBehaviour
         ServerControl.text = config.BaseUrl;
         UsernameControl.text = config.Username;
         PasswordControl.text = config.Password;
+        ErrorDisplay.text = "";
 
         var configUpdateAction = new UnityAction<string>(OnEditFinished);
 
@@ -53,7 +55,8 @@ public class WelcomeScreen : MonoBehaviour
                 Registry.WorldStore.LastUpdate = world.timestamp;
 
                 SceneManager.LoadScene("GameLoader");
-            }
+            },
+            (err) => ErrorDisplay.text = err
         ));
     }
 }
