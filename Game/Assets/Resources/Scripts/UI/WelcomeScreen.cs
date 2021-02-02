@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class WelcomeScreen : MonoBehaviour
@@ -9,6 +10,7 @@ public class WelcomeScreen : MonoBehaviour
     public InputField ServerControl;
     public InputField UsernameControl;
     public InputField PasswordControl;
+    public Button JoinGameButton;
 
     public Config Config => Registry.ConfigLoader.Config;
 
@@ -20,11 +22,15 @@ public class WelcomeScreen : MonoBehaviour
         UsernameControl.text = config.Username;
         PasswordControl.text = config.Password;
 
-        var action = new UnityAction<string>(OnEditFinished);
+        var configUpdateAction = new UnityAction<string>(OnEditFinished);
 
-        ServerControl.onEndEdit.AddListener(action);
-        UsernameControl.onEndEdit.AddListener(action);
-        PasswordControl.onEndEdit.AddListener(action);
+        ServerControl.onEndEdit.AddListener(configUpdateAction);
+        UsernameControl.onEndEdit.AddListener(configUpdateAction);
+        PasswordControl.onEndEdit.AddListener(configUpdateAction);
+
+        var onJoinGame = new UnityAction(OnJoinGame);
+
+        JoinGameButton.onClick.AddListener(onJoinGame);
     }
 
     private void OnEditFinished(string s)
@@ -34,5 +40,20 @@ public class WelcomeScreen : MonoBehaviour
         Config.Password = PasswordControl.text;
 
         Registry.ConfigLoader.SaveConfig();
+    }
+
+    private void OnJoinGame()
+    {
+        StartCoroutine(Registry.CommsService.LoadGame(
+            (playerId, world) =>
+            {
+                Debug.Log("Loaded world from API");
+                Registry.WorldStore.PlayerId = playerId;
+                Registry.WorldStore.World = world.value;
+                Registry.WorldStore.LastUpdate = world.timestamp;
+
+                SceneManager.LoadScene("GameLoader");
+            }
+        ));
     }
 }

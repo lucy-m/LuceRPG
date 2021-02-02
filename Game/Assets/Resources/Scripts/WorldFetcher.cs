@@ -9,6 +9,8 @@ public class WorldFetcher : MonoBehaviour
 {
     public float PollPeriod = 0.1f;
 
+    public WorldStore WorldStore => Registry.WorldStore;
+
     private void Start()
     {
         StartCoroutine(FetchWorld());
@@ -16,41 +18,44 @@ public class WorldFetcher : MonoBehaviour
 
     private IEnumerator FetchWorld()
     {
-        void OnUpdate(GetSinceResultModule.Payload update)
+        if (WorldStore.HasWorld())
         {
-            if (update.IsEvents)
-            {
-                var events =
-                    ((GetSinceResultModule.Payload.Events)update)
-                    .Item
-                    .Select(e => e.value)
-                    .ToArray();
+            WorldLoader.Instance.LoadWorld(WorldStore.PlayerId, WorldStore.World);
 
-                if (events.Any())
+            void OnUpdate(GetSinceResultModule.Payload update)
+            {
+                if (update.IsEvents)
                 {
-                    WorldLoader.Instance.ApplyUpdate(events, UpdateSource.Server);
+                    var events =
+                        ((GetSinceResultModule.Payload.Events)update)
+                        .Item
+                        .Select(e => e.value)
+                        .ToArray();
+
+                    if (events.Any())
+                    {
+                        WorldLoader.Instance.ApplyUpdate(events, UpdateSource.Server);
+                    }
+                }
+                else
+                {
+                    var worldUpdate =
+                        ((GetSinceResultModule.Payload.World)update)
+                        .Item;
+
+                    WorldLoader.Instance.CheckConsistency(worldUpdate);
                 }
             }
-            else
+
+            void OnConsistencyCheck(WorldModule.Model world)
             {
-                var worldUpdate =
-                    ((GetSinceResultModule.Payload.World)update)
-                    .Item;
-
-                WorldLoader.Instance.CheckConsistency(worldUpdate);
+                WorldLoader.Instance.CheckConsistency(world);
             }
+
+            yield return Registry.CommsService.FetchUpdates(OnUpdate, OnConsistencyCheck);
         }
 
-        void OnLoad(string playerId, WorldModule.Model world)
-        {
-            WorldLoader.Instance.LoadWorld(playerId, world);
-        }
-
-        void OnConsistencyCheck(WorldModule.Model world)
-        {
-            WorldLoader.Instance.CheckConsistency(world);
-        }
-
-        return Registry.CommsService.JoinGame(OnLoad, OnUpdate, OnConsistencyCheck);
+        Debug.LogError("No world in store");
+        yield return null;
     }
 }
