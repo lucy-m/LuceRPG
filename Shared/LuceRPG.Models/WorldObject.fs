@@ -25,6 +25,7 @@ module WorldObject =
 
     let topLeft (wo: Model): Point = wo.value.topLeft
     let t (wo: Model): Type = wo.value.t
+    let id (wo: Model): Id.WorldObject = wo.id
 
     let isBlocking (obj: Model): bool =
         match obj.value.t with

@@ -19,6 +19,7 @@
     <Compile Include="Rect.Test.fs" />
     <Compile Include="WorldObject.Test.fs" />
     <Compile Include="World.Test.fs" />
+    <Compile Include="WorldDiff.Test.fs" />
     <Compile Include="IntentionProcessing.Test.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
