@@ -10,10 +10,11 @@ using UnityEngine.Networking;
 
 public interface ICommsService
 {
-    IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
+    IEnumerator FetchUpdates(Action<GetSinceResultModule.Payload> onUpdate, Action<WorldModule.Model> onConsistencyCheck);
+
+    IEnumerator LoadGame(
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     );
 
     IEnumerator SendIntention(string id, IntentionModule.Type t);
@@ -33,10 +34,9 @@ public class CommsService : ICommsService
 
     private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
-    public IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
+    public IEnumerator LoadGame(
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     )
     {
         var url =
@@ -71,40 +71,36 @@ public class CommsService : ICommsService
 
                     _clientId = clientId;
 
-                    onLoad(playerId, tsWorld.value);
-
-                    yield return FetchUpdates(tsWorld.timestamp, onUpdate, onConsistencyCheck);
+                    onLoad(playerId, tsWorld);
                 }
                 else if (result.IsIncorrectCredentials)
                 {
-                    Debug.LogError("Credentials are incorrect, please update your config.json");
+                    onError("Credentials are incorrect, please update your config.json");
                 }
                 else
                 {
                     var failure = (GetJoinGameResultModule.Model.Failure)result;
-                    Debug.LogError($"Could not join world {failure.Item}");
+                    onError($"Could not join world {failure.Item}");
                 }
             }
             else
             {
-                Debug.LogError("Could not deserialise world");
+                onError("Could not deserialise world");
             }
         }
         else
         {
-            Debug.LogError("Web request error " + webRequest.error);
+            onError("Web request error " + webRequest.error);
         }
     }
 
     private IEnumerator FetchUpdate(
-        long timestamp,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<long> updateTimestamp
+        Action<GetSinceResultModule.Payload> onUpdate
     )
     {
         var url =
             BaseUrl
-            + "World/since?timestamp=" + timestamp
+            + "World/since?timestamp=" + Registry.WorldStore.LastUpdate
             + "&clientId=" + _clientId;
 
         var webRequest = UnityWebRequest.Get(url);
@@ -119,7 +115,7 @@ public class CommsService : ICommsService
             if (tUpdate.HasValue())
             {
                 var update = tUpdate.Value.value;
-                updateTimestamp(update.timestamp);
+                Registry.WorldStore.LastUpdate = update.timestamp;
                 onUpdate(update.value);
             }
             else
@@ -160,19 +156,17 @@ public class CommsService : ICommsService
         }
     }
 
-    private IEnumerator FetchUpdates(
-        long initialTimestamp,
+    public IEnumerator FetchUpdates(
         Action<GetSinceResultModule.Payload> onUpdate,
         Action<WorldModule.Model> onConsistencyCheck
     )
     {
-        var lastTimestamp = initialTimestamp;
-        var lastConsistencyCheck = lastTimestamp;
+        var lastConsistencyCheck = Registry.WorldStore.LastUpdate;
         var checkTicks = TimeSpan.FromSeconds(ConsistencyCheckFreq).Ticks;
 
         while (true)
         {
-            if (lastTimestamp - lastConsistencyCheck > checkTicks)
+            if (Registry.WorldStore.LastUpdate - lastConsistencyCheck > checkTicks)
             {
                 yield return ConsistencyCheck(onConsistencyCheck);
 
@@ -181,7 +175,7 @@ public class CommsService : ICommsService
             else
             {
                 var prior = TimestampProvider.Now;
-                yield return FetchUpdate(lastTimestamp, onUpdate, ts => lastTimestamp = ts);
+                yield return FetchUpdate(onUpdate);
                 var post = TimestampProvider.Now;
 
                 var ping = TimeSpan.FromTicks(post - prior).Milliseconds;
@@ -240,15 +234,16 @@ public class TestCommsService : ICommsService
     public IntentionModule.Type LastIntention { get; private set; }
     public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
-    public IEnumerator JoinGame(
-        Action<string, WorldModule.Model> onLoad,
-        Action<GetSinceResultModule.Payload> onUpdate,
-        Action<WorldModule.Model> onConsistencyCheck
+    public IEnumerator FetchUpdates(Action<GetSinceResultModule.Payload> onUpdate, Action<WorldModule.Model> onConsistencyCheck)
+    {
+        yield return null;
+    }
+
+    public IEnumerator LoadGame(
+        Action<string, WithTimestamp.Model<WorldModule.Model>> onLoad,
+        Action<string> onError
     )
     {
-        OnLoad = onLoad;
-        OnUpdate = onUpdate;
-        OnConsistencyCheck = onConsistencyCheck;
         yield return null;
     }
 
