@@ -26,6 +26,7 @@ namespace LuceRPGServer.Controllers
         private readonly LastPingStorer _pingStorer;
         private readonly ICredentialService _credentialService;
         private readonly ITimestampProvider _timestampProvider;
+        private readonly ICsvLogService _logService;
 
         public WorldController(
             ILogger<WorldController> logger,
@@ -33,7 +34,9 @@ namespace LuceRPGServer.Controllers
             WorldEventsStorer store,
             LastPingStorer pingStorer,
             ICredentialService credentialService,
-            ITimestampProvider timestampProvider)
+            ITimestampProvider timestampProvider,
+            ICsvLogService logService
+        )
         {
             _logger = logger;
             _queue = queue;
@@ -41,6 +44,7 @@ namespace LuceRPGServer.Controllers
             _pingStorer = pingStorer;
             _credentialService = credentialService;
             _timestampProvider = timestampProvider;
+            _logService = logService;
         }
 
         [HttpGet("join")]
@@ -60,6 +64,8 @@ namespace LuceRPGServer.Controllers
                 WithId.Model<WorldObjectModule.Payload>? playerObject = null;
                 bool intentionProcessed = false;
                 var clientId = Guid.NewGuid().ToString();
+
+                _logService.EstablishLog(clientId, username);
 
                 var intention = WithId.create(
                     IntentionModule.makePayload(clientId, IntentionModule.Type.NewJoinGame(username))

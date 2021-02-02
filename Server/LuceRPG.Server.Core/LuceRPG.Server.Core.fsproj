@@ -8,7 +8,7 @@
     <Compile Include="ASCIIWorld.fs" />
     <Compile Include="WorldEventsStore.fs" />
     <Compile Include="LastPingStore.fs" />
-    <Compile Include="Library.fs" />
+    <Compile Include="ToLogString.fs" />
   </ItemGroup>
 
   <ItemGroup>

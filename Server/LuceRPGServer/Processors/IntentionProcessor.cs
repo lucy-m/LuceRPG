@@ -1,6 +1,5 @@
 ﻿using LuceRPG.Models;
 using LuceRPG.Utility;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 
@@ -11,17 +10,20 @@ namespace LuceRPG.Server.Processors
         private readonly ILogger<IntentionProcessor> _logger;
         private readonly WorldEventsStorer _store;
         private readonly IntentionQueue _queue;
+        private readonly ICsvLogService _logService;
         private readonly ITimestampProvider _timestampProvider;
 
         public IntentionProcessor(
             ILogger<IntentionProcessor> logger,
             WorldEventsStorer store,
             IntentionQueue queue,
+            ICsvLogService logService,
             ITimestampProvider timestampProvider)
         {
             _store = store;
             _queue = queue;
             _logger = logger;
+            _logService = logService;
             _timestampProvider = timestampProvider;
         }
 
@@ -43,6 +45,8 @@ namespace LuceRPG.Server.Processors
                     _store.CurrentWorld,
                     intentions
                 );
+
+                _logService.AddProcessResult(processed);
 
                 var events = processed.events.ToArray();
                 foreach (var (Intention, OnProcessed) in entries)
