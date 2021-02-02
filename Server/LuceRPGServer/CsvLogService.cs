@@ -40,7 +40,7 @@ namespace LuceRPG.Server
             _timestampProvider = timestampProvider;
             _logger = logger;
 
-            var now = DateTime.UtcNow.ToString("yyyy-MM-dd-HHmm");
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd-HHmmss");
             Directory = $"logs/{now}/";
             ServerLogPath = Directory + ServerLogName;
             _logger.LogInformation($"Logging to {Directory}");
@@ -54,7 +54,7 @@ namespace LuceRPG.Server
             var fileName = $"client-{username}-{clientId}.csv";
             var filePath = Directory + fileName;
 
-            System.IO.File.WriteAllText(filePath, $"Log file for {clientId}");
+            System.IO.File.Create(filePath).Close();
             AddServerLogs(ToLogString.clientJoined(_timestampProvider.Now, clientId, username));
 
             _clientFileMap[clientId] = fileName;
@@ -90,6 +90,10 @@ namespace LuceRPG.Server
                     .SelectMany(l => ClientLogEntryFormatter.create(l));
 
                 System.IO.File.AppendAllLines(filePath, lines);
+            }
+            else
+            {
+                _logger.LogError($"Unable to add client logs for clientId");
             }
         }
     }

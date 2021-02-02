@@ -169,5 +169,24 @@ namespace LuceRPGServer.Controllers
                 _logger.LogWarning("Unable to deserialise intention");
             }
         }
+
+        [HttpPut("logs")]
+        public async Task PutLogs(string clientId)
+        {
+            var buffer = new byte[1000];
+            var read = await Request.Body.ReadAsync(buffer);
+
+            if (read == buffer.Length)
+            {
+                throw new Exception("Logs received were larger than the buffer size");
+            }
+
+            var logs = ClientLogEntrySrl.deserialiseLog(buffer);
+
+            if (logs.HasValue())
+            {
+                _logService.AddClientLogs(clientId, logs.Value.value);
+            }
+        }
     }
 }

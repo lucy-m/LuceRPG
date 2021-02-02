@@ -31,6 +31,9 @@ module ClientLogEntrySrl =
     let serialise (logEntry: ClientLogEntry): byte[] =
         WithTimestampSrl.serialise serialisePayload logEntry
 
+    let serialiseLog (log: ClientLog): byte[] =
+        ListSrl.serialise serialise log
+
     let deserialisePayload (bytes: byte[]): ClientLogEntry.Payload DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): ClientLogEntry.Payload DesrlResult =
             match tag with
@@ -54,3 +57,6 @@ module ClientLogEntrySrl =
 
     let deserialise (bytes: byte[]): ClientLogEntry DesrlResult =
         WithTimestampSrl.deserialise deserialisePayload bytes
+
+    let deserialiseLog (bytes: byte[]): ClientLog DesrlResult =
+        ListSrl.deserialise deserialise bytes

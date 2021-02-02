@@ -1,6 +1,7 @@
 ﻿using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ public interface ICommsService
     );
 
     IEnumerator SendIntention(string id, IntentionModule.Type t);
+
+    IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs);
 }
 
 public class CommsService : ICommsService
@@ -209,6 +212,23 @@ public class CommsService : ICommsService
             Debug.LogError("No client ID available");
         }
     }
+
+    public IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+    {
+        var url =
+            BaseUrl
+            + "World/logs?clientId=" + _clientId;
+
+        var bytes = ClientLogEntrySrl.serialiseLog(ListModule.OfSeq(logs));
+        var webRequest = UnityWebRequest.Put(url, bytes);
+
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Web request error " + webRequest.error);
+        }
+    }
 }
 
 public class TestCommsService : ICommsService
@@ -237,6 +257,11 @@ public class TestCommsService : ICommsService
         LastIntention = t;
         LastIntentionId = id;
         AllIntentions.Add(t);
+        yield return null;
+    }
+
+    public IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+    {
         yield return null;
     }
 }
