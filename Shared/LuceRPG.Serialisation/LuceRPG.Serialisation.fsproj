@@ -24,6 +24,7 @@
     <Compile Include="WorldEventSrl.fs" />
     <Compile Include="WorldSrl.fs" />
     <Compile Include="WorldDiffSrl.fs" />
+    <Compile Include="InteractionSrl.fs" />
     <Compile Include="GetSinceResultSrl.fs" />
     <Compile Include="GetJoinGameResultSrl.fs" />
     <Compile Include="ClientLogEntrySrl.fs" />

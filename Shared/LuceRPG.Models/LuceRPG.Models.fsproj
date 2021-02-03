@@ -19,6 +19,7 @@
     <Compile Include="WorldDiff.fs" />
     <Compile Include="EventApply.fs" />
     <Compile Include="IntentionProcessing.fs" />
+    <Compile Include="Interaction.fs" />
     <Compile Include="GetSinceResult.fs" />
     <Compile Include="GetJoinGameResult.fs" />
     <Compile Include="ClientLogEntry.fs" />

@@ -145,6 +145,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let interactionSrl () =
+            let checkFn =
+                srlAndDesrl InteractionSrl.serialise InteractionSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let getSinceResultSrl () =
             let checkFn =
                 srlAndDesrl GetSinceResultSrl.serialise GetSinceResultSrl.deserialise
