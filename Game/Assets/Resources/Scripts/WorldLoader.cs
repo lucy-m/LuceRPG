@@ -16,6 +16,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
+    public GameObject NpcPrefab = null;
 
     public WorldModule.Model World { get; private set; }
 
@@ -46,6 +47,10 @@ public class WorldLoader : MonoBehaviour
         else if (t.IsPlayer)
         {
             return PlayerPrefab;
+        }
+        else if (t.IsNPC)
+        {
+            return NpcPrefab;
         }
 
         return null;

@@ -6,6 +6,7 @@ module WorldObject =
             | Wall
             | Path of int * int
             | Player of PlayerData
+            | NPC of PlayerData
 
     type Type = Type.Model
 
@@ -32,6 +33,7 @@ module WorldObject =
         | Type.Wall -> true
         | Type.Path _ -> false
         | Type.Player _ -> false
+        | Type.NPC _ -> true
 
     let size (obj: Payload): Point =
         let p2x2 = Point.create 2 2
@@ -40,6 +42,7 @@ module WorldObject =
         | Type.Wall -> p2x2
         | Type.Path (w,h) -> Point.create w h
         | Type.Player _ -> p2x2
+        | Type.NPC _ -> p2x2
 
     let getPoints (obj: Payload): Point List =
         let objSize = size obj
@@ -81,5 +84,12 @@ module WorldObject =
         match t obj with
         | Type.Player _ -> true
         | _ -> false
+
+    let getName (obj: Payload): string =
+        match obj.t with
+        | Type.Player pd -> pd.name
+        | Type.NPC pd -> pd.name
+        | Type.Wall -> "Wall"
+        | Type.Path _ -> "Path"
 
 type WorldObject = WorldObject.Model

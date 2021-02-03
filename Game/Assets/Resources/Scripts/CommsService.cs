@@ -71,6 +71,11 @@ public class CommsService : ICommsService
 
                     _clientId = clientId;
 
+                    Debug.Log("Loaded world from API");
+                    Registry.WorldStore.PlayerId = playerId;
+                    Registry.WorldStore.World = tsWorld.value;
+                    Registry.WorldStore.LastUpdate = tsWorld.timestamp;
+
                     onLoad(playerId, tsWorld);
                 }
                 else if (result.IsIncorrectCredentials)

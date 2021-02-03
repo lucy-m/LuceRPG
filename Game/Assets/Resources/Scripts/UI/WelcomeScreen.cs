@@ -49,11 +49,6 @@ public class WelcomeScreen : MonoBehaviour
         StartCoroutine(Registry.CommsService.LoadGame(
             (playerId, world) =>
             {
-                Debug.Log("Loaded world from API");
-                Registry.WorldStore.PlayerId = playerId;
-                Registry.WorldStore.World = world.value;
-                Registry.WorldStore.LastUpdate = world.timestamp;
-
                 SceneManager.LoadScene("GameLoader");
             },
             (err) => ErrorDisplay.text = err

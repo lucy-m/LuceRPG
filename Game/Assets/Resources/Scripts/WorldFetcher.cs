@@ -18,6 +18,11 @@ public class WorldFetcher : MonoBehaviour
 
     private IEnumerator FetchWorld()
     {
+        if (!WorldStore.HasWorld())
+        {
+            yield return Registry.CommsService.LoadGame((s, w) => { }, err => Debug.LogError(err));
+        }
+
         if (WorldStore.HasWorld())
         {
             WorldLoader.Instance.LoadWorld(WorldStore.PlayerId, WorldStore.World);
