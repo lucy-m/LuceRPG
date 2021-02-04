@@ -341,13 +341,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 301701310}
     m_Modifications:
+    - target: {fileID: 1949726073, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 10.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 1949726073, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.49
+      objectReference: {fileID: 0}
     - target: {fileID: 6182008921855037452, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
       propertyPath: m_Name
       value: Speech Bubble
       objectReference: {fileID: 0}
     - target: {fileID: 6182008921855037452, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6182008921855037455, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
       propertyPath: m_RootOrder
@@ -392,6 +400,23 @@ PrefabInstance:
     - target: {fileID: 6182008921855037455, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6182008921879464600, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_Text
+      value: Text on World Layer. Lorem ipsum dolor sit amet consectetur blah blah
+        I am very good at game desig
+      objectReference: {fileID: 0}
+    - target: {fileID: 6182008922075291625, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 52
+      objectReference: {fileID: 0}
+    - target: {fileID: 6182008922075291625, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.42
+      objectReference: {fileID: 0}
+    - target: {fileID: 6869066622228249605, guid: 1106d3223f24379408bb5a7408228db3, type: 3}
+      propertyPath: m_Size.y
+      value: 2.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1106d3223f24379408bb5a7408228db3, type: 3}

@@ -34,7 +34,7 @@ module SampleWorlds =
             )
 
         let sayHiInteraction: Interaction =
-            let sayHi = Interaction.One.Chat "Hey you, you're finally awake. Welcome to LuceRPG pre-alpha dev preview."
+            let sayHi = Interaction.One.Chat "Hey you, you're finally awake. Welcome to LuceRPG pre-alpha dev preview. Enjoy your stay, {player}!"
             let payload = [sayHi]
             WithId.create(payload)
 
