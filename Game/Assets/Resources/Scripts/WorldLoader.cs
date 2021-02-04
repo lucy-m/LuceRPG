@@ -70,7 +70,6 @@ public class WorldLoader : MonoBehaviour
                 uc = go.AddComponent<UniversalController>();
             }
 
-            Debug.Log($"Setting UC ID to {obj.id}");
             uc.Id = obj.id;
             uc.Model = obj.value;
 

@@ -37,7 +37,6 @@ public class UniversalController : MonoBehaviour
             var travelTime = _model == null ? 0 :
                 (WorldObjectModule.travelTime(_model) / System.TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
-            Debug.Log($"Setting speed for {Id} to {_speed}, travel time {travelTime}");
 
             if (_model.t.IsPlayer || _model.t.IsNPC)
             {

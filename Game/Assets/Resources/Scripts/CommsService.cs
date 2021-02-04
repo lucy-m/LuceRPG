@@ -217,18 +217,21 @@ public class CommsService : ICommsService
 
     public IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
     {
-        var url =
-            BaseUrl
-            + "World/logs?clientId=" + _clientId;
-
-        var bytes = ClientLogEntrySrl.serialiseLog(ListModule.OfSeq(logs));
-        var webRequest = UnityWebRequest.Put(url, bytes);
-
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        if (_clientId != null)
         {
-            Debug.LogError("Web request error " + webRequest.error);
+            var url =
+                BaseUrl
+                + "World/logs?clientId=" + _clientId;
+
+            var bytes = ClientLogEntrySrl.serialiseLog(ListModule.OfSeq(logs));
+            var webRequest = UnityWebRequest.Put(url, bytes);
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Web request error " + webRequest.error);
+            }
         }
     }
 }
