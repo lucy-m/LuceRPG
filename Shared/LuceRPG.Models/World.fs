@@ -118,6 +118,20 @@ module World =
     let spawnPoint (world: Model): Point =
         world.playerSpawner
 
+    let getInteraction
+            (objectId: Id.WorldObject)
+            (interactions: Interaction.Store)
+            (world: Model)
+            : Interaction Option =
+        let interactionId =
+            world.interactions
+            |> Map.tryFind objectId
+
+        interactionId
+        |> Option.bind (fun iId ->
+            interactions |> Map.tryFind iId
+        )
+
     /// Adds an object to the map
     /// Object will not be added if it is blocked or out of bounds
     /// An object with the same id that already exists will be removed
