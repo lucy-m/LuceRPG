@@ -3,7 +3,7 @@
 open LuceRPG.Models
 
 module SampleWorlds =
-    let world1: World =
+    let world1: (World * Interactions) =
         let bounds =
             [
                 Rect.create 0 0 44 8
@@ -17,6 +17,7 @@ module SampleWorlds =
             let playerData = PlayerData.create "Harry"
             let t = WorldObject.Type.NPC playerData
             WorldObject.create t (Point.create 20 -4)
+            |> WithId.create
 
         let walls =
             [
@@ -27,11 +28,20 @@ module SampleWorlds =
                 WorldObject.create WorldObject.Type.Wall (Point.create -4 -1)
 
                 WorldObject.create (WorldObject.Type.Path (1,5)) (Point.create 5 8)
-
-                npc
             ]
             |> List.map (fun wo ->
                 WithId.create wo
             )
 
-        World.createWithObjs bounds spawnPoint walls
+        let sayHiInteraction: Interaction =
+            let sayHi = Interaction.One.Chat "Hello World"
+            let payload = [sayHi]
+            WithId.create(payload)
+
+        let interactionMap: World.InteractionMap =
+            Map.ofList [npc.id, sayHiInteraction.id]
+
+        let world = World.createWithInteractions bounds spawnPoint (npc::walls) interactionMap
+        let interactions = [sayHiInteraction]
+
+        (world, interactions)

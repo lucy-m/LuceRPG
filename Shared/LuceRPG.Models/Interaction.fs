@@ -10,3 +10,4 @@ module Interaction =
     type Store = Map<Id.Interaction, Model>
 
 type Interaction = Interaction.Model
+type Interactions = Interaction List
