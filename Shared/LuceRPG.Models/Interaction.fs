@@ -9,9 +9,4 @@ module Interaction =
 
     type Store = Map<Id.Interaction, Model>
 
-    let storeToList (store: Store): Model List =
-        store
-        |> Map.toList
-        |> List.map snd
-
 type Interaction = Interaction.Model

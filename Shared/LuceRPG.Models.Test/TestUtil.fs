@@ -7,9 +7,6 @@ module TestUtil =
 
         WithId.useId guid t
 
-    let makeId (): string =
-        System.Guid.NewGuid().ToString()
-
     let makePlayer (topLeft: Point): WorldObject =
         let name = System.Guid.NewGuid().ToString()
         let playerData = PlayerData.create name

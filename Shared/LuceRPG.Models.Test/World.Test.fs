@@ -91,8 +91,8 @@ module World =
 
                 [<TestFixture>]
                 module ``with interactions`` =
-                    let valid = (wall.id, TestUtil.makeId())
-                    let invalid = (TestUtil.makeId(), TestUtil.makeId())
+                    let valid = (wall.id, Id.make())
+                    let invalid = (Id.make(), Id.make())
                     let interactions = [valid; invalid] |> Map.ofList
 
                     let withInteractions = World.setInteractions interactions world
