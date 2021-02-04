@@ -17,9 +17,7 @@ module World =
         }
 
     let objectList (world: Model): WorldObject List =
-        world.objects
-        |> Map.toList
-        |> List.map snd
+        WithId.toList world.objects
 
     let empty (bounds: Rect seq) (playerSpawner: Point): Model =
         let blocked =
