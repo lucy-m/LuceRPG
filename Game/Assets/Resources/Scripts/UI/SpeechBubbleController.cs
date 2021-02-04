@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class SpeechBubbleController : MonoBehaviour
 {
     public Text Text;
+    public GameObject ShowMoreIndicator;
 
     private string remaining = null;
 
@@ -11,9 +12,12 @@ public class SpeechBubbleController : MonoBehaviour
     {
         Text.text = text;
         Canvas.ForceUpdateCanvases();
-        var c = Text.cachedTextGenerator.characterCountVisible;
+        var ccv = Text.cachedTextGenerator.characterCountVisible;
 
-        remaining = c == text.Length ? null : text.Substring(c);
+        var hasOverflow = ccv != text.Length;
+
+        remaining = hasOverflow ? text.Substring(ccv) : null;
+        ShowMoreIndicator.SetActive(hasOverflow);
     }
 
     private void OnMouseDown()
