@@ -89,6 +89,38 @@ module World =
 
                         blockedPoints |> should be (equivalent expected)
 
+                [<TestFixture>]
+                module ``with interactions`` =
+                    let valid = (wall.id, TestUtil.makeId())
+                    let invalid = (TestUtil.makeId(), TestUtil.makeId())
+                    let interactions = [valid; invalid] |> Map.ofList
+
+                    let withInteractions = World.setInteractions interactions world
+
+                    [<Test>]
+                    let ``interaction created for wall`` () =
+                        withInteractions.interactions
+                        |> Map.containsKey wall.id
+                        |> should equal true
+
+                        withInteractions.interactions
+                        |> Map.find wall.id
+                        |> should equal (snd valid)
+
+                    [<Test>]
+                    let ``interaction ignored for non existant object`` () =
+                        withInteractions.interactions
+                        |> Map.containsKey (fst invalid)
+                        |> should equal false
+
+                    [<Test>]
+                    let ``removing wall removes interaction `` () =
+                        let withoutWall = World.removeObject wall.id withInteractions
+
+                        withoutWall.interactions
+                        |> Map.containsKey wall.id
+                        |> should equal false
+
             [<Test>]
             let ``adding a wall out of bounds fails`` () =
                 let topLeft = Point.create 100 100

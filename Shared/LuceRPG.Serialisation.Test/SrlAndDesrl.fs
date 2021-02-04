@@ -50,6 +50,15 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let mapSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (MapSrl.serialise IntSrl.serialise StringSrl.serialise)
+                    (MapSrl.deserialise IntSrl.deserialise StringSrl.deserialise)
+
+            doCheck checkFn
+
+        [<Test>]
         let withTimestampSrl () =
             let checkFn =
                 srlAndDesrl

@@ -5,10 +5,13 @@ module World =
         | Object of WorldObject
         | SpawnPoint
 
+    type InteractionMap = Map<Id.WorldObject, Id.Interaction>
+
     type Model =
         {
             bounds: Rect Set
             objects: Map<Id.WorldObject, WorldObject>
+            interactions: InteractionMap
             blocked: Map<Point, BlockedType>
             playerSpawner: Point
         }
@@ -36,6 +39,7 @@ module World =
         {
             bounds = bounds |> Set.ofSeq
             objects = Map.empty
+            interactions = Map.empty
             blocked = blocked
             playerSpawner = playerSpawner
         }
@@ -100,10 +104,15 @@ module World =
                 | BlockedType.SpawnPoint _ -> true
             )
 
+        let newInteractions =
+            world.interactions
+            |> Map.remove id
+
         {
             world with
                 objects = newObjects
                 blocked = newBlocked
+                interactions = newInteractions
         }
 
     let spawnPoint (world: Model): Point =
@@ -160,8 +169,30 @@ module World =
 
         withItems
 
+    let setInteractions (interactions: InteractionMap) (world: Model): Model =
+        let validInteractions =
+            interactions
+            |> Map.filter (fun oId iId ->
+                world.objects |> Map.containsKey oId
+            )
+
+        {
+            world with
+                interactions = validInteractions
+        }
+
     let createWithObjs (bounds: Rect seq) (spawn: Point) (objs: WorldObject seq): Model =
         let emptyWorld = empty bounds spawn
         addObjects objs emptyWorld
+
+    let createWithInteractions
+            (bounds: Rect seq)
+            (spawn: Point)
+            (objs: WorldObject seq)
+            (interactions: Map<Id.WorldObject, Id.Interaction>)
+            : Model =
+        let emptyWorld = empty bounds spawn
+        let withObjects = addObjects objs emptyWorld
+        setInteractions interactions withObjects
 
 type World = World.Model

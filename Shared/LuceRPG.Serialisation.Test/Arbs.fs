@@ -47,11 +47,30 @@ type SerialisationArbs() =
                 |> Option.defaultValue Point.zero
             )
         let objects = Gen.listOf Arb.generate<WorldObject>
+        let interactions =
+            let objectIds =
+                objects
+                |> Gen.map (fun objs ->
+                    objs
+                    |> List.map (fun o -> o.id)
+                    |> List.take (objs.Length / 2)
+                )
+
+            objectIds
+            |> Gen.map (fun oIds ->
+                oIds
+                |> List.map (fun oId ->
+                    let iId = Arb.generate<string> |> Gen.sample 0 1 |> List.head
+                    (oId, iId)
+                )
+                |> Map.ofList
+            )
 
         let world =
-            Gen.zip3 bounds point objects
-            |> Gen.map (fun (bs, p, os) ->
-                World.createWithObjs bs p os
+            Gen.zip (Gen.zip bounds point)
+                    (Gen.zip objects interactions)
+            |> Gen.map (fun ((bs, p), (os, is)) ->
+                World.createWithInteractions bs p os is
             )
 
         world

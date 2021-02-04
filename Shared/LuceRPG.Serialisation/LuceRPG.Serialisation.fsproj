@@ -13,6 +13,7 @@
     <Compile Include="LongSrl.fs" />
     <Compile Include="StringSrl.fs" />
     <Compile Include="ListSrl.fs" />
+    <Compile Include="MapSrl.fs" />
     <Compile Include="WithTimestampSrl.fs" />
     <Compile Include="WithGuidSrl.fs" />
     <Compile Include="PointSrl.fs" />
