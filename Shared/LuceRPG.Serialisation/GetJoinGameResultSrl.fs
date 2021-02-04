@@ -9,6 +9,7 @@ module GetJoinGameResultSrl =
             StringSrl.serialise p.clientId
             StringSrl.serialise p.playerObjectId
             WithTimestampSrl.serialise WorldSrl.serialise p.tsWorld
+            ListSrl.serialise InteractionSrl.serialise p.interactions
         ]
 
     let serialise (result: GetJoinGameResult): byte[] =
@@ -27,10 +28,11 @@ module GetJoinGameResultSrl =
         Array.append [|label|] addtInfo
 
     let deserialisePayload (bytes: byte[]): GetJoinGameResult.SuccessPayload DesrlResult =
-        DesrlUtil.getThree
+        DesrlUtil.getFour
             StringSrl.deserialise
             StringSrl.deserialise
             (WithTimestampSrl.deserialise WorldSrl.deserialise)
+            (ListSrl.deserialise InteractionSrl.deserialise)
             GetJoinGameResult.SuccessPayload.create
             bytes
 

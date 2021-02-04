@@ -7,17 +7,20 @@ module GetJoinGameResult =
                 clientId: string
                 playerObjectId: string
                 tsWorld: World WithTimestamp
+                interactions: Interaction List
             }
 
         let create
                 (clientId: string)
                 (playerObjectId: string)
                 (tsWorld: World WithTimestamp)
+                (interactions: Interaction List)
                 : Model =
             {
                 clientId = clientId
                 playerObjectId = playerObjectId
                 tsWorld = tsWorld
+                interactions = interactions
             }
 
     type SuccessPayload = SuccessPayload.Model
