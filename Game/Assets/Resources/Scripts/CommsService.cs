@@ -1,4 +1,5 @@
-﻿using LuceRPG.Models;
+﻿using LuceRPG.Adapters;
+using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
@@ -61,11 +62,12 @@ public class CommsService : ICommsService
 
                 if (result.IsSuccess)
                 {
-                    var success = (GetJoinGameResultModule.Model.Success)result;
+                    var success = ((GetJoinGameResultModule.Model.Success)result).Item;
 
-                    var clientId = success.Item1;
-                    var playerId = success.Item2;
-                    var tsWorld = success.Item3;
+                    var clientId = success.clientId;
+                    var playerId = success.playerObjectId;
+                    var tsWorld = success.tsWorld;
+                    var interactions = new InteractionStore(WithId.toMap(success.interactions));
 
                     Debug.Log($"Client {clientId} joined with player ID {playerId}");
 
@@ -75,6 +77,7 @@ public class CommsService : ICommsService
                     Registry.WorldStore.PlayerId = playerId;
                     Registry.WorldStore.World = tsWorld.value;
                     Registry.WorldStore.LastUpdate = tsWorld.timestamp;
+                    Registry.WorldStore.Interactions = interactions;
 
                     onLoad(playerId, tsWorld);
                 }
