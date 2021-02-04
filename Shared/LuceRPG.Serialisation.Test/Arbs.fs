@@ -63,7 +63,8 @@ type SerialisationArbs() =
                 (Gen.zip Arb.generate<int64> Arb.generate<World>)
             |> Gen.map (fun ((cId, oId), (ts, w)) ->
                 let tsWorld = WithTimestamp.create ts w
-                GetJoinGameResult.Success (cId, oId, tsWorld)
+                let payload = GetJoinGameResult.SuccessPayload.create cId oId tsWorld
+                GetJoinGameResult.Success payload
             )
         let failureGen =
             Arb.generate<string>
