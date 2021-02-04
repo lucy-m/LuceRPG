@@ -1,3 +1,4 @@
+using LuceRPG.Adapters;
 using LuceRPG.Samples;
 using LuceRPG.Server;
 using LuceRPG.Server.Processors;
@@ -25,6 +26,7 @@ namespace LuceRPGServer
         {
             services.AddSingleton<IntentionQueue>();
             services.AddSingleton(SampleWorlds.world1);
+            services.AddSingleton(InteractionStore.Empty());
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
             services.AddSingleton<ICredentialService, CredentialService>();
