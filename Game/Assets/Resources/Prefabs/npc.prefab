@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1113982545424815416}
   - component: {fileID: 5683779607360765399}
+  - component: {fileID: 3234387971988179776}
   m_Layer: 0
   m_Name: npc
   m_TagString: Player
@@ -45,6 +46,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 896fad32d1f92d54996ac4bc339f2429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!70 &3234387971988179776
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1113982545424815417}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0.4}
+  m_Size: {x: 2, y: 2.5}
+  m_Direction: 0
 --- !u!1 &2706387646160663704
 GameObject:
   m_ObjectHideFlags: 0

@@ -133,4 +133,9 @@ public class UniversalController : MonoBehaviour
     {
         Gizmos.DrawCube(Target, Vector3.one);
     }
+
+    private void OnMouseDown()
+    {
+        InteractionController.Instance.InteractWith(Id, transform.position);
+    }
 }

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - UnitName
+  - WorldText
   layers:
   - Default
   - TransparentFX
@@ -50,4 +51,7 @@ TagManager:
     locked: 0
   - name: Character
     uniqueID: 2148991103
+    locked: 0
+  - name: Chat
+    uniqueID: 594306259
     locked: 0

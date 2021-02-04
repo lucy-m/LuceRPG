@@ -16,7 +16,7 @@ module SampleWorlds =
         let npc =
             let playerData = PlayerData.create "Harry"
             let t = WorldObject.Type.NPC playerData
-            WorldObject.create t (Point.create 20 -4)
+            WorldObject.create t (Point.create 16 -4)
             |> WithId.create
 
         let walls =
@@ -34,7 +34,7 @@ module SampleWorlds =
             )
 
         let sayHiInteraction: Interaction =
-            let sayHi = Interaction.One.Chat "Hello World"
+            let sayHi = Interaction.One.Chat "Hey you, you're finally awake. Welcome to LuceRPG pre-alpha dev preview."
             let payload = [sayHi]
             WithId.create(payload)
 
