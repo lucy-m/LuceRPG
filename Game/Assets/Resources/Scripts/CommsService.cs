@@ -238,15 +238,21 @@ public class CommsService : ICommsService
 
 public class TestCommsService : ICommsService
 {
-    public Action<string, WorldModule.Model> OnLoad { get; private set; }
     public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
     public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
     public string LastIntentionId { get; private set; }
     public IntentionModule.Type LastIntention { get; private set; }
     public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
-    public IEnumerator FetchUpdates(Action<GetSinceResultModule.Payload> onUpdate, Action<WorldModule.Model> onConsistencyCheck)
+    private Action<string, WithTimestamp.Model<WorldModule.Model>> _doLoad;
+
+    public IEnumerator FetchUpdates(
+        Action<GetSinceResultModule.Payload> onUpdate,
+        Action<WorldModule.Model> onConsistencyCheck
+    )
     {
+        OnUpdate = onUpdate;
+        OnConsistencyCheck = onConsistencyCheck;
         yield return null;
     }
 
@@ -255,7 +261,18 @@ public class TestCommsService : ICommsService
         Action<string> onError
     )
     {
+        _doLoad = onLoad;
         yield return null;
+    }
+
+    public void OnLoad(string playerId, WithTimestamp.Model<WorldModule.Model> tsWorld)
+    {
+        Registry.WorldStore.PlayerId = playerId;
+        Registry.WorldStore.World = tsWorld.value;
+        Registry.WorldStore.LastUpdate = tsWorld.timestamp;
+        Registry.WorldStore.Interactions = InteractionStore.Empty();
+
+        _doLoad?.Invoke(playerId, tsWorld);
     }
 
     public IEnumerator SendIntention(string id, IntentionModule.Type t)

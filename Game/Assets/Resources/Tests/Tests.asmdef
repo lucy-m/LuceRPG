@@ -16,7 +16,8 @@
         "LuceRPG.Models.dll",
         "LuceRPG.Serialisation.dll",
         "LuceRPG.Utility.dll",
-        "LuceRPG.Samples.dll"
+        "LuceRPG.Samples.dll",
+        "LuceRPG.Adapters.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

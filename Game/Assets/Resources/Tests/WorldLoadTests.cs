@@ -1,3 +1,4 @@
+using LuceRPG.Adapters;
 using LuceRPG.Game.Util;
 using LuceRPG.Models;
 using LuceRPG.Utility;
@@ -17,8 +18,6 @@ public class WorldLoadTests
     private WithId.Model<WorldObjectModule.Payload> playerModel;
     private WithId.Model<WorldObjectModule.Payload> wallModel;
     private WorldModule.Model world;
-    private UniversalController playerObject;
-    private UniversalController wallObject;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -30,11 +29,11 @@ public class WorldLoadTests
         Registry.CommsService = testCommsService;
         Registry.InputProvider = testInputProvider;
         Registry.TimestampProvider = testTimestampProvider;
+        Registry.WorldStore = new WorldStore();
 
         overlord = MonoBehaviour.Instantiate(
             Resources.Load<GameObject>("Prefabs/Overlord")
         );
-
         Assert.That(overlord, Is.Not.Null);
 
         yield return null;
@@ -59,10 +58,7 @@ public class WorldLoadTests
 
         world = WorldModule.createWithObjs(worldBounds, spawnPoint, objects);
 
-        testCommsService.OnLoad(playerModel.id, world);
-
-        playerObject = UniversalController.GetById(playerModel.id);
-        wallObject = UniversalController.GetById(wallModel.id);
+        testCommsService.OnLoad(playerModel.id, WithTimestamp.create(0, world));
     }
 
     [UnityTearDown]
@@ -84,6 +80,7 @@ public class WorldLoadTests
     public IEnumerator WorldLoadsCorrectly()
     {
         // Player is loaded correctly
+        var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
         var expectedLocation = playerModel.GetGameLocation();
@@ -93,6 +90,7 @@ public class WorldLoadTests
         Assert.That(hasPlayerController, Is.True);
 
         //Wall loads correctly
+        var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
         expectedLocation = wallModel.GetGameLocation();
@@ -107,6 +105,7 @@ public class WorldLoadTests
     [UnityTest]
     public IEnumerator PlayerReactsToInputsCorrectly()
     {
+        var playerObject = UniversalController.GetById(playerModel.id);
         var pc = playerObject.GetComponent<PlayerController>();
 
         // Pressing down and right
@@ -181,10 +180,12 @@ public class WorldLoadTests
         testCommsService.OnUpdate(getSinceResult);
 
         // player object should target to be 1 square north
+        var playerObject = UniversalController.GetById(playerModel.id);
         var expectedTarget = playerObject.transform.position + new Vector3(0, 1);
         Assert.That(playerObject.Target, Is.EqualTo(expectedTarget));
 
         // wall object target should be unchanged
+        var wallObject = UniversalController.GetById(wallModel.id);
         var wallUc = wallObject.GetComponent<UniversalController>();
         expectedTarget = wallObject.transform.position;
         Assert.That(wallUc.Target, Is.EqualTo(expectedTarget));
@@ -266,6 +267,7 @@ public class WorldLoadTests
         yield return null;
 
         // wall object should be destroyed
+        var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject == null, Is.True);
 
         // universal controller should be unregistered
@@ -273,6 +275,7 @@ public class WorldLoadTests
         Assert.That(uc, Is.Null);
 
         // player object is unaffected
+        var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject != null, Is.True);
     }
 }

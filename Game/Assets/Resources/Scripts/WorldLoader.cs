@@ -176,7 +176,7 @@ public class WorldLoader : MonoBehaviour
         var diff = WorldDiffModule.diff(world, World).ToArray();
         if (diff.Any())
         {
-            Debug.LogError($"Consistency check failed with {diff.Length} results");
+            Debug.LogWarning($"Consistency check failed with {diff.Length} results");
             var logs = ClientLogEntryModule.Payload.NewConsistencyCheckFailed(ListModule.OfSeq(diff));
             LogDispatcher.Instance.AddLog(logs);
         }

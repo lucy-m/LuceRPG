@@ -21,10 +21,6 @@ public class ConsistencyCheckTests
 
     private WorldModule.Model updatedWorld;
 
-    private UniversalController objToMove;
-    private UniversalController objToSnap;
-    private UniversalController objToRemove;
-
     [UnitySetUp]
     public IEnumerator SetUp()
     {
@@ -33,6 +29,7 @@ public class ConsistencyCheckTests
         testInputProvider = new TestInputProvider();
         Registry.CommsService = testCommsService;
         Registry.InputProvider = testInputProvider;
+        Registry.WorldStore = new WorldStore();
 
         overlord = MonoBehaviour.Instantiate(
             Resources.Load<GameObject>("Prefabs/Overlord")
@@ -61,11 +58,7 @@ public class ConsistencyCheckTests
 
         var world = WorldModule.createWithObjs(worldBounds, spawnPoint, objects);
 
-        testCommsService.OnLoad(modelToMove.id, world);
-
-        objToMove = UniversalController.GetById(modelToMove.id);
-        objToSnap = UniversalController.GetById(modelToSnap.id);
-        objToRemove = UniversalController.GetById(modelToRemove.id);
+        testCommsService.OnLoad(modelToMove.id, WithTimestamp.create(0, world));
 
         updatedToMove = WorldObjectModule.moveObject(DirectionModule.Model.North, modelToMove);
         updatedToSnap = WorldObjectModule.moveObjectN(DirectionModule.Model.North, 8, modelToSnap);
@@ -96,6 +89,10 @@ public class ConsistencyCheckTests
     [UnityTest]
     public IEnumerator WorldSetUpCorrectly()
     {
+        var objToMove = UniversalController.GetById(modelToMove.id);
+        var objToSnap = UniversalController.GetById(modelToSnap.id);
+        var objToRemove = UniversalController.GetById(modelToRemove.id);
+
         Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetGameLocation()));
         Assert.That(objToSnap.transform.position, Is.EqualTo(modelToSnap.GetGameLocation()));
         Assert.That(objToRemove.transform.position, Is.EqualTo(modelToRemove.GetGameLocation()));
@@ -110,6 +107,7 @@ public class ConsistencyCheckTests
         testCommsService.OnConsistencyCheck(updatedWorld);
 
         // should not move immediately
+        var objToMove = UniversalController.GetById(modelToMove.id);
         Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetGameLocation()));
 
         // target should be set to the new location
@@ -124,6 +122,7 @@ public class ConsistencyCheckTests
         testCommsService.OnConsistencyCheck(updatedWorld);
 
         // moves position and target to the new location
+        var objToSnap = UniversalController.GetById(modelToSnap.id);
         Assert.That(objToSnap.transform.position, Is.EqualTo(updatedToSnap.GetGameLocation()));
         Assert.That(objToSnap.Target, Is.EqualTo(updatedToSnap.GetGameLocation()));
 
@@ -139,6 +138,7 @@ public class ConsistencyCheckTests
         yield return null;
 
         // obj should be null
+        var objToRemove = UniversalController.GetById(modelToRemove.id);
         Assert.That(objToRemove == null, Is.True);
 
         yield return null;

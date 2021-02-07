@@ -59,8 +59,10 @@ public class WorldFetcher : MonoBehaviour
 
             yield return Registry.CommsService.FetchUpdates(OnUpdate, OnConsistencyCheck);
         }
-
-        Debug.LogError("No world in store");
-        yield return null;
+        else
+        {
+            Debug.LogError("No world in store");
+            yield return null;
+        }
     }
 }
