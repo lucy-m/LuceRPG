@@ -4,5 +4,6 @@
     {
         public ICommsService Comms { get; } = new CommsService();
         public WorldLoaderService WorldLoader { get; } = new WorldLoaderService();
+        public IntentionService Intentions { get; } = new IntentionService();
     }
 }

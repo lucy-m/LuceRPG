@@ -2,14 +2,6 @@ using System;
 using System.IO;
 using UnityEngine;
 
-[Serializable]
-public class Config
-{
-    public string BaseUrl;
-    public string Username;
-    public string Password;
-}
-
 public interface IConfigLoader
 {
     Config Config { get; }
