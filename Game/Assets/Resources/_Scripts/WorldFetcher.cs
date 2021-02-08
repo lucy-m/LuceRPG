@@ -5,7 +5,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
-public class WorldFetcher : MonoBehaviour
+public class _WorldFetcher : MonoBehaviour
 {
     public float PollPeriod = 0.1f;
 

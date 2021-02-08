@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class WorldLoader : MonoBehaviour
+public class _WorldLoader : MonoBehaviour
 {
     public static WorldLoader Instance = null;
     public GameObject WallPrefab = null;
@@ -85,89 +85,6 @@ public class WorldLoader : MonoBehaviour
         else
         {
             return null;
-        }
-    }
-
-    public void LoadWorld(string playerId, WorldModule.Model world)
-    {
-        World = world;
-
-        foreach (var bound in world.bounds)
-        {
-            var location = bound.GetGameLocation();
-
-            if (BackgroundPrefab != null)
-            {
-                var bg = Instantiate(BackgroundPrefab, location, Quaternion.identity);
-                var spriteRenderer = bg.GetComponent<SpriteRenderer>();
-
-                if (spriteRenderer != null)
-                {
-                    var size = new Vector2(bound.size.x, bound.size.y);
-                    spriteRenderer.size = size;
-                }
-            }
-        }
-
-        var objectCount = world.objects.Count;
-        Debug.Log($"Loading {objectCount} objects");
-
-        foreach (var kvp in world.objects)
-        {
-            var obj = kvp.Value;
-            var go = AddObject(obj);
-
-            if (obj.id == playerId && go != null)
-            {
-                Debug.Log($"Adding PC to {obj.id}");
-                go.AddComponent<PlayerController>();
-                Instantiate(CameraPrefab, go.transform);
-            }
-        }
-    }
-
-    public void ApplyUpdate(
-        IEnumerable<WorldEventModule.Model> worldEvents,
-        UpdateSource source
-    )
-    {
-        foreach (var worldEvent in worldEvents)
-        {
-            if (source == UpdateSource.Server
-                && OptimisticIntentionProcessor.Instance.DidProcess(worldEvent.resultOf))
-            {
-                var log = ClientLogEntryModule.Payload.NewUpdateIgnored(worldEvent);
-                LogDispatcher.Instance.AddLog(log);
-                OptimisticIntentionProcessor.Instance.CheckEvent(worldEvent);
-                continue;
-            }
-
-            World = EventApply.apply(worldEvent, World);
-
-            var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
-            if (tObjectId.HasValue())
-            {
-                var objectId = tObjectId.Value;
-
-                if (worldEvent.t.IsObjectAdded)
-                {
-                    var objectAdded = ((WorldEventModule.Type.ObjectAdded)worldEvent.t).Item;
-                    AddObject(objectAdded);
-                    Debug.Log($"Adding item to game {objectAdded.id}");
-                }
-                else
-                {
-                    var uc = UniversalController.GetById(objectId);
-                    if (uc != null)
-                    {
-                        uc.Apply(worldEvent);
-                    }
-                    else
-                    {
-                        Debug.LogError($"Could not process update for unknown object {objectId}");
-                    }
-                }
-            }
         }
     }
 
