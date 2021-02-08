@@ -16,13 +16,16 @@ namespace LuceRPG.Game.Overlords
 
         private void Start()
         {
+            Registry.Streams.WorldEvents.RegisterOnAdd(AddObject);
+            Registry.Streams.WorldEvents.RegisterOnUcEvent(OnUcEvent);
+
             StartCoroutine(OnStarted());
         }
 
         private IEnumerator OnStarted()
         {
             yield return Registry.Services.WorldLoader.LoadWorld(LoadWorldGameObjects);
-            yield return Registry.Services.WorldLoader.GetUpdates(AddObject, OnUcEvent, OnDiff);
+            yield return Registry.Services.WorldLoader.GetUpdates(OnDiff);
         }
 
         private GameObject GetPrefab(WithId.Model<WorldObjectModule.Payload> obj)
