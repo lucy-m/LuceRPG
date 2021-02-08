@@ -1,4 +1,5 @@
 ﻿using LuceRPG.Game.Processors;
+using LuceRPG.Game.Providers;
 using LuceRPG.Game.Services;
 using LuceRPG.Game.Stores;
 using LuceRPG.Game.Streams;
@@ -12,6 +13,7 @@ namespace LuceRPG.Game
         public static ServiceRegistry Services { get; private set; } = new ServiceRegistry();
         public static ProcessorRegistry Processors { get; private set; } = new ProcessorRegistry();
         public static StreamRegistry Streams { get; private set; } = new StreamRegistry();
+        public static ProviderRegistry Providers { get; private set; } = new ProviderRegistry();
         public static ITimestampProvider TimestampProvider { get; set; } = new TimestampProvider();
 
         public static void Reset()
@@ -20,6 +22,7 @@ namespace LuceRPG.Game
             Services = new ServiceRegistry();
             Processors = new ProcessorRegistry();
             Streams = new StreamRegistry();
+            Providers = new ProviderRegistry();
             TimestampProvider = new TimestampProvider();
         }
     }
