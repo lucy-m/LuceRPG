@@ -1,4 +1,5 @@
 ﻿using LuceRPG.Game.Util;
+using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
 using System.Collections;
 using UnityEngine;
@@ -109,8 +110,7 @@ namespace LuceRPG.Game.Overlords
 
                 if (obj.id == Registry.Stores.World.PlayerId)
                 {
-                    Debug.Log($"Adding PC to {obj.id}");
-                    go.AddComponent<PlayerController>();
+                    Debug.Log($"Adding camera to {obj.id}");
                     Instantiate(CameraPrefab, go.transform);
                 }
             }
