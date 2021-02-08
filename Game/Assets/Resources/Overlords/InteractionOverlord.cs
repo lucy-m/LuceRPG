@@ -1,4 +1,5 @@
-﻿using LuceRPG.Models;
+﻿using LuceRPG.Game.WorldObjects;
+using LuceRPG.Models;
 using Microsoft.FSharp.Collections;
 using UnityEngine;
 

@@ -26,28 +26,28 @@ namespace LuceRPG.Game.Overlords
                 if (vertIn > 0)
                 {
                     var intention = IntentionModule.Type.NewMove(Id, DirectionModule.Model.North, 1);
-                    Registry.Services.Intentions.Dispatch(intention);
+                    yield return Registry.Services.Intentions.Dispatch(intention);
                     yield return SpinWhileBusy();
                 }
 
                 if (vertIn < 0)
                 {
                     var intention = IntentionModule.Type.NewMove(Id, DirectionModule.Model.South, 1);
-                    Registry.Services.Intentions.Dispatch(intention);
+                    yield return Registry.Services.Intentions.Dispatch(intention);
                     yield return SpinWhileBusy();
                 }
 
                 if (horzIn > 0)
                 {
                     var intention = IntentionModule.Type.NewMove(Id, DirectionModule.Model.East, 1);
-                    Registry.Services.Intentions.Dispatch(intention);
+                    yield return Registry.Services.Intentions.Dispatch(intention);
                     yield return SpinWhileBusy();
                 }
 
                 if (horzIn < 0)
                 {
                     var intention = IntentionModule.Type.NewMove(Id, DirectionModule.Model.West, 1);
-                    Registry.Services.Intentions.Dispatch(intention);
+                    yield return Registry.Services.Intentions.Dispatch(intention);
                     yield return SpinWhileBusy();
                 }
 

@@ -84,8 +84,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6182008921855037455}
-  - component: {fileID: 7626780674173862328}
   - component: {fileID: 6869066622228249605}
+  - component: {fileID: 88354331909752461}
   m_Layer: 0
   m_Name: Speech Bubble
   m_TagString: Untagged
@@ -110,20 +110,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7626780674173862328
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6182008921855037452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc6a9f73e15b8544f806d92d734c5ebf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Text: {fileID: 6182008921879464600}
-  ShowMoreIndicator: {fileID: 1949726072}
 --- !u!61 &6869066622228249605
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -150,6 +136,20 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 10, y: 2.4}
   m_EdgeRadius: 0
+--- !u!114 &88354331909752461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6182008921855037452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 552e1072a1b8e2745ac43395812f6caa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Text: {fileID: 6182008921879464600}
+  ShowMoreIndicator: {fileID: 1949726072}
 --- !u!1 &6182008921879464606
 GameObject:
   m_ObjectHideFlags: 0

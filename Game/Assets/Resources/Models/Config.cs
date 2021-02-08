@@ -5,9 +5,9 @@ namespace LuceRPG.Game.Models
     [Serializable]
     public class Config
     {
-        public string BaseUrl { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string BaseUrl;
+        public string Username;
+        public string Password;
 
         public static Config Default = new Config()
         {

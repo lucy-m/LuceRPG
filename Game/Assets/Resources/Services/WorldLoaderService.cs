@@ -10,7 +10,7 @@ namespace LuceRPG.Game.Services
 {
     public class WorldLoaderService
     {
-        public static IEnumerator LoadWorld(Action onLoad)
+        public IEnumerator LoadWorld(Action onLoad)
         {
             if (!Registry.Stores.World.HasWorld())
             {
@@ -23,7 +23,7 @@ namespace LuceRPG.Game.Services
             onLoad();
         }
 
-        public static IEnumerator GetUpdates(
+        public IEnumerator GetUpdates(
             Action<WorldDiffModule.DiffType> onDiff)
         {
             if (!Registry.Stores.World.HasWorld())
@@ -64,7 +64,7 @@ namespace LuceRPG.Game.Services
             yield return Registry.Services.Comms.FetchUpdates(15, 0.1f, OnUpdate, OnConsistencyCheck);
         }
 
-        private static void CheckConsistency(
+        private void CheckConsistency(
             Action<WorldDiffModule.DiffType> onDiff,
             WorldModule.Model world)
         {

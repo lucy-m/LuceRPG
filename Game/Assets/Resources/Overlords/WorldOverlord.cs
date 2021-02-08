@@ -20,6 +20,8 @@ namespace LuceRPG.Game.Overlords
             Registry.Streams.WorldEvents.RegisterOnAdd(AddObject);
             Registry.Streams.WorldEvents.RegisterOnUcEvent(OnUcEvent);
 
+            Registry.Services.ConfigLoader.LoadConfig();
+
             StartCoroutine(OnStarted());
         }
 
@@ -57,30 +59,37 @@ namespace LuceRPG.Game.Overlords
         {
             var world = Registry.Stores.World.World;
 
-            foreach (var bound in world.bounds)
+            if (world == null)
             {
-                var location = bound.GetGameLocation();
-
-                if (BackgroundPrefab != null)
+                throw new System.Exception("Unable to load world");
+            }
+            else
+            {
+                foreach (var bound in world.bounds)
                 {
-                    var bg = Instantiate(BackgroundPrefab, location, Quaternion.identity);
-                    var spriteRenderer = bg.GetComponent<SpriteRenderer>();
+                    var location = bound.GetGameLocation();
 
-                    if (spriteRenderer != null)
+                    if (BackgroundPrefab != null)
                     {
-                        var size = new Vector2(bound.size.x, bound.size.y);
-                        spriteRenderer.size = size;
+                        var bg = Instantiate(BackgroundPrefab, location, Quaternion.identity);
+                        var spriteRenderer = bg.GetComponent<SpriteRenderer>();
+
+                        if (spriteRenderer != null)
+                        {
+                            var size = new Vector2(bound.size.x, bound.size.y);
+                            spriteRenderer.size = size;
+                        }
                     }
                 }
-            }
 
-            var objectCount = world.objects.Count;
-            Debug.Log($"Loading {objectCount} objects");
+                var objectCount = world.objects.Count;
+                Debug.Log($"Loading {objectCount} objects");
 
-            foreach (var kvp in world.objects)
-            {
-                var obj = kvp.Value;
-                AddObject(obj);
+                foreach (var kvp in world.objects)
+                {
+                    var obj = kvp.Value;
+                    AddObject(obj);
+                }
             }
         }
 

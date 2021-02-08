@@ -6,11 +6,11 @@ namespace LuceRPG.Game.Services
 {
     public class ConfigLoaderService
     {
-        private readonly string ConfigPath = "credentials.json";
+        private string Path => Registry.Stores.Config.Path;
 
         public void LoadConfig()
         {
-            if (!File.Exists(ConfigPath))
+            if (!File.Exists(Path))
             {
                 Debug.Log("Creating new config file");
                 Registry.Stores.Config.Config = Config.Default;
@@ -19,16 +19,17 @@ namespace LuceRPG.Game.Services
             else
             {
                 Debug.Log("Reading existing config file");
-                var asString = File.ReadAllText(ConfigPath);
-                Registry.Stores.Config.Config = JsonUtility.FromJson<Config>(asString);
+                var asString = File.ReadAllText(Path);
+                var c = JsonUtility.FromJson<Config>(asString);
+                Registry.Stores.Config.Config = c;
             }
         }
 
         public void SaveConfig()
         {
-            var config = Registry.Stores.Config;
+            var config = Registry.Stores.Config.Config;
             var asString = JsonUtility.ToJson(config, true);
-            File.WriteAllText(ConfigPath, asString);
+            File.WriteAllText(Path, asString);
         }
     }
 }

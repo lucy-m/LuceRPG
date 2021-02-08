@@ -25,12 +25,11 @@ namespace LuceRPG.Game.Services
 
     public class CommsService : ICommsService
     {
-        private string BaseUrl => Registry.Stores.Config.BaseUrl;
-        private string Username => Registry.Stores.Config.Username;
-        private string Password => Registry.Stores.Config.Password;
+        private string BaseUrl => Registry.Stores.Config.Config.BaseUrl;
+        private string Username => Registry.Stores.Config.Config.Username;
+        private string Password => Registry.Stores.Config.Config.Password;
         private string ClientId => Registry.Stores.World.ClientId;
         private long LastUpdate => Registry.Stores.World.LastUpdate;
-        private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
         public IEnumerator LoadWorld(
             Action<LoadWorldPayload> onLoad,
@@ -171,12 +170,7 @@ namespace LuceRPG.Game.Services
                 }
                 else
                 {
-                    var prior = TimestampProvider.Now;
                     yield return FetchUpdate(onUpdate);
-                    var post = TimestampProvider.Now;
-
-                    var ping = TimeSpan.FromTicks(post - prior).Milliseconds;
-                    UIStatsOverlay.Instance.SetPingMs(ping);
                 }
 
                 yield return new WaitForSeconds(pollPeriod);
