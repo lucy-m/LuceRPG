@@ -5,7 +5,7 @@ namespace LuceRPG.Game.Util
 {
     public static class DirectionUtil
     {
-        public static Vector3 AsVector3(DirectionModule.Model dir)
+        public static Vector3 AsVector3(this DirectionModule.Model dir)
         {
             if (dir.IsNorth)
             {
