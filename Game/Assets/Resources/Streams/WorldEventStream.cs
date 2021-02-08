@@ -8,10 +8,10 @@ namespace LuceRPG.Game.Streams
 {
     public class WorldEventStream
     {
-        private List<Action<WithId.Model<WorldObjectModule.Payload>>> _onAddHandlers
+        private readonly List<Action<WithId.Model<WorldObjectModule.Payload>>> _onAddHandlers
             = new List<Action<WithId.Model<WorldObjectModule.Payload>>>();
 
-        private List<Action<string, WorldEventModule.Model>> _onUcEventHandlers
+        private readonly List<Action<string, WorldEventModule.Model>> _onUcEventHandlers
             = new List<Action<string, WorldEventModule.Model>>();
 
         public void NextMany(IEnumerable<WorldEventModule.Model> worldEvents, UpdateSource source)
@@ -24,8 +24,8 @@ namespace LuceRPG.Game.Streams
 
         public void Next(WorldEventModule.Model worldEvent, UpdateSource source)
         {
-            if (source == UpdateSource.Server
-                && OptimisticIntentionProcessor.Instance.DidProcess(worldEvent.resultOf))
+            if (source == UpdateSource.Server &&
+                Registry.Processors.Intentions.DidProcess(worldEvent.resultOf))
             {
                 var log = ClientLogEntryModule.Payload.NewUpdateIgnored(worldEvent);
                 Registry.Processors.Logs.AddLog(log);

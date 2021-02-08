@@ -140,7 +140,7 @@ namespace LuceRPG.Game.WorldObjects
 
         private void OnMouseDown()
         {
-            InteractionController.Instance.InteractWith(Id, transform.position);
+            Registry.Streams.Interactions.Next(Id, transform.position);
         }
     }
 }
