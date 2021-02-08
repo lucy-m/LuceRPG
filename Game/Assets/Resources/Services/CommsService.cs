@@ -30,6 +30,7 @@ namespace LuceRPG.Game.Services
         private string Password => Registry.Stores.Config.Config.Password;
         private string ClientId => Registry.Stores.World.ClientId;
         private long LastUpdate => Registry.Stores.World.LastUpdate;
+        private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
 
         public IEnumerator LoadWorld(
             Action<LoadWorldPayload> onLoad,
@@ -98,8 +99,12 @@ namespace LuceRPG.Game.Services
                 + "World/since?timestamp=" + LastUpdate
                 + "&clientId=" + ClientId;
 
+            var preTs = TimestampProvider.Now;
             var webRequest = UnityWebRequest.Get(url);
             yield return webRequest.SendWebRequest();
+
+            var postTs = TimestampProvider.Now;
+            Registry.Stores.PerfStats.Ping = TimeSpan.FromTicks(postTs - preTs).Milliseconds;
 
             if (webRequest.result == UnityWebRequest.Result.Success)
             {

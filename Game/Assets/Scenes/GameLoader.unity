@@ -228,8 +228,9 @@ GameObject:
   - component: {fileID: 448441559}
   - component: {fileID: 448441561}
   - component: {fileID: 448441560}
+  - component: {fileID: 448441562}
   m_Layer: 5
-  m_Name: PingDisplay
+  m_Name: PerfStatDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -285,9 +286,11 @@ MonoBehaviour:
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Ping display
+  m_Text: 'Perf Stats
+
+'
 --- !u!222 &448441561
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -296,6 +299,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 448441558}
   m_CullTransparentMesh: 1
+--- !u!114 &448441562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448441558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecf383d31551c2e4881dd28a26d0d411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1078433486
 GameObject:
   m_ObjectHideFlags: 0
