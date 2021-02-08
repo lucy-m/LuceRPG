@@ -11,7 +11,9 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Serialisation", "Lu
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "LuceRPG.Serialisation.Test", "LuceRPG.Serialisation.Test\LuceRPG.Serialisation.Test.fsproj", "{0926DEF3-08E1-4FA8-8C5B-ED130EC3083B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuceRPG.Utility", "LuceRPG.Extensions\LuceRPG.Utility.csproj", "{7D4808C6-C32E-4CDF-B5B6-58F7A0F1A8BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LuceRPG.Utility", "LuceRPG.Extensions\LuceRPG.Utility.csproj", "{7D4808C6-C32E-4CDF-B5B6-58F7A0F1A8BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuceRPG.Adapters", "LuceRPG.Adapters\LuceRPG.Adapters.csproj", "{97ABE913-F7DA-44CB-B70D-2ABA8F00E591}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{7D4808C6-C32E-4CDF-B5B6-58F7A0F1A8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D4808C6-C32E-4CDF-B5B6-58F7A0F1A8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D4808C6-C32E-4CDF-B5B6-58F7A0F1A8BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97ABE913-F7DA-44CB-B70D-2ABA8F00E591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97ABE913-F7DA-44CB-B70D-2ABA8F00E591}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97ABE913-F7DA-44CB-B70D-2ABA8F00E591}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97ABE913-F7DA-44CB-B70D-2ABA8F00E591}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

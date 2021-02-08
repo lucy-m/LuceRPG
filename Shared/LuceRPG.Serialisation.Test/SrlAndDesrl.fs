@@ -50,6 +50,15 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let mapSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (MapSrl.serialise IntSrl.serialise StringSrl.serialise)
+                    (MapSrl.deserialise IntSrl.deserialise StringSrl.deserialise)
+
+            doCheck checkFn
+
+        [<Test>]
         let withTimestampSrl () =
             let checkFn =
                 srlAndDesrl
@@ -113,6 +122,13 @@ module SrlAndDesrl =
         let indexedIntentionSrl () =
             let checkFn =
                 srlAndDesrl IntentionSrl.serialiseIndexed IntentionSrl.deserialiseIndexed
+
+            doCheck checkFn
+
+        [<Test>]
+        let interactionSrl () =
+            let checkFn =
+                srlAndDesrl InteractionSrl.serialise InteractionSrl.deserialise
 
             doCheck checkFn
 

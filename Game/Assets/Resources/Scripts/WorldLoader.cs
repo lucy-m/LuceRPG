@@ -16,6 +16,7 @@ public class WorldLoader : MonoBehaviour
     public GameObject PlayerPrefab = null;
     public GameObject BackgroundPrefab = null;
     public GameObject CameraPrefab = null;
+    public GameObject NpcPrefab = null;
 
     public WorldModule.Model World { get; private set; }
 
@@ -47,6 +48,10 @@ public class WorldLoader : MonoBehaviour
         {
             return PlayerPrefab;
         }
+        else if (t.IsNPC)
+        {
+            return NpcPrefab;
+        }
 
         return null;
     }
@@ -65,7 +70,6 @@ public class WorldLoader : MonoBehaviour
                 uc = go.AddComponent<UniversalController>();
             }
 
-            Debug.Log($"Setting UC ID to {obj.id}");
             uc.Id = obj.id;
             uc.Model = obj.value;
 
@@ -172,7 +176,7 @@ public class WorldLoader : MonoBehaviour
         var diff = WorldDiffModule.diff(world, World).ToArray();
         if (diff.Any())
         {
-            Debug.LogError($"Consistency check failed with {diff.Length} results");
+            Debug.LogWarning($"Consistency check failed with {diff.Length} results");
             var logs = ClientLogEntryModule.Payload.NewConsistencyCheckFailed(ListModule.OfSeq(diff));
             LogDispatcher.Instance.AddLog(logs);
         }

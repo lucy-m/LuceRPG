@@ -13,6 +13,7 @@
     <Compile Include="LongSrl.fs" />
     <Compile Include="StringSrl.fs" />
     <Compile Include="ListSrl.fs" />
+    <Compile Include="MapSrl.fs" />
     <Compile Include="WithTimestampSrl.fs" />
     <Compile Include="WithGuidSrl.fs" />
     <Compile Include="PointSrl.fs" />
@@ -21,6 +22,7 @@
     <Compile Include="PlayerDataSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
+    <Compile Include="InteractionSrl.fs" />
     <Compile Include="WorldEventSrl.fs" />
     <Compile Include="WorldSrl.fs" />
     <Compile Include="WorldDiffSrl.fs" />

@@ -102,10 +102,12 @@ namespace LuceRPGServer.Controllers
 
                 var joinGameResult = playerObject != null
                     ? GetJoinGameResultModule.Model.NewSuccess(
+                        GetJoinGameResultModule.SuccessPayloadModule.create(
                         clientId,
                         playerObject.id,
-                        WithTimestamp.create(_timestampProvider.Now, _worldStore.CurrentWorld)
-                    )
+                        WithTimestamp.create(_timestampProvider.Now, _worldStore.CurrentWorld),
+                        WithId.toList(_worldStore.Interactions.Value)
+                    ))
                     : GetJoinGameResultModule.Model.NewFailure("Could not join game");
 
                 var serialised = GetJoinGameResultSrl.serialise(joinGameResult);

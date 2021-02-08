@@ -1,3 +1,4 @@
+using LuceRPG.Adapters;
 using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using LuceRPG.Server.Processors;
@@ -53,7 +54,7 @@ namespace LuceRPG.Server.Test
 
             initialWorld = WorldModule.empty(worldBounds, spawnPoint);
 
-            worldStorer = new WorldEventsStorer(initialWorld, timestampProvider);
+            worldStorer = new WorldEventsStorer(initialWorld, InteractionStore.Empty(), timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
             pingStorer = new LastPingStorer();
             var logService = new TestCsvLogService();
@@ -159,20 +160,20 @@ namespace LuceRPG.Server.Test
                 Assert.That(deserialised.HasValue(), Is.True);
                 Assert.That(deserialised.Value.value.IsSuccess, Is.True);
 
-                var success = (GetJoinGameResultModule.Model.Success)deserialised.Value.value;
+                var success = ((GetJoinGameResultModule.Model.Success)deserialised.Value.value).Item;
 
                 // Result contains newly added player id
-                Assert.That(success.Item2, Is.EqualTo(playerObj.id));
+                Assert.That(success.playerObjectId, Is.EqualTo(playerObj.id));
 
                 // Result contains correct world
-                var tsWorld = success.Item3;
+                var tsWorld = success.tsWorld;
                 Assert.That(tsWorld.timestamp, Is.EqualTo(timestampProvider.Now));
                 Assert.That(tsWorld.value, Is.EqualTo(worldStorer.CurrentWorld));
 
                 // Object client map correct
                 var ocMapEntry = MapModule.TryFind(playerObj.id, worldStorer.ObjectClientMap);
                 Assert.That(ocMapEntry.HasValue(), Is.True);
-                Assert.That(ocMapEntry.Value, Is.EqualTo(success.Item1));
+                Assert.That(ocMapEntry.Value, Is.EqualTo(success.clientId));
             }
         }
 

@@ -20,4 +20,14 @@ module WithId =
             value = value
         }
 
+    let toMap (items: 'T Model List): Map<string, 'T Model> =
+        items
+        |> List.map (fun i -> (i.id, i))
+        |> Map.ofList
+
+    let toList (map: Map<string, 'T Model>): 'T Model List =
+        map
+        |> Map.toList
+        |> List.map snd
+
 type 'T WithId = 'T WithId.Model

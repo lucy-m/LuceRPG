@@ -30,6 +30,10 @@ module UnknownTag =
             unknownTag WorldDiffSrl.deserialiseDiffType 100uy
 
         [<Test>]
+        let interactionSrl () =
+            unknownTag InteractionSrl.deserialiseOne 100uy
+
+        [<Test>]
         let getJoinGameResultSrl () =
             unknownTag GetJoinGameResultSrl.deserialise 100uy
 

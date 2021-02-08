@@ -37,12 +37,10 @@ public class UniversalController : MonoBehaviour
             var travelTime = _model == null ? 0 :
                 (WorldObjectModule.travelTime(_model) / System.TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
-            Debug.Log($"Setting speed for {Id} to {_speed}, travel time {travelTime}");
 
-            if (_model.t.IsPlayer)
+            if (_model.t.IsPlayer || _model.t.IsNPC)
             {
-                var asPlayer = ((WorldObjectModule.TypeModule.Model.Player)_model.t).Item;
-                var name = asPlayer.name;
+                var name = WorldObjectModule.getName(_model);
 
                 var unitNameGo =
                     gameObject
@@ -133,5 +131,10 @@ public class UniversalController : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.DrawCube(Target, Vector3.one);
+    }
+
+    private void OnMouseDown()
+    {
+        InteractionController.Instance.InteractWith(Id, transform.position);
     }
 }

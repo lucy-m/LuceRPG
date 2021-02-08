@@ -47,23 +47,44 @@ type SerialisationArbs() =
                 |> Option.defaultValue Point.zero
             )
         let objects = Gen.listOf Arb.generate<WorldObject>
+        let interactions =
+            let objectIds =
+                objects
+                |> Gen.map (fun objs ->
+                    objs
+                    |> List.map (fun o -> o.id)
+                    |> List.take (objs.Length / 2)
+                )
+
+            objectIds
+            |> Gen.map (fun oIds ->
+                oIds
+                |> List.map (fun oId ->
+                    let iId = Arb.generate<string> |> Gen.sample 0 1 |> List.head
+                    (oId, iId)
+                )
+                |> Map.ofList
+            )
 
         let world =
-            Gen.zip3 bounds point objects
-            |> Gen.map (fun (bs, p, os) ->
-                World.createWithObjs bs p os
+            Gen.zip (Gen.zip bounds point)
+                    (Gen.zip objects interactions)
+            |> Gen.map (fun ((bs, p), (os, is)) ->
+                World.createWithInteractions bs p os is
             )
 
         world
 
     static member genGetJoinGameResult: Gen<GetJoinGameResult> =
         let worldGen =
-            Gen.zip
+            Gen.zip3
                 (Gen.zip Arb.generate<string> Arb.generate<string>)
                 (Gen.zip Arb.generate<int64> Arb.generate<World>)
-            |> Gen.map (fun ((cId, oId), (ts, w)) ->
+                Arb.generate<Interaction List>
+            |> Gen.map (fun ((cId, oId), (ts, w), il) ->
                 let tsWorld = WithTimestamp.create ts w
-                GetJoinGameResult.Success (cId, oId, tsWorld)
+                let payload = GetJoinGameResult.SuccessPayload.create cId oId tsWorld il
+                GetJoinGameResult.Success payload
             )
         let failureGen =
             Arb.generate<string>

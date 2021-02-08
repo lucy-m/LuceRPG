@@ -17,6 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="LuceRPG.Adapters">
+      <HintPath>..\..\Shared\LuceRPG.Adapters\bin\Release\netstandard2.0\LuceRPG.Adapters.dll</HintPath>
+    </Reference>
     <Reference Include="LuceRPG.Models">
       <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
     </Reference>

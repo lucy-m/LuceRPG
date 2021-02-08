@@ -1,4 +1,5 @@
-﻿using LuceRPG.Models;
+﻿using LuceRPG.Adapters;
+using LuceRPG.Models;
 using LuceRPG.Serialisation;
 using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
@@ -61,15 +62,22 @@ public class CommsService : ICommsService
 
                 if (result.IsSuccess)
                 {
-                    var success = (GetJoinGameResultModule.Model.Success)result;
+                    var success = ((GetJoinGameResultModule.Model.Success)result).Item;
 
-                    var clientId = success.Item1;
-                    var playerId = success.Item2;
-                    var tsWorld = success.Item3;
+                    var clientId = success.clientId;
+                    var playerId = success.playerObjectId;
+                    var tsWorld = success.tsWorld;
+                    var interactions = new InteractionStore(WithId.toMap(success.interactions));
 
                     Debug.Log($"Client {clientId} joined with player ID {playerId}");
 
                     _clientId = clientId;
+
+                    Debug.Log("Loaded world from API");
+                    Registry.WorldStore.PlayerId = playerId;
+                    Registry.WorldStore.World = tsWorld.value;
+                    Registry.WorldStore.LastUpdate = tsWorld.timestamp;
+                    Registry.WorldStore.Interactions = interactions;
 
                     onLoad(playerId, tsWorld);
                 }
@@ -209,33 +217,42 @@ public class CommsService : ICommsService
 
     public IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
     {
-        var url =
-            BaseUrl
-            + "World/logs?clientId=" + _clientId;
-
-        var bytes = ClientLogEntrySrl.serialiseLog(ListModule.OfSeq(logs));
-        var webRequest = UnityWebRequest.Put(url, bytes);
-
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        if (_clientId != null)
         {
-            Debug.LogError("Web request error " + webRequest.error);
+            var url =
+                BaseUrl
+                + "World/logs?clientId=" + _clientId;
+
+            var bytes = ClientLogEntrySrl.serialiseLog(ListModule.OfSeq(logs));
+            var webRequest = UnityWebRequest.Put(url, bytes);
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Web request error " + webRequest.error);
+            }
         }
     }
 }
 
 public class TestCommsService : ICommsService
 {
-    public Action<string, WorldModule.Model> OnLoad { get; private set; }
     public Action<GetSinceResultModule.Payload> OnUpdate { get; private set; }
     public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
     public string LastIntentionId { get; private set; }
     public IntentionModule.Type LastIntention { get; private set; }
     public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
 
-    public IEnumerator FetchUpdates(Action<GetSinceResultModule.Payload> onUpdate, Action<WorldModule.Model> onConsistencyCheck)
+    private Action<string, WithTimestamp.Model<WorldModule.Model>> _doLoad;
+
+    public IEnumerator FetchUpdates(
+        Action<GetSinceResultModule.Payload> onUpdate,
+        Action<WorldModule.Model> onConsistencyCheck
+    )
     {
+        OnUpdate = onUpdate;
+        OnConsistencyCheck = onConsistencyCheck;
         yield return null;
     }
 
@@ -244,7 +261,18 @@ public class TestCommsService : ICommsService
         Action<string> onError
     )
     {
+        _doLoad = onLoad;
         yield return null;
+    }
+
+    public void OnLoad(string playerId, WithTimestamp.Model<WorldModule.Model> tsWorld)
+    {
+        Registry.WorldStore.PlayerId = playerId;
+        Registry.WorldStore.World = tsWorld.value;
+        Registry.WorldStore.LastUpdate = tsWorld.timestamp;
+        Registry.WorldStore.Interactions = InteractionStore.Empty();
+
+        _doLoad?.Invoke(playerId, tsWorld);
     }
 
     public IEnumerator SendIntention(string id, IntentionModule.Type t)
