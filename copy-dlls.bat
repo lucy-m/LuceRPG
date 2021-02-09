@@ -2,4 +2,3 @@ copy "Shared\LuceRPG.Serialisation\bin\Release\netstandard2.0\LuceRPG.Serialisat
 copy "Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll" "Game\Assets\Resources\DLLs"
 copy "Shared\LuceRPG.Extensions\bin\Release\netstandard2.0\LuceRPG.Utility.dll" "Game\Assets\Resources\DLLs"
 copy "Shared\LuceRPG.Adapters\bin\Release\netstandard2.0\LuceRPG.Adapters.dll" "Game\Assets\Resources\DLLs"
-
