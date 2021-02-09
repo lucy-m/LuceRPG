@@ -138,7 +138,7 @@ namespace LuceRPG.Game.WorldObjects
             Gizmos.DrawCube(Target, Vector3.one);
         }
 
-        private void OnMouseDown()
+        public void OnMouseDown()
         {
             Registry.Streams.Interactions.Next(Id, transform.position);
         }

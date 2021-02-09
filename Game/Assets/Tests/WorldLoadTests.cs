@@ -10,6 +10,7 @@ using LuceRPG.Models;
 using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,6 +27,8 @@ public class WorldLoadTests
     private WithId.Model<WorldObjectModule.Payload> wallModel;
     private WorldModule.Model world;
     private readonly string clientId = "client-id";
+    private readonly string playerName = "test-player";
+    private readonly string interactionText = "Hello {player}!";
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -45,17 +48,20 @@ public class WorldLoadTests
         SceneManager.LoadScene("GameLoader", LoadSceneMode.Single);
         yield return null;
 
-        playerModel = TestUtil.MakePlayer(4, 8);
+        playerModel = TestUtil.MakePlayer(4, 8, playerName);
 
         wallModel =
             WithId.create(WorldObjectModule.create(
                 WorldObjectModule.TypeModule.Model.Wall, PointModule.create(2, 4)
             ));
 
-        var worldBounds = new RectModule.Model[]
-        {
-            new RectModule.Model(PointModule.create(0, 10), PointModule.create(10,10))
-        };
+        var wallInteraction = WithId.create(InteractionModule.One.NewChat(interactionText).ToSingletonEnumerable());
+        var interactions = InteractionStore.OfInteractions(wallInteraction);
+
+        var worldBounds =
+            new RectModule.Model(PointModule.create(0, 10), PointModule.create(10, 10))
+            .ToSingletonEnumerable();
+
         var objects = new WithId.Model<WorldObjectModule.Payload>[]
         {
             playerModel,
@@ -63,9 +69,11 @@ public class WorldLoadTests
         };
         var spawnPoint = PointModule.create(10, 10);
 
-        world = WorldModule.createWithObjs(worldBounds, spawnPoint, objects);
+        var wallInteractionMap = Tuple.Create(wallModel.id, wallInteraction.id);
+        var interactionMap = new FSharpMap<string, string>(wallInteractionMap.ToSingletonEnumerable());
+
+        world = WorldModule.createWithInteractions(worldBounds, spawnPoint, objects, interactionMap);
         var tsWorld = WithTimestamp.create(0, world);
-        var interactions = InteractionStore.Empty();
 
         var payload = new LoadWorldPayload(clientId, playerModel.id, tsWorld, interactions);
         testCommsService.OnLoad(payload);
@@ -306,5 +314,30 @@ public class WorldLoadTests
         // player object is unaffected
         var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject != null, Is.True);
+    }
+
+    [UnityTest]
+    public IEnumerator ClickInteractionsWork()
+    {
+        // clicking on player
+        var playerObject = UniversalController.GetById(playerModel.id);
+        playerObject.OnMouseDown();
+
+        // does nothing
+        var sbc = GameObject.FindObjectOfType<SpeechBubbleController>();
+        Assert.That(sbc, Is.Null);
+
+        // clicking on wall
+        var wallObject = UniversalController.GetById(wallModel.id);
+        wallObject.OnMouseDown();
+
+        // speech bubble is created correctly
+        sbc = GameObject.FindObjectOfType<SpeechBubbleController>();
+        Assert.That(sbc, Is.Not.Null);
+
+        var expected = $"Hello {playerName}!";
+        Assert.That(sbc.Text.text, Is.EqualTo(expected));
+
+        yield return null;
     }
 }

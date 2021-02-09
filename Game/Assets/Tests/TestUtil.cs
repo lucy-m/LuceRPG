@@ -4,10 +4,10 @@ using System;
 public static class TestUtil
 {
     public static WithId.Model<WorldObjectModule.Payload> MakePlayer(
-        int x, int y
+        int x, int y, string name = null
     )
     {
-        var name = Guid.NewGuid().ToString();
+        name = name ?? Guid.NewGuid().ToString();
         var playerData = PlayerDataModule.create(name);
         var topLeft = PointModule.create(x, y);
 
