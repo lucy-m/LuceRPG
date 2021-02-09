@@ -223,4 +223,43 @@ namespace LuceRPG.Game.Services
             }
         }
     }
+
+    public class TestCommsService : ICommsService
+    {
+        public Action<WithTimestamp.Model<GetSinceResultModule.Payload>> OnUpdate { get; private set; }
+        public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
+        public Action<LoadWorldPayload> OnLoad { get; private set; }
+        public Action<string> OnLoadError { get; private set; }
+        public IntentionModule.Type LastIntention { get; private set; }
+
+        public IEnumerator FetchUpdates(
+            float consistencyCheckFreq,
+            float pollPeriod,
+            Action<WithTimestamp.Model<GetSinceResultModule.Payload>> onUpdate,
+            Action<WorldModule.Model> onConsistencyCheck)
+        {
+            OnUpdate = onUpdate;
+            OnConsistencyCheck = onConsistencyCheck;
+
+            yield return null;
+        }
+
+        public IEnumerator LoadWorld(Action<LoadWorldPayload> onLoad, Action<string> onError)
+        {
+            OnLoad = onLoad;
+            OnLoadError = onError;
+            yield return null;
+        }
+
+        public IEnumerator SendIntention(string id, IntentionModule.Type t)
+        {
+            LastIntention = t;
+            yield return null;
+        }
+
+        public IEnumerator SendLogs(IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+        {
+            yield return null;
+        }
+    }
 }

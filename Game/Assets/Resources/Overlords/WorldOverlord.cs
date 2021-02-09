@@ -3,7 +3,9 @@ using LuceRPG.Game.Util;
 using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
 using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LuceRPG.Game.Overlords
@@ -171,9 +173,51 @@ namespace LuceRPG.Game.Overlords
             }
         }
 
-        private void OnDiff(WorldDiffModule.DiffType diff)
+        private void OnDiff(
+            WorldModule.Model world,
+            IReadOnlyCollection<WorldDiffModule.DiffType> diffs)
         {
-            Debug.Log(diff);
+            Registry.Stores.World.World = world;
+
+            foreach (var diff in diffs)
+            {
+                if (diff.IsExtraObject)
+                {
+                    var extraObject = ((WorldDiffModule.DiffType.ExtraObject)diff).Item;
+                    var uc = UniversalController.GetById(extraObject);
+                    Destroy(uc.gameObject);
+                }
+                else if (diff.IsMissingObject)
+                {
+                    var missingObjectId = ((WorldDiffModule.DiffType.MissingObject)diff).Item;
+                    var tMissingObject = MapModule.TryFind(missingObjectId, world.objects);
+
+                    if (tMissingObject.HasValue())
+                    {
+                        AddObject(tMissingObject.Value);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Unable to add missing object");
+                    }
+                }
+                else if (diff.IsUnmatchingObjectPosition)
+                {
+                    var unmatching = ((WorldDiffModule.DiffType.UnmatchingObjectPosition)diff);
+                    var id = unmatching.Item1;
+                    var tCorrectObject = MapModule.TryFind(id, world.objects);
+                    if (tCorrectObject.HasValue())
+                    {
+                        var location = CoOrdTranslator.GetGameLocation(tCorrectObject.Value);
+                        var uc = UniversalController.GetById(id);
+                        uc.EnsureLocation(location);
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Unsupported diff type {diff} {diff.Tag}");
+                }
+            }
         }
     }
 }

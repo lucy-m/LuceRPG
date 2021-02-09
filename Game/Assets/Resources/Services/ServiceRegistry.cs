@@ -2,7 +2,7 @@
 {
     public class ServiceRegistry
     {
-        public ICommsService Comms { get; } = new CommsService();
+        public ICommsService Comms { get; set; } = new CommsService();
         public WorldLoaderService WorldLoader { get; } = new WorldLoaderService();
         public IntentionService Intentions { get; } = new IntentionService();
         public ConfigLoaderService ConfigLoader { get; } = new ConfigLoaderService();

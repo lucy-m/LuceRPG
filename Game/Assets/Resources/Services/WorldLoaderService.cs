@@ -3,6 +3,7 @@ using LuceRPG.Models;
 using Microsoft.FSharp.Collections;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace LuceRPG.Game.Services
 
         public IEnumerator GetUpdates(
             Action<WorldEventModule.Model> onEvent,
-            Action<WorldDiffModule.DiffType> onDiff)
+            Action<WorldModule.Model, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff)
         {
             if (!Registry.Stores.World.HasWorld())
             {
@@ -69,7 +70,7 @@ namespace LuceRPG.Game.Services
         }
 
         private void CheckConsistency(
-            Action<WorldDiffModule.DiffType> onDiff,
+            Action<WorldModule.Model, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff,
             WorldModule.Model world)
         {
             var diffs = WorldDiffModule.diff(world, Registry.Stores.World.World).ToArray();
@@ -78,11 +79,8 @@ namespace LuceRPG.Game.Services
                 Debug.LogWarning($"Consistency check failed with {diffs.Length} results");
                 var logs = ClientLogEntryModule.Payload.NewConsistencyCheckFailed(ListModule.OfSeq(diffs));
                 Registry.Processors.Logs.AddLog(logs);
-            }
 
-            foreach (var diff in diffs)
-            {
-                onDiff(diff);
+                onDiff(world, diffs);
             }
         }
     }

@@ -8,7 +8,7 @@ namespace LuceRPG.Game.Stores
     {
         public string PlayerId { get; private set; }
         public string ClientId { get; private set; }
-        public WorldModule.Model World { get; private set; }
+        public WorldModule.Model World { get; set; }
         public InteractionStore Interactions { get; private set; }
         public long LastUpdate { get; set; }
 
