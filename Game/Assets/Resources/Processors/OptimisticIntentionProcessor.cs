@@ -44,7 +44,7 @@ namespace LuceRPG.Game.Processors
         /// <returns>ID used for the intention</returns>
         public string Process(IntentionModule.Type intention)
         {
-            var timestamp = Registry.TimestampProvider.Now;
+            var timestamp = Registry.Providers.Timestamp.Now;
             var payload = IntentionModule.makePayload("", intention);
             var withId = WithId.create(payload);
             var withTimestamp = WithTimestamp.create(timestamp, withId);

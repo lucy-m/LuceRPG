@@ -7,7 +7,7 @@ namespace LuceRPG.Game.Overlords
 {
     public class PlayerOverlord : MonoBehaviour
     {
-        private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
+        private ITimestampProvider TimestampProvider => Registry.Providers.Timestamp;
         private string Id => Registry.Stores.World.PlayerId;
 
         // Start is called before the first frame update

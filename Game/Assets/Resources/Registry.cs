@@ -14,7 +14,6 @@ namespace LuceRPG.Game
         public static ProcessorRegistry Processors { get; private set; } = new ProcessorRegistry();
         public static StreamRegistry Streams { get; private set; } = new StreamRegistry();
         public static ProviderRegistry Providers { get; private set; } = new ProviderRegistry();
-        public static ITimestampProvider TimestampProvider { get; set; } = new TimestampProvider();
 
         public static void Reset()
         {
@@ -23,7 +22,6 @@ namespace LuceRPG.Game
             Processors = new ProcessorRegistry();
             Streams = new StreamRegistry();
             Providers = new ProviderRegistry();
-            TimestampProvider = new TimestampProvider();
         }
     }
 }

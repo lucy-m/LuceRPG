@@ -15,7 +15,7 @@ namespace LuceRPG.Game.Processors
 
         public void AddLog(ClientLogEntryModule.Payload payload)
         {
-            var timestamped = WithTimestamp.create(Registry.TimestampProvider.Now, payload);
+            var timestamped = WithTimestamp.create(Registry.Providers.Timestamp.Now, payload);
             Add(timestamped);
         }
     }

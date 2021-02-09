@@ -30,7 +30,7 @@ namespace LuceRPG.Game.Services
         private string Password => Registry.Stores.Config.Config.Password;
         private string ClientId => Registry.Stores.World.ClientId;
         private long LastUpdate => Registry.Stores.World.LastUpdate;
-        private ITimestampProvider TimestampProvider => Registry.TimestampProvider;
+        private ITimestampProvider TimestampProvider => Registry.Providers.Timestamp;
 
         public IEnumerator LoadWorld(
             Action<LoadWorldPayload> onLoad,
