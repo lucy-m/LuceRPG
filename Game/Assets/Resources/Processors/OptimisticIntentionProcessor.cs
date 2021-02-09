@@ -23,6 +23,9 @@ namespace LuceRPG.Game.Processors
         private readonly Dictionary<string, Dictionary<int, WorldEventModule.Model>> _eventsProduced
             = new Dictionary<string, Dictionary<int, WorldEventModule.Model>>();
 
+        private readonly List<Action<WorldEventModule.Model>> _onEventHandlers
+            = new List<Action<WorldEventModule.Model>>();
+
         /// <summary>
         /// Processes delayed intentions
         /// </summary>
@@ -69,7 +72,13 @@ namespace LuceRPG.Game.Processors
 
             _objectBusyMap = processResult.objectBusyMap;
 
-            Registry.Streams.WorldEvents.NextMany(processResult.events, UpdateSource.Game);
+            foreach (var we in processResult.events)
+            {
+                foreach (var handler in _onEventHandlers)
+                {
+                    handler(we);
+                }
+            }
 
             foreach (var e in processResult.events)
             {
@@ -105,6 +114,11 @@ namespace LuceRPG.Game.Processors
         public bool DidProcess(string intentionId)
         {
             return _intentions.TryGetValue(intentionId, out _);
+        }
+
+        public void RegisterOnEvent(Action<WorldEventModule.Model> handler)
+        {
+            _onEventHandlers.Add(handler);
         }
     }
 }

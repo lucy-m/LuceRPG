@@ -24,6 +24,7 @@ namespace LuceRPG.Game.Services
         }
 
         public IEnumerator GetUpdates(
+            Action<WorldEventModule.Model> onEvent,
             Action<WorldDiffModule.DiffType> onDiff)
         {
             if (!Registry.Stores.World.HasWorld())
@@ -43,7 +44,10 @@ namespace LuceRPG.Game.Services
 
                     if (events.Any())
                     {
-                        Registry.Streams.WorldEvents.NextMany(events, UpdateSource.Server);
+                        foreach (var we in events)
+                        {
+                            onEvent(we);
+                        }
                     }
                 }
                 else

@@ -1,6 +1,8 @@
-﻿using LuceRPG.Game.Util;
+﻿using LuceRPG.Game.Models;
+using LuceRPG.Game.Util;
 using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
+using LuceRPG.Utility;
 using System.Collections;
 using UnityEngine;
 
@@ -17,8 +19,7 @@ namespace LuceRPG.Game.Overlords
 
         private void Start()
         {
-            Registry.Streams.WorldEvents.RegisterOnAdd(AddObject);
-            Registry.Streams.WorldEvents.RegisterOnUcEvent(OnUcEvent);
+            Registry.Processors.Intentions.RegisterOnEvent(we => OnWorldEvent(we, UpdateSource.Game));
 
             Registry.Services.ConfigLoader.LoadConfig();
 
@@ -28,7 +29,9 @@ namespace LuceRPG.Game.Overlords
         private IEnumerator OnStarted()
         {
             yield return Registry.Services.WorldLoader.LoadWorld(LoadWorldGameObjects);
-            yield return Registry.Services.WorldLoader.GetUpdates(OnDiff);
+            yield return Registry.Services.WorldLoader.GetUpdates(
+                we => OnWorldEvent(we, UpdateSource.Server),
+                OnDiff);
         }
 
         private GameObject GetPrefab(WithId.Model<WorldObjectModule.Payload> obj)
@@ -89,6 +92,36 @@ namespace LuceRPG.Game.Overlords
                 {
                     var obj = kvp.Value;
                     AddObject(obj);
+                }
+            }
+        }
+
+        private void OnWorldEvent(WorldEventModule.Model worldEvent, UpdateSource source)
+        {
+            if (source == UpdateSource.Server &&
+                Registry.Processors.Intentions.DidProcess(worldEvent.resultOf))
+            {
+                var log = ClientLogEntryModule.Payload.NewUpdateIgnored(worldEvent);
+                Registry.Processors.Logs.AddLog(log);
+            }
+            else
+            {
+                Registry.Stores.World.Apply(worldEvent);
+
+                var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
+                if (tObjectId.HasValue())
+                {
+                    var objectId = tObjectId.Value;
+
+                    if (worldEvent.t.IsObjectAdded)
+                    {
+                        var objectAdded = ((WorldEventModule.Type.ObjectAdded)worldEvent.t).Item;
+                        AddObject(objectAdded);
+                    }
+                    else
+                    {
+                        OnUcEvent(objectId, worldEvent);
+                    }
                 }
             }
         }
