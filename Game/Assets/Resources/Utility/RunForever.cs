@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace LuceRPG.Game.Util
+namespace LuceRPG.Game.Utility
 {
     public static class CoroutineUtil
     {

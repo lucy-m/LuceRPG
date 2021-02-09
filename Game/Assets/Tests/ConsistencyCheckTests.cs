@@ -3,7 +3,7 @@ using LuceRPG.Game;
 using LuceRPG.Game.Models;
 using LuceRPG.Game.Providers;
 using LuceRPG.Game.Services;
-using LuceRPG.Game.Util;
+using LuceRPG.Game.Utility;
 using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
 using NUnit.Framework;

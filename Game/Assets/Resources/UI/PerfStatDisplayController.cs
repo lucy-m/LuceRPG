@@ -1,5 +1,5 @@
 ﻿using LuceRPG.Game.Stores;
-using LuceRPG.Game.Util;
+using LuceRPG.Game.Utility;
 using UnityEngine;
 using UnityEngine.UI;
 

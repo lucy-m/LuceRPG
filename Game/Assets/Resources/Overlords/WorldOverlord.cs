@@ -1,5 +1,5 @@
 ﻿using LuceRPG.Game.Models;
-using LuceRPG.Game.Util;
+using LuceRPG.Game.Utility;
 using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
 using LuceRPG.Utility;

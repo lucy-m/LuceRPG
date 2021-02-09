@@ -1,4 +1,4 @@
-﻿using LuceRPG.Game.Util;
+﻿using LuceRPG.Game.Utility;
 using LuceRPG.Models;
 using System;
 using System.Collections.Generic;

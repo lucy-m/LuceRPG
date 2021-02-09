@@ -1,7 +1,7 @@
 ﻿using LuceRPG.Models;
 using UnityEngine;
 
-namespace LuceRPG.Game.Util
+namespace LuceRPG.Game.Utility
 {
     public static class DirectionUtil
     {
