@@ -228,9 +228,13 @@ namespace LuceRPG.Game.Services
     {
         public Action<WithTimestamp.Model<GetSinceResultModule.Payload>> OnUpdate { get; private set; }
         public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
-        public Action<LoadWorldPayload> OnLoad { get; private set; }
         public Action<string> OnLoadError { get; private set; }
+        public string LastIntentionId { get; private set; }
         public IntentionModule.Type LastIntention { get; private set; }
+        public List<IntentionModule.Type> AllIntentions { get; } = new List<IntentionModule.Type>();
+
+        private bool loaded = false;
+        private Action<LoadWorldPayload> _doLoad;
 
         public IEnumerator FetchUpdates(
             float consistencyCheckFreq,
@@ -246,14 +250,26 @@ namespace LuceRPG.Game.Services
 
         public IEnumerator LoadWorld(Action<LoadWorldPayload> onLoad, Action<string> onError)
         {
-            OnLoad = onLoad;
+            _doLoad = onLoad;
             OnLoadError = onError;
-            yield return null;
+            while (!loaded)
+            {
+                yield return null;
+            }
+        }
+
+        public void OnLoad(LoadWorldPayload payload)
+        {
+            loaded = true;
+            _doLoad(payload);
         }
 
         public IEnumerator SendIntention(string id, IntentionModule.Type t)
         {
+            Debug.Log($"Intention sent {t}");
+            LastIntentionId = id;
             LastIntention = t;
+            AllIntentions.Add(t);
             yield return null;
         }
 

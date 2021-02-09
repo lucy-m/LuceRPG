@@ -35,6 +35,8 @@ namespace LuceRPG.Game.Services
 
             void OnUpdate(WithTimestamp.Model<GetSinceResultModule.Payload> update)
             {
+                Registry.Stores.World.LastUpdate = update.timestamp;
+
                 if (update.value.IsEvents)
                 {
                     var events =
