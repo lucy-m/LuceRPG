@@ -13,12 +13,12 @@ type SerialisationArbs() =
             |> Gen.two
             |> Gen.map (fun (x,y) -> Point.create x y)
 
-        let topLeft =
+        let btmLeft =
             Gen.choose (-100,100)
             |> Gen.two
             |> Gen.map (fun (x,y) -> Point.create x y)
 
-        Gen.zip topLeft size
+        Gen.zip btmLeft size
         |> Gen.map (fun (t, s) -> Rect.pointCreate t s)
 
     static member genWorldObject: Gen<WorldObject> =
@@ -26,7 +26,7 @@ type SerialisationArbs() =
             Arb.generate<System.Guid>
             |> Gen.map (fun g -> g.ToString())
 
-        let topLeft =
+        let btmLeft =
             Gen.choose (-100,100)
             |> Gen.two
             |> Gen.map (fun (x,y) -> Point.create x y)
@@ -34,7 +34,7 @@ type SerialisationArbs() =
         let objType =
             Arb.generate<WorldObject.Type>
 
-        Gen.zip3 id objType topLeft
+        Gen.zip3 id objType btmLeft
         |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.useId id)
 
     static member genWorld: Gen<World> =
@@ -43,7 +43,7 @@ type SerialisationArbs() =
             bounds
             |> Gen.map (fun rects ->
                 List.tryHead rects
-                |> Option.map (fun r -> r.topLeft)
+                |> Option.map (fun r -> r.btmLeft)
                 |> Option.defaultValue Point.zero
             )
         let objects = Gen.listOf Arb.generate<WorldObject>

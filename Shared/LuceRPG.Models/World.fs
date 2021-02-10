@@ -24,9 +24,9 @@ module World =
             let spawnerPoints =
                 [
                     Point.zero
-                    Point.create 0 -1
+                    Point.create 0 1
                     Point.create 1 0
-                    Point.create 1 -1
+                    Point.create 1 1
                 ]
                 |> List.map (Point.add playerSpawner)
 

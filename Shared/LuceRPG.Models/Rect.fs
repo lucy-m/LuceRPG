@@ -2,7 +2,7 @@
 
 module Rect =
     type Model = {
-        topLeft: Point
+        btmLeft: Point
         size: Point
     }
 
@@ -13,35 +13,35 @@ module Rect =
                 (max 0 h)
 
         {
-            topLeft = Point.create x y
+            btmLeft = Point.create x y
             size = size
         }
 
-    let pointCreate (topLeft: Point) (size: Point): Model =
+    let pointCreate (btmLeft: Point) (size: Point): Model =
         {
-            topLeft = topLeft
+            btmLeft = btmLeft
             size = size
         }
 
     /// inclusive left bound
     let leftBound (rect: Model): int =
-        rect.topLeft.x
+        rect.btmLeft.x
 
     /// exclusive right bound
     let rightBound (rect: Model): int =
-        rect.topLeft.x + rect.size.x
+        rect.btmLeft.x + rect.size.x
 
-    /// inclusive top bound
+    /// exclusive top bound
     let topBound (rect: Model): int =
-        rect.topLeft.y
+        rect.btmLeft.y + rect.size.y
 
-    /// exclusive bottom bound
+    /// inclusive bottom bound
     let bottomBound (rect: Model): int =
-        rect.topLeft.y - rect.size.y
+        rect.btmLeft.y
 
     let contains (p: Point) (rect: Model): bool =
         let inX = p.x >= (leftBound rect) && p.x < (rightBound rect)
-        let inY = p.y <= (topBound rect) && p.y > (bottomBound rect)
+        let inY = p.y >= (bottomBound rect) && p.y < (topBound rect)
 
         inX && inY
 

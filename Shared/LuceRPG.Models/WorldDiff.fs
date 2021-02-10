@@ -76,15 +76,15 @@ module WorldDiff =
             let unmatchingPositions =
                 unmatchingObjects
                 |> List.filter (fun (fromObj, toObj) ->
-                    WorldObject.topLeft fromObj
-                    <> WorldObject.topLeft toObj
+                    WorldObject.btmLeft fromObj
+                    <> WorldObject.btmLeft toObj
                 )
                 |> List.map (fun (fromObj, toObj) ->
                     DiffType.UnmatchingObjectPosition
                         (
                             fromObj.id,
-                            WorldObject.topLeft fromObj,
-                            WorldObject.topLeft toObj
+                            WorldObject.btmLeft fromObj,
+                            WorldObject.btmLeft toObj
                         )
                 )
 

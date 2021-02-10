@@ -13,18 +13,18 @@ module WorldObject =
     type Payload =
         {
             t: Type
-            topLeft: Point
+            btmLeft: Point
         }
 
     type Model = Payload WithId
 
-    let create (t: Type) (topLeft: Point): Payload =
+    let create (t: Type) (btmLeft: Point): Payload =
         {
             t = t
-            topLeft = topLeft
+            btmLeft = btmLeft
         }
 
-    let topLeft (wo: Model): Point = wo.value.topLeft
+    let btmLeft (wo: Model): Point = wo.value.btmLeft
     let t (wo: Model): Type = wo.value.t
     let id (wo: Model): Id.WorldObject = wo.id
 
@@ -51,23 +51,23 @@ module WorldObject =
             ([0 .. (objSize.x - 1)], [0 .. (objSize.y - 1)])
             |> (fun (xs, ys) ->
                 xs
-                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x -y))
+                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x y))
             )
 
         let blocked =
             relPoints
-            |> List.map (fun p1 -> Point.add p1 obj.topLeft)
+            |> List.map (fun p1 -> Point.add p1 obj.btmLeft)
 
         blocked
 
     let moveObjectN (direction: Direction) (amount: int) (obj: Model): Model =
-        let newTopLeft = Direction.movePoint direction amount obj.value.topLeft
+        let newBtmLeft = Direction.movePoint direction amount obj.value.btmLeft
 
         {
             obj with
                 value = {
                     obj.value with
-                        topLeft = newTopLeft
+                        btmLeft = newBtmLeft
                 }
         }
 

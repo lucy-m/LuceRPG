@@ -7,13 +7,13 @@ open IntentionProcessing
 [<TestFixture>]
 module IntentionProcessing =
     let clientId = "client"
-    let bound = Rect.create 0 10 10 10
-    let spawnPoint = Point.create 2 9
+    let bound = Rect.create 0 0 10 10
+    let spawnPoint = Point.create 1 1
 
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
-        let player = TestUtil.makePlayer (Point.create 1 3)
-        let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 3) |> TestUtil.withId
+        let player = TestUtil.makePlayer (Point.create 1 1)
+        let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) |> TestUtil.withId
         let objectClientMap = [player.id, clientId] |> Map.ofList |> Option.Some
         let now = 120L
 
@@ -55,7 +55,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 4)
+                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 2)
 
                 [<Test>]
                 let ``client object map is unchanged`` () =
@@ -86,7 +86,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
+                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move one square east`` =
@@ -107,11 +107,11 @@ module IntentionProcessing =
                     let newPlayer = result.world.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
+                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move four squares east`` =
-                // player should teleport past the wall in this case
+                // player is blocked by the wall
                 let intention =
                     Intention.Move (player.id, Direction.East, 4uy)
                     |> makeIntention
@@ -128,7 +128,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 3)
+                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move two squares south `` =
@@ -154,7 +154,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.topLeft |> should equal (Point.create 1 2)
+                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 0)
 
                 [<Test>]
                 let ``the rest of the move intention is delayed`` () =
