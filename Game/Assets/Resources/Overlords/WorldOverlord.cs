@@ -18,6 +18,8 @@ namespace LuceRPG.Game.Overlords
         public GameObject BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
         public GameObject NpcPrefab = null;
+        public GameObject UnitNamePrefab = null;
+        public Canvas WorldTextCanvas = null;
 
         private void Start()
         {
@@ -143,7 +145,7 @@ namespace LuceRPG.Game.Overlords
                 }
 
                 uc.Id = obj.id;
-                uc.Model = obj.value;
+                uc.SetModelProps(obj.value);
 
                 if (WorldObjectModule.t(obj).IsPath)
                 {
@@ -156,6 +158,15 @@ namespace LuceRPG.Game.Overlords
                 {
                     Debug.Log($"Adding camera to {obj.id}");
                     Instantiate(CameraPrefab, go.transform);
+                }
+
+                var tName = WorldObjectModule.getName(obj.value);
+                if (tName.HasValue())
+                {
+                    var unitNameLocation = obj.GetCenterLocation() + Vector3.up;
+                    var unitNameGo = Instantiate(UnitNamePrefab, unitNameLocation, Quaternion.identity, WorldTextCanvas.transform);
+                    var unitName = unitNameGo.GetComponent<UnitNameController>();
+                    unitName.SetFollow(tName.Value, uc);
                 }
             }
         }
