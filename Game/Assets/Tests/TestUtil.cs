@@ -7,7 +7,7 @@ public static class TestUtil
         int x, int y, string name = null
     )
     {
-        name = name ?? Guid.NewGuid().ToString();
+        name ??= Guid.NewGuid().ToString();
         var playerData = PlayerDataModule.create(name);
         var topLeft = PointModule.create(x, y);
 

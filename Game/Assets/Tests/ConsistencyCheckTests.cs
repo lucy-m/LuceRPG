@@ -97,9 +97,9 @@ public class ConsistencyCheckTests
         var objToSnap = UniversalController.GetById(modelToSnap.id);
         var objToRemove = UniversalController.GetById(modelToRemove.id);
 
-        Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetGameLocation()));
-        Assert.That(objToSnap.transform.position, Is.EqualTo(modelToSnap.GetGameLocation()));
-        Assert.That(objToRemove.transform.position, Is.EqualTo(modelToRemove.GetGameLocation()));
+        Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetCenterLocation()));
+        Assert.That(objToSnap.transform.position, Is.EqualTo(modelToSnap.GetCenterLocation()));
+        Assert.That(objToRemove.transform.position, Is.EqualTo(modelToRemove.GetCenterLocation()));
         Assert.That(UniversalController.GetById(modelToAdd.id), Is.Null);
 
         yield return null;
@@ -112,10 +112,10 @@ public class ConsistencyCheckTests
 
         // should not move immediately
         var objToMove = UniversalController.GetById(modelToMove.id);
-        Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetGameLocation()));
+        Assert.That(objToMove.transform.position, Is.EqualTo(modelToMove.GetCenterLocation()));
 
         // target should be set to the new location
-        Assert.That(objToMove.Target, Is.EqualTo(updatedToMove.GetGameLocation()));
+        Assert.That(objToMove.Target, Is.EqualTo(updatedToMove.GetCenterLocation()));
 
         yield return null;
     }
@@ -127,8 +127,8 @@ public class ConsistencyCheckTests
 
         // moves position and target to the new location
         var objToSnap = UniversalController.GetById(modelToSnap.id);
-        Assert.That(objToSnap.transform.position, Is.EqualTo(updatedToSnap.GetGameLocation()));
-        Assert.That(objToSnap.Target, Is.EqualTo(updatedToSnap.GetGameLocation()));
+        Assert.That(objToSnap.transform.position, Is.EqualTo(updatedToSnap.GetCenterLocation()));
+        Assert.That(objToSnap.Target, Is.EqualTo(updatedToSnap.GetCenterLocation()));
 
         yield return null;
     }
@@ -157,7 +157,7 @@ public class ConsistencyCheckTests
         var newObj = UniversalController.GetById(modelToAdd.id);
         Assert.That(newObj == null, Is.False);
 
-        Assert.That(newObj.transform.position, Is.EqualTo(modelToAdd.GetGameLocation()));
+        Assert.That(newObj.transform.position, Is.EqualTo(modelToAdd.GetCenterLocation()));
 
         yield return null;
     }

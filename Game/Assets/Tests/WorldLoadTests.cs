@@ -111,14 +111,14 @@ public class WorldLoadTests
         var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
-        var expectedLocation = playerModel.GetGameLocation();
+        var expectedLocation = playerModel.GetCenterLocation();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         //Wall loads correctly
         var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
-        expectedLocation = wallModel.GetGameLocation();
+        expectedLocation = wallModel.GetCenterLocation();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         yield return null;
