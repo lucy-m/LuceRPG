@@ -11,23 +11,21 @@ module SampleWorlds =
                 Rect.create -6 0 6 11
             ]
 
-        let spawnPoint = Point.create 2 -5
+        let spawnPoint = Point.create 2 5
 
         let npc =
             let playerData = PlayerData.create "Harry"
             let t = WorldObject.Type.NPC playerData
-            WorldObject.create t (Point.create 16 -4)
+            WorldObject.create t (Point.create 16 4)
             |> WithId.create
 
         let walls =
             [
-                WorldObject.create WorldObject.Type.Wall (Point.create 2 -2)
-                WorldObject.create WorldObject.Type.Wall (Point.create 4 -2)
-                WorldObject.create WorldObject.Type.Wall (Point.create 7 -2)
-                WorldObject.create WorldObject.Type.Wall (Point.create 9 -3)
-                WorldObject.create WorldObject.Type.Wall (Point.create -4 -1)
-
-                WorldObject.create (WorldObject.Type.Path (1,5)) (Point.create 5 8)
+                WorldObject.create WorldObject.Type.Wall (Point.create 2 2)
+                WorldObject.create WorldObject.Type.Wall (Point.create 4 2)
+                WorldObject.create WorldObject.Type.Wall (Point.create 7 2)
+                WorldObject.create WorldObject.Type.Wall (Point.create 9 3)
+                WorldObject.create WorldObject.Type.Wall (Point.create -4 1)
             ]
             |> List.map (fun wo ->
                 WithId.create wo

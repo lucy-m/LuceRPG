@@ -5,7 +5,7 @@ open LuceRPG.Models
 module WorldDiffFields =
 
     let rStr (r: Rect): string =
-        sprintf "%i %i %i %i" r.topLeft.x r.topLeft.y r.size.x r.size.y
+        sprintf "%i %i %i %i" r.btmLeft.x r.btmLeft.y r.size.x r.size.y
 
     let create (dt: WorldDiff.DiffType): string * string seq =
         match dt with

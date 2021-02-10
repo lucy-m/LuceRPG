@@ -15,6 +15,7 @@ module ASCIIWorld =
                 | World.BlockedType.Object obj ->
                     match WorldObject.t obj with
                     | WorldObject.Type.Wall _ -> "W"
+                    | WorldObject.Type.NPC _ -> "N"
                     | _ -> " "
                 | World.BlockedType.SpawnPoint _ -> "S"
             )

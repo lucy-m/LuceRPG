@@ -48,9 +48,9 @@ namespace LuceRPG.Server.Test
 
             var worldBounds = new RectModule.Model[]
             {
-                new RectModule.Model(PointModule.create(0, 10), PointModule.create(10, 10))
+                new RectModule.Model(PointModule.create(0, 0), PointModule.create(10, 10))
             };
-            spawnPoint = PointModule.create(0, 10);
+            spawnPoint = PointModule.create(5, 5);
 
             initialWorld = WorldModule.empty(worldBounds, spawnPoint);
 
@@ -144,7 +144,7 @@ namespace LuceRPG.Server.Test
 
                 // Player is at the spawn point
                 var playerObj = players.Single().Value;
-                Assert.That(playerObj.value.topLeft, Is.EqualTo(spawnPoint));
+                Assert.That(playerObj.value.btmLeft, Is.EqualTo(spawnPoint));
 
                 // Player has username passed in
                 var playerData =
@@ -309,9 +309,9 @@ namespace LuceRPG.Server.Test
                 var player1 = newWorld.objects[playerId1];
                 var newPlayerPos = DirectionModule.movePoint(direction, 1, spawnPoint);
 
-                Assert.That(player1.value.topLeft, Is.EqualTo(newPlayerPos));
-                Assert.That(newWorld.objects[playerId2].value.topLeft, Is.EqualTo(spawnPoint));
-                Assert.That(newWorld.objects[playerId3].value.topLeft, Is.EqualTo(spawnPoint));
+                Assert.That(player1.value.btmLeft, Is.EqualTo(newPlayerPos));
+                Assert.That(newWorld.objects[playerId2].value.btmLeft, Is.EqualTo(spawnPoint));
+                Assert.That(newWorld.objects[playerId3].value.btmLeft, Is.EqualTo(spawnPoint));
 
                 // Player is marked as busy
                 var expectedBusyEnd = timestampProvider.Now + WorldObjectModule.travelTime(player1.value);
@@ -349,7 +349,7 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // Player is not moved
-                Assert.That(newWorld.objects[playerId1].value.topLeft, Is.EqualTo(newPlayerPos));
+                Assert.That(newWorld.objects[playerId1].value.btmLeft, Is.EqualTo(newPlayerPos));
 
                 // Intention is delayed
                 Assert.That(intentionQueue.Queue.Count, Is.EqualTo(1));
@@ -369,7 +369,7 @@ namespace LuceRPG.Server.Test
                 // Player is moved
                 var newPlayerPos2 = DirectionModule.movePoint(direction, 1, newPlayerPos);
                 var newWorld2 = worldStorer.CurrentWorld;
-                Assert.That(newWorld2.objects[playerId1].value.topLeft, Is.EqualTo(newPlayerPos2));
+                Assert.That(newWorld2.objects[playerId1].value.btmLeft, Is.EqualTo(newPlayerPos2));
             }
 
             [Test]
@@ -393,9 +393,9 @@ namespace LuceRPG.Server.Test
                 // Player is not moved
                 var newWorld = worldStorer.CurrentWorld;
 
-                Assert.That(newWorld.objects[playerId1].value.topLeft, Is.EqualTo(spawnPoint));
-                Assert.That(newWorld.objects[playerId2].value.topLeft, Is.EqualTo(spawnPoint));
-                Assert.That(newWorld.objects[playerId3].value.topLeft, Is.EqualTo(spawnPoint));
+                Assert.That(newWorld.objects[playerId1].value.btmLeft, Is.EqualTo(spawnPoint));
+                Assert.That(newWorld.objects[playerId2].value.btmLeft, Is.EqualTo(spawnPoint));
+                Assert.That(newWorld.objects[playerId3].value.btmLeft, Is.EqualTo(spawnPoint));
 
                 // Player is not marked as busy
                 Assert.That(worldStorer.ObjectBusyMap.ContainsKey(playerId1), Is.False);

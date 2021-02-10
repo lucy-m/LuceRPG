@@ -75,7 +75,7 @@ namespace LuceRPG.Game.Services
             Action<WorldModule.Model, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff,
             WorldModule.Model world)
         {
-            var diffs = WorldDiffModule.diff(world, Registry.Stores.World.World).ToArray();
+            var diffs = WorldDiffModule.diff(Registry.Stores.World.World, world).ToArray();
             if (diffs.Any())
             {
                 Debug.LogWarning($"Consistency check failed with {diffs.Length} results");

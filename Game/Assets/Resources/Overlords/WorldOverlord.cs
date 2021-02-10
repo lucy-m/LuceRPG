@@ -72,7 +72,7 @@ namespace LuceRPG.Game.Overlords
             {
                 foreach (var bound in world.bounds)
                 {
-                    var location = bound.GetGameLocation();
+                    var location = bound.GetCenterLocation();
 
                     if (BackgroundPrefab != null)
                     {
@@ -130,7 +130,7 @@ namespace LuceRPG.Game.Overlords
 
         private void AddObject(WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var location = obj.GetGameLocation();
+            var location = WorldObjectModule.btmLeft(obj).ToVector3();
             var prefab = GetPrefab(obj);
 
             if (prefab != null)
@@ -181,15 +181,15 @@ namespace LuceRPG.Game.Overlords
 
             foreach (var diff in diffs)
             {
-                if (diff.IsExtraObject)
+                if (diff.IsMissingObject)
                 {
-                    var extraObject = ((WorldDiffModule.DiffType.ExtraObject)diff).Item;
+                    var extraObject = ((WorldDiffModule.DiffType.MissingObject)diff).Item;
                     var uc = UniversalController.GetById(extraObject);
                     Destroy(uc.gameObject);
                 }
-                else if (diff.IsMissingObject)
+                else if (diff.IsExtraObject)
                 {
-                    var missingObjectId = ((WorldDiffModule.DiffType.MissingObject)diff).Item;
+                    var missingObjectId = ((WorldDiffModule.DiffType.ExtraObject)diff).Item;
                     var tMissingObject = MapModule.TryFind(missingObjectId, world.objects);
 
                     if (tMissingObject.HasValue())
@@ -203,15 +203,11 @@ namespace LuceRPG.Game.Overlords
                 }
                 else if (diff.IsUnmatchingObjectPosition)
                 {
-                    var unmatching = ((WorldDiffModule.DiffType.UnmatchingObjectPosition)diff);
+                    var unmatching = (WorldDiffModule.DiffType.UnmatchingObjectPosition)diff;
                     var id = unmatching.Item1;
-                    var tCorrectObject = MapModule.TryFind(id, world.objects);
-                    if (tCorrectObject.HasValue())
-                    {
-                        var location = CoOrdTranslator.GetGameLocation(tCorrectObject.Value);
-                        var uc = UniversalController.GetById(id);
-                        uc.EnsureLocation(location);
-                    }
+                    var location = unmatching.Item3.ToVector3();
+                    var uc = UniversalController.GetById(id);
+                    uc.EnsureLocation(location);
                 }
                 else
                 {
