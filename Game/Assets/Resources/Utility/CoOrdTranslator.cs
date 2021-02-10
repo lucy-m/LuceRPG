@@ -18,6 +18,12 @@ namespace LuceRPG.Game.Utility
             return location;
         }
 
+        public static Vector3 GetBtmLeft(this WithId.Model<WorldObjectModule.Payload> obj)
+        {
+            var btmLeft = WorldObjectModule.btmLeft(obj);
+            return btmLeft.ToVector3();
+        }
+
         public static Vector3 GetCenterLocation(this RectModule.Model rect)
         {
             var location = new Vector3(

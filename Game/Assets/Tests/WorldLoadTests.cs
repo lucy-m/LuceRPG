@@ -59,7 +59,7 @@ public class WorldLoadTests
         var interactions = InteractionStore.OfInteractions(wallInteraction);
 
         var worldBounds =
-            new RectModule.Model(PointModule.create(0, 10), PointModule.create(10, 10))
+            new RectModule.Model(PointModule.create(0, 0), PointModule.create(10, 10))
             .ToSingletonEnumerable();
 
         var objects = new WithId.Model<WorldObjectModule.Payload>[]
@@ -111,14 +111,14 @@ public class WorldLoadTests
         var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
-        var expectedLocation = playerModel.GetCenterLocation();
+        var expectedLocation = WorldObjectModule.btmLeft(playerModel).ToVector3();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         //Wall loads correctly
         var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
-        expectedLocation = wallModel.GetCenterLocation();
+        expectedLocation = WorldObjectModule.btmLeft(wallModel).ToVector3();
         Assert.That(location, Is.EqualTo(expectedLocation));
 
         yield return null;

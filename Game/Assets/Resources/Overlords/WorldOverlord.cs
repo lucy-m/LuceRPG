@@ -181,15 +181,15 @@ namespace LuceRPG.Game.Overlords
 
             foreach (var diff in diffs)
             {
-                if (diff.IsExtraObject)
+                if (diff.IsMissingObject)
                 {
-                    var extraObject = ((WorldDiffModule.DiffType.ExtraObject)diff).Item;
+                    var extraObject = ((WorldDiffModule.DiffType.MissingObject)diff).Item;
                     var uc = UniversalController.GetById(extraObject);
                     Destroy(uc.gameObject);
                 }
-                else if (diff.IsMissingObject)
+                else if (diff.IsExtraObject)
                 {
-                    var missingObjectId = ((WorldDiffModule.DiffType.MissingObject)diff).Item;
+                    var missingObjectId = ((WorldDiffModule.DiffType.ExtraObject)diff).Item;
                     var tMissingObject = MapModule.TryFind(missingObjectId, world.objects);
 
                     if (tMissingObject.HasValue())
