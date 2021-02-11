@@ -14,6 +14,8 @@ namespace LuceRPG.Game.WorldObjects
         public readonly static Dictionary<string, UniversalController> Controllers
             = new Dictionary<string, UniversalController>();
 
+        private Vector3 _target;
+
         private const string UnitNameTag = "UnitName";
 
         private string _id = "";
@@ -64,6 +66,17 @@ namespace LuceRPG.Game.WorldObjects
             }
         }
 
+        public Vector3 Target
+        {
+            get => _target;
+            set
+            {
+                var z = value.y;
+                _target = new Vector3(value.x, value.y, z);
+                transform.position = new Vector3(transform.position.x, transform.position.y, z);
+            }
+        }
+
         public static UniversalController GetById(string id)
         {
             if (Controllers.TryGetValue(id, out var uc))
@@ -75,8 +88,6 @@ namespace LuceRPG.Game.WorldObjects
                 return null;
             }
         }
-
-        public Vector3 Target { get; private set; }
 
         private void Start()
         {
