@@ -85,11 +85,10 @@ module WorldObject =
         | Type.Player _ -> true
         | _ -> false
 
-    let getName (obj: Payload): string =
+    let getName (obj: Payload): string Option =
         match obj.t with
-        | Type.Player pd -> pd.name
-        | Type.NPC pd -> pd.name
-        | Type.Wall -> "Wall"
-        | Type.Path _ -> "Path"
+        | Type.Player pd -> Option.Some pd.name
+        | Type.NPC pd -> Option.Some pd.name
+        | _ -> Option.None
 
 type WorldObject = WorldObject.Model

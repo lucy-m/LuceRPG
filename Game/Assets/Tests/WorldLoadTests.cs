@@ -125,6 +125,16 @@ public class WorldLoadTests
     }
 
     [UnityTest]
+    public IEnumerator PlayerNameShownCorrectly()
+    {
+        var unitNameControllers = GameObject.FindObjectsOfType<UnitNameController>();
+        Assert.That(unitNameControllers.Length, Is.EqualTo(1));
+        Assert.That(unitNameControllers[0].Text.text, Is.EqualTo(playerName));
+
+        yield return null;
+    }
+
+    [UnityTest]
     public IEnumerator PlayerReactsToInputsCorrectly()
     {
         var playerObject = UniversalController.GetById(playerModel.id);
