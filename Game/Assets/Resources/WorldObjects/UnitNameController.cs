@@ -1,7 +1,4 @@
-using LuceRPG.Game.Utility;
 using LuceRPG.Game.WorldObjects;
-using LuceRPG.Models;
-using LuceRPG.Utility;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +18,14 @@ public class UnitNameController : MonoBehaviour
 
     private void Update()
     {
-        var ucLocation = _following.transform.position;
-        transform.position = ucLocation + _offset;
+        if (_following == null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            var ucLocation = _following.transform.position;
+            transform.position = ucLocation + _offset;
+        }
     }
 }
