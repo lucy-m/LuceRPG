@@ -2,9 +2,6 @@
 using LuceRPG.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LuceRPG.Game.WorldObjects
@@ -16,10 +13,7 @@ namespace LuceRPG.Game.WorldObjects
 
         private Vector3 _target;
 
-        private const string UnitNameTag = "UnitName";
-
         private string _id = "";
-        private WorldObjectModule.Payload _model;
         private float _speed = 0;
 
         public string Id
@@ -34,36 +28,11 @@ namespace LuceRPG.Game.WorldObjects
             }
         }
 
-        public WorldObjectModule.Payload Model
+        public void SetModelProps(WorldObjectModule.Payload model)
         {
-            get => _model;
-            set
-            {
-                _model = value;
-
-                var travelTime = _model == null ? 0 :
-                    (WorldObjectModule.travelTime(_model) / System.TimeSpan.TicksPerMillisecond);
-                _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
-
-                if (_model.t.IsPlayer || _model.t.IsNPC)
-                {
-                    var name = WorldObjectModule.getName(_model);
-
-                    var unitNameGo =
-                        gameObject
-                            .GetComponentsInChildren<TextMesh>()
-                            .FirstOrDefault(tm => tm.gameObject.CompareTag(UnitNameTag));
-
-                    if (unitNameGo == null)
-                    {
-                        Debug.LogWarning($"Could not set player name  {name} as no unit name component found");
-                    }
-                    else
-                    {
-                        unitNameGo.text = name;
-                    }
-                }
-            }
+            var travelTime = model == null ? 0 :
+                (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
+            _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
         }
 
         public Vector3 Target

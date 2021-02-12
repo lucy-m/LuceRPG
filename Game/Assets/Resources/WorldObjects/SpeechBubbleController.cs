@@ -26,7 +26,12 @@ namespace LuceRPG.Game.WorldObjects
 
                 if (playerObj.HasValue())
                 {
-                    playerName = WorldObjectModule.getName(playerObj.Value.value);
+                    var tPlayerName = WorldObjectModule.getName(playerObj.Value.value);
+
+                    if (tPlayerName.HasValue())
+                    {
+                        playerName = tPlayerName.Value;
+                    }
                 }
             }
         }
