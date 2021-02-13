@@ -60,7 +60,7 @@ namespace LuceRPG.Server
 
         public string AddOrResetUser(string username)
         {
-            var password = Guid.NewGuid().ToString();
+            var password = Guid.NewGuid().ToString().Split("-")[0];
             Credentials[username] = password;
 
             SaveCredentials();

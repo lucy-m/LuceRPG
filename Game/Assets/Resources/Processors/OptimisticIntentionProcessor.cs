@@ -61,7 +61,7 @@ namespace LuceRPG.Game.Processors
         {
             var processResult = IntentionProcessing.processMany(
                 DateTime.UtcNow.Ticks,
-                FSharpOption<FSharpMap<string, string>>.None,
+                FSharpOption<ServerSideDataModule.Model>.None,
                 _objectBusyMap,
                 Registry.Stores.World.World,
                 intentions
