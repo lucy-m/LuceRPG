@@ -18,7 +18,7 @@ namespace LuceRPG.Server.Test
 {
     public class WorldControllerTests
     {
-        protected WorldModule.Model initialWorld;
+        protected WithId.Model<WorldModule.Payload> initialWorld;
         protected PointModule.Model spawnPoint;
 
         protected IntentionProcessor intentionProcessor;
@@ -52,7 +52,7 @@ namespace LuceRPG.Server.Test
             };
             spawnPoint = PointModule.create(5, 5);
 
-            initialWorld = WorldModule.empty(worldBounds, spawnPoint);
+            initialWorld = WithId.create(WorldModule.empty("Testville", worldBounds, spawnPoint));
 
             worldStorer = new WorldEventsStorer(initialWorld, InteractionStore.Empty(), timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
@@ -136,6 +136,7 @@ namespace LuceRPG.Server.Test
                 var players =
                     worldStorer
                     .CurrentWorld
+                    .value
                     .objects
                     .Where(kvp => kvp.Value.value.t.IsPlayer)
                     .ToArray();
@@ -207,7 +208,7 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // world has three objects
-                var worldObjects = WorldModule.objectList(worldStorer.CurrentWorld).ToArray();
+                var worldObjects = WorldModule.objectList(worldStorer.CurrentWorld.value).ToArray();
                 Assert.That(worldObjects.Length, Is.EqualTo(3));
 
                 string GetPlayerId(string playerName)
@@ -304,8 +305,12 @@ namespace LuceRPG.Server.Test
 
                 intentionProcessor.Process();
 
+                // ID is unchanged
+                var idNewWorld = worldStorer.CurrentWorld;
+                Assert.That(idNewWorld, Is.EqualTo(initialWorld.id));
+
                 // Player is moved correctly
-                var newWorld = worldStorer.CurrentWorld;
+                var newWorld = idNewWorld.value;
                 var player1 = newWorld.objects[playerId1];
                 var newPlayerPos = DirectionModule.movePoint(direction, 1, spawnPoint);
 
@@ -368,7 +373,7 @@ namespace LuceRPG.Server.Test
 
                 // Player is moved
                 var newPlayerPos2 = DirectionModule.movePoint(direction, 1, newPlayerPos);
-                var newWorld2 = worldStorer.CurrentWorld;
+                var newWorld2 = worldStorer.CurrentWorld.value;
                 Assert.That(newWorld2.objects[playerId1].value.btmLeft, Is.EqualTo(newPlayerPos2));
             }
 
@@ -391,7 +396,8 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // Player is not moved
-                var newWorld = worldStorer.CurrentWorld;
+                var idNewWorld = worldStorer.CurrentWorld;
+                var newWorld = idNewWorld.value;
 
                 Assert.That(newWorld.objects[playerId1].value.btmLeft, Is.EqualTo(spawnPoint));
                 Assert.That(newWorld.objects[playerId2].value.btmLeft, Is.EqualTo(spawnPoint));

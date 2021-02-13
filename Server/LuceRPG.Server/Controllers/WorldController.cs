@@ -144,7 +144,7 @@ namespace LuceRPGServer.Controllers
         public string Dump()
         {
             var world = _worldStore.CurrentWorld;
-            var dump = ASCIIWorld.dump(world);
+            var dump = ASCIIWorld.dump(world.value);
 
             Console.WriteLine(dump);
 

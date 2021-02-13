@@ -39,7 +39,15 @@ module SampleWorlds =
         let interactionMap: World.InteractionMap =
             Map.ofList [npc.id, sayHiInteraction.id]
 
-        let world = World.createWithInteractions bounds spawnPoint (npc::walls) interactionMap
+        let world =
+            World.createWithInteractions
+                "sampleville"
+                bounds
+                spawnPoint
+                (npc::walls)
+                interactionMap
+            |> WithId.create
+
         let interactions = [sayHiInteraction]
 
         (world, interactions)

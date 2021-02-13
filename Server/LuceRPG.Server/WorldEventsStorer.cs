@@ -15,7 +15,7 @@ namespace LuceRPG.Server
         private readonly long _cullThreshold = TimeSpan.FromMinutes(1).Ticks;
 
         public WorldEventsStorer(
-            WorldModule.Model initialWorld,
+            WithId.Model<WorldModule.Payload> initialWorld,
             InteractionStore interactions,
             ITimestampProvider timestampProvider)
         {
@@ -24,7 +24,7 @@ namespace LuceRPG.Server
             Interactions = interactions;
         }
 
-        public WorldModule.Model CurrentWorld => _store.world;
+        public WithId.Model<WorldModule.Payload> CurrentWorld => _store.world;
         public ServerSideDataModule.Model ServerSideData => _store.serverSideData;
         public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
         public InteractionStore Interactions { get; }

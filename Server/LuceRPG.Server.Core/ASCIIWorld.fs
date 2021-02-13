@@ -3,7 +3,7 @@
 open LuceRPG.Models
 
 module ASCIIWorld =
-    let dumpPos (x: int) (y: int) (world: World): string =
+    let dumpPos (x: int) (y: int) (world: World.Payload): string =
         let point = Point.create x y
 
         if World.pointInBounds point world
@@ -13,7 +13,7 @@ module ASCIIWorld =
             |> Option.map (fun b ->
                 match b with
                 | World.BlockedType.Object obj ->
-                    match WorldObject.t obj with
+                    match obj.value.t with
                     | WorldObject.Type.Wall _ -> "W"
                     | WorldObject.Type.NPC _ -> "N"
                     | _ -> " "
@@ -31,7 +31,7 @@ module ASCIIWorld =
 
         minXLabel + padding + maxXLabel
 
-    let dumpRow (minX: int) (maxX: int) (y: int) (world: World): string =
+    let dumpRow (minX: int) (maxX: int) (y: int) (world: World.Payload): string =
         let xs = [minX .. (maxX - 1)]
 
         let row =
@@ -43,7 +43,7 @@ module ASCIIWorld =
 
         yLabel + " " + row
 
-    let dump (world: World): string =
+    let dump (world: World.Payload): string =
         let bounds = world.bounds |> Set.toList
 
         let minX =
