@@ -23,7 +23,7 @@ namespace LuceRPG.Server
         }
 
         public WorldModule.Model CurrentWorld => _store.world;
-        public FSharpMap<string, string> ObjectClientMap => _store.objectClientMap;
+        public ServerSideDataModule.Model ServerSideData => _store.serverSideData;
         public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
         public InteractionStore Interactions { get; }
 

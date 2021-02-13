@@ -40,7 +40,7 @@ namespace LuceRPG.Server.Processors
 
                 var processed = IntentionProcessing.processMany(
                     timestamp,
-                    _store.ObjectClientMap,
+                    _store.ServerSideData,
                     _store.ObjectBusyMap,
                     _store.CurrentWorld,
                     intentions
