@@ -57,7 +57,7 @@ module World =
                     let newWall =
                         WithId.useId
                             wall.id
-                            (WorldObject.create (WorldObject.t wall) (Point.create 3 4))
+                            (WorldObject.create wall.value.t (Point.create 3 4))
                     let newWorld = World.addObject newWall world
 
                     [<Test>]

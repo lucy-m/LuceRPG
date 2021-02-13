@@ -7,7 +7,7 @@ module EventApply =
             let tObj = world.value.objects |> Map.tryFind id
             tObj
             |> Option.map (fun obj ->
-                let newObj = WorldObject.moveObject dir obj
+                let newObj = WithId.map (WorldObject.moveObject dir) obj
                 WithId.map (World.addObject newObj) world
             )
             |> Option.defaultValue world

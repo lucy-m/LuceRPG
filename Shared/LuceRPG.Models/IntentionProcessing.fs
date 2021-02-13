@@ -88,7 +88,7 @@ module IntentionProcessing =
                         if travelTime <= 0L
                         then thisUnchanged
                         else
-                            let newObj = WorldObject.moveObject dir obj
+                            let newObj = WithId.map (WorldObject.moveObject dir) obj
 
                             if not (World.canPlace newObj world.value)
                             then thisUnchanged

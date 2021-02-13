@@ -16,7 +16,8 @@ module WorldObject =
             btmLeft: Point
         }
 
-    type Model = Payload WithId
+    let t (wo: Payload): Type = wo.t
+    let btmLeft (wo: Payload): Point = wo.btmLeft
 
     let create (t: Type) (btmLeft: Point): Payload =
         {
@@ -24,12 +25,8 @@ module WorldObject =
             btmLeft = btmLeft
         }
 
-    let btmLeft (wo: Model): Point = wo.value.btmLeft
-    let t (wo: Model): Type = wo.value.t
-    let id (wo: Model): Id.WorldObject = wo.id
-
-    let isBlocking (obj: Model): bool =
-        match obj.value.t with
+    let isBlocking (obj: Payload): bool =
+        match obj.t with
         | Type.Wall -> true
         | Type.Path _ -> false
         | Type.Player _ -> false
@@ -60,18 +57,15 @@ module WorldObject =
 
         blocked
 
-    let moveObjectN (direction: Direction) (amount: int) (obj: Model): Model =
-        let newBtmLeft = Direction.movePoint direction amount obj.value.btmLeft
+    let moveObjectN (direction: Direction) (amount: int) (obj: Payload): Payload =
+        let newBtmLeft = Direction.movePoint direction amount obj.btmLeft
 
         {
             obj with
-                value = {
-                    obj.value with
-                        btmLeft = newBtmLeft
-                }
+                btmLeft = newBtmLeft
         }
 
-    let moveObject (direction: Direction) (obj: Model): Model =
+    let moveObject (direction: Direction) (obj: Payload): Payload =
         moveObjectN direction 1 obj
 
     /// Time taken by the object to move one square
@@ -80,8 +74,8 @@ module WorldObject =
         | Type.Player _ -> System.TimeSpan.FromMilliseconds(float(250)).Ticks
         | _ -> 0L
 
-    let isPlayer (obj: Model): bool =
-        match t obj with
+    let isPlayer (obj: Payload): bool =
+        match obj.t with
         | Type.Player _ -> true
         | _ -> false
 
@@ -90,5 +84,7 @@ module WorldObject =
         | Type.Player pd -> Option.Some pd.name
         | Type.NPC pd -> Option.Some pd.name
         | _ -> Option.None
+
+    type Model = Payload WithId
 
 type WorldObject = WorldObject.Model

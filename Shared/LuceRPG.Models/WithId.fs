@@ -7,6 +7,9 @@ module WithId =
             value: 'T
         }
 
+    let id (t: 'T Model): string = t.id
+    let value (t: 'T Model): 'T = t.value
+
     let useId (id: string) (value: 'T): 'T Model =
         {
             id = id

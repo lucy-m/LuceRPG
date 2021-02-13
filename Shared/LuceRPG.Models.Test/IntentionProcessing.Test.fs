@@ -63,7 +63,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 2)
+                    newPlayer.Value.value.btmLeft |> should equal (Point.create 1 2)
 
                 [<Test>]
                 let ``client object map is unchanged`` () =
@@ -97,7 +97,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
+                    newPlayer.Value.value.btmLeft |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move one square east`` =
@@ -118,7 +118,10 @@ module IntentionProcessing =
                     let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
+                    newPlayer.Value
+                    |> WithId.value
+                    |> WorldObject.btmLeft
+                    |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move four squares east`` =
@@ -139,7 +142,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
+                    newPlayer.Value.value.btmLeft |> should equal (Point.create 1 1)
 
             [<TestFixture>]
             module ``when the player tries to move two squares south `` =
@@ -165,7 +168,7 @@ module IntentionProcessing =
                     let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
-                    newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 0)
+                    newPlayer.Value.value.btmLeft |> should equal (Point.create 1 0)
 
                 [<Test>]
                 let ``the rest of the move intention is delayed`` () =
@@ -330,11 +333,10 @@ module IntentionProcessing =
                     |> List.find (
                         fun p ->
                             p.id <> player.id
-                            && WorldObject.isPlayer p
+                            && WorldObject.isPlayer p.value
                     )
 
-                newPlayer
-                |> WorldObject.t
+                newPlayer.value.t
                 |> should be (ofCase <@WorldObject.Type.Player@>)
 
             [<Test>]
@@ -352,7 +354,7 @@ module IntentionProcessing =
                     |> List.find (
                         fun p ->
                             p.id <> player.id
-                            && WorldObject.isPlayer p
+                            && WorldObject.isPlayer p.value
                     )
 
                 let tEntry =

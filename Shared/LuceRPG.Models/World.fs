@@ -82,7 +82,7 @@ module World =
                     // objects are blocked by other objects with a differing id
                     | BlockedType.Object o -> o.id <> obj.id
                     // players are not blocked by spawn points
-                    | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj)
+                    | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj.value)
                 )
 
             blockedPoints |> List.isEmpty
@@ -146,7 +146,7 @@ module World =
         if not canPlaceObject
         then existingIdRemoved
         else
-            let isBlocking = WorldObject.isBlocking obj
+            let isBlocking = WorldObject.isBlocking obj.value
 
             let blocked =
                 if isBlocking
@@ -175,7 +175,7 @@ module World =
         let blocking, nonBlocking =
             objs
             |> List.ofSeq
-            |> List.partition WorldObject.isBlocking
+            |> List.partition (WithId.value >> WorldObject.isBlocking)
 
         let withItems =
             (blocking @ nonBlocking)
