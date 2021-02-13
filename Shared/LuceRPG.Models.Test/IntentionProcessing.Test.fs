@@ -7,19 +7,24 @@ open IntentionProcessing
 [<TestFixture>]
 module IntentionProcessing =
     let clientId = "client"
+    let username = "some-user"
     let bound = Rect.create 0 0 10 10
     let spawnPoint = Point.create 1 1
 
     [<TestFixture>]
     module ``for a world with a single wall and player`` =
-        let player = TestUtil.makePlayer (Point.create 1 1)
+        let player = TestUtil.makePlayerWithName (Point.create 1 1) username
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) |> TestUtil.withId
-        let objectClientMap = [player.id, clientId] |> Map.ofList |> Option.Some
+        let objectClientMap = [player.id, clientId] |> Map.ofList
+        let usernameClientMap = [username, clientId] |> Map.ofList
+        let serverSideData =
+            ServerSideData.create objectClientMap usernameClientMap
+            |> Option.Some
         let now = 120L
 
         let world = World.createWithObjs [bound] spawnPoint [player; wall]
 
-        let processFn = IntentionProcessing.processOne now objectClientMap Map.empty world
+        let processFn = IntentionProcessing.processOne now serverSideData Map.empty world
         let makeIntention =
                 Intention.makePayload clientId
                 >> TestUtil.withId
@@ -59,7 +64,10 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``client object map is unchanged`` () =
-                    result.objectClientMap |> should equal objectClientMap
+                    result
+                    |> IntentionProcessing.objectClientMap
+                    |> (fun ocm -> ocm.Value)
+                    |> should equal objectClientMap
 
                 [<Test>]
                 let ``nothing is delayed`` () =
@@ -210,7 +218,7 @@ module IntentionProcessing =
                     let result =
                         IntentionProcessing.processOne
                             now
-                            objectClientMap
+                            serverSideData
                             objectBusyMap
                             world
                             intention
@@ -228,7 +236,7 @@ module IntentionProcessing =
                 let processFn =
                     IntentionProcessing.processOne
                         now
-                        objectClientMap
+                        serverSideData
                         objectBusyMap
                         world
 
@@ -285,11 +293,12 @@ module IntentionProcessing =
                     result.events |> Seq.isEmpty |> should equal true
 
         [<TestFixture>]
-        module ``join game`` =
+        module ``join game for new username`` =
             let newClientId = "new-client"
+            let newUsername = "new-username"
 
             let intention =
-                Intention.JoinGame "username"
+                Intention.JoinGame newUsername
                 |> Intention.makePayload newClientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
@@ -298,7 +307,7 @@ module IntentionProcessing =
             let processResult =
                 IntentionProcessing.processOne
                     now
-                    (Map.empty |> Option.Some)
+                    (ServerSideData.empty |> Option.Some)
                     Map.empty
                     world
                     intention
@@ -344,12 +353,50 @@ module IntentionProcessing =
                     )
 
                 let tEntry =
-                    processResult.objectClientMap.Value
+                    processResult
+                    |> IntentionProcessing.objectClientMap
+                    |> (fun ocm -> ocm.Value)
                     |> Map.tryFind newPlayer.id
 
                 tEntry.IsSome |> should equal true
-
                 tEntry.Value |> should equal newClientId
+
+            [<Test>]
+            let ``adds new username and client to usernameClientMap`` () =
+                let ucm = IntentionProcessing.usernameClientMap processResult
+
+                ucm |> Option.isSome |> should equal true
+                ucm.Value |> Map.containsKey newUsername |> should equal true
+                ucm.Value |> Map.find newUsername |> should equal newClientId
+
+        [<TestFixture>]
+        module ``join game for existing username`` =
+            let newClientId = "new-client"
+
+            let intention =
+                Intention.JoinGame username
+                |> Intention.makePayload newClientId
+                |> WithId.create
+                |> WithTimestamp.create 100L
+                |> IndexedIntention.create
+
+            let processResult = processFn intention
+
+            [<Test>]
+            let ``creates object added event`` () =
+                let events = processResult.events |> Seq.toList
+
+                events |> List.length |> should equal 1
+                events.Head.resultOf |> should equal intention.tsIntention.value.id
+                events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
+
+            [<Test>]
+            let ``delays a leave game intention for old client id`` () =
+                let delayed = processResult.delayed |> Seq.toList
+
+                delayed |> List.length |> should equal 1
+                delayed.Head.tsIntention.value.value.t |> should be (ofCase <@Intention.LeaveGame@>)
+                delayed.Head.tsIntention.value.value.clientId |> should equal clientId
 
         [<TestFixture>]
         module ``leave game`` =
@@ -365,7 +412,7 @@ module IntentionProcessing =
             let processResult =
                 IntentionProcessing.processOne
                     now
-                    objectClientMap
+                    serverSideData
                     objectBusyMap
                     world
                     intention
@@ -390,6 +437,20 @@ module IntentionProcessing =
                 |> Map.containsKey player.id
                 |> should equal false
 
+            [<Test>]
+            let ``removes entry from serverSideData`` () =
+                let ucm = IntentionProcessing.usernameClientMap processResult
+                ucm.IsSome |> should equal true
+                ucm.Value |> Map.containsKey username |> should equal false
+
+                let ocm = IntentionProcessing.objectClientMap processResult
+                ocm.IsSome |> should equal true
+
+                ocm.Value
+                    |> Map.filter (fun oId cId -> cId <> clientId)
+                    |> Map.count
+                    |> should equal 0
+
         [<TestFixture>]
         module ``for multiple intentions`` =
             let intention1 =
@@ -413,7 +474,7 @@ module IntentionProcessing =
                 |> WithTimestamp.create 11L
                 |> IndexedIntention.create
 
-            let processFn = IntentionProcessing.processMany now objectClientMap Map.empty world
+            let processFn = IntentionProcessing.processMany now serverSideData Map.empty world
 
             let i123 = processFn [intention1; intention2; intention3]
             let i213 = processFn [intention2; intention1; intention3]
@@ -450,7 +511,8 @@ module IntentionProcessing =
                 player2.id, clientId
             ]
             |> Map.ofList
-            |> Option.Some
+
+        let serverSideData = ServerSideData.create objectClientMap Map.empty |> Option.Some
 
         let world = World.createWithObjs [bound] spawnPoint [player1; player2]
 
@@ -469,7 +531,7 @@ module IntentionProcessing =
                 |> IndexedIntention.create
 
             let processResult =
-                IntentionProcessing.processOne 100L objectClientMap Map.empty world intention
+                IntentionProcessing.processOne 100L serverSideData Map.empty world intention
 
             [<Test>]
             let ``creates object removed events`` () =

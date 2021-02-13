@@ -57,6 +57,12 @@ namespace LuceRPGServer
             }
 
             app.UseRouting();
+            app.UseCors(policy =>
+            {
+                policy.AllowAnyOrigin();
+                policy.AllowAnyHeader();
+                policy.AllowAnyMethod();
+            });
 
             app.UseEndpoints(endpoints =>
             {

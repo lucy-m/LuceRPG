@@ -7,9 +7,13 @@ module TestUtil =
 
         WithId.useId guid t
 
-    let makePlayer (btmLeft: Point): WorldObject =
-        let name = System.Guid.NewGuid().ToString()
+    let makePlayerWithName (btmLeft: Point) (name: string): WorldObject =
         let playerData = PlayerData.create name
         let payload = WorldObject.create (WorldObject.Type.Player playerData) btmLeft
 
         WithId.create payload
+
+    let makePlayer (btmLeft: Point): WorldObject =
+        let name = System.Guid.NewGuid().ToString()
+
+        makePlayerWithName btmLeft name

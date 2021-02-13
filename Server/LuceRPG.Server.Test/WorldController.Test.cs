@@ -171,7 +171,7 @@ namespace LuceRPG.Server.Test
                 Assert.That(tsWorld.value, Is.EqualTo(worldStorer.CurrentWorld));
 
                 // Object client map correct
-                var ocMapEntry = MapModule.TryFind(playerObj.id, worldStorer.ObjectClientMap);
+                var ocMapEntry = MapModule.TryFind(playerObj.id, worldStorer.ServerSideData.objectClientMap);
                 Assert.That(ocMapEntry.HasValue(), Is.True);
                 Assert.That(ocMapEntry.Value, Is.EqualTo(success.clientId));
             }
@@ -225,7 +225,7 @@ namespace LuceRPG.Server.Test
 
                 string GetClientId(string playerId)
                 {
-                    var clientId = MapModule.Find(playerId, worldStorer.ObjectClientMap);
+                    var clientId = MapModule.Find(playerId, worldStorer.ServerSideData.objectClientMap);
                     return clientId;
                 }
 
