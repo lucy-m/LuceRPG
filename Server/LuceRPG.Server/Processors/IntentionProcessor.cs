@@ -1,6 +1,7 @@
 ﻿using LuceRPG.Models;
 using LuceRPG.Utility;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 
 namespace LuceRPG.Server.Processors
@@ -79,6 +80,7 @@ namespace LuceRPG.Server.Processors
     public sealed class IntentionProcessorService : ProcessorHostService
     {
         private readonly IntentionProcessor _intentionProcessor;
+        protected override TimeSpan Interval => TimeSpan.FromMilliseconds(100);
 
         public IntentionProcessorService(
             ILogger<ProcessorHostService> logger, IntentionProcessor intentionProcessor)

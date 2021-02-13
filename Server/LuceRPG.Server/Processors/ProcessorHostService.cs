@@ -25,7 +25,7 @@ namespace LuceRPG.Server.Processors
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Processor starting");
-            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+            _timer = new Timer(ProcessIntentions, null, TimeSpan.Zero, Interval);
 
             return Task.CompletedTask;
         }
@@ -44,5 +44,7 @@ namespace LuceRPG.Server.Processors
         }
 
         protected abstract void DoProcess();
+
+        protected abstract TimeSpan Interval { get; }
     }
 }

@@ -3,6 +3,7 @@ using LuceRPG.Models;
 using LuceRPG.Server.Core;
 using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
+using System;
 
 namespace LuceRPG.Server
 {
@@ -11,6 +12,7 @@ namespace LuceRPG.Server
         private WorldEventsStoreModule.Model _store;
 
         private readonly ITimestampProvider _timestampProvider;
+        private readonly long _cullThreshold = TimeSpan.FromMinutes(1).Ticks;
 
         public WorldEventsStorer(
             WorldModule.Model initialWorld,
@@ -36,6 +38,12 @@ namespace LuceRPG.Server
         public GetSinceResultModule.Payload GetSince(long timestamp)
         {
             return WorldEventsStoreModule.getSince(timestamp, _store);
+        }
+
+        public void CullStore()
+        {
+            var timestamp = _timestampProvider.Now - _cullThreshold;
+            _store = WorldEventsStoreModule.cull(timestamp, _store);
         }
     }
 }

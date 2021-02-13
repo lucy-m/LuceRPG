@@ -44,6 +44,7 @@ namespace LuceRPG.Server.Processors
     public sealed class StaleClientProcessorService : ProcessorHostService
     {
         private readonly StaleClientProcessor _staleClientProcessor;
+        protected override TimeSpan Interval => TimeSpan.FromSeconds(15);
 
         public StaleClientProcessorService(ILogger<ProcessorHostService> logger, StaleClientProcessor staleClientProcessor)
             : base(logger)
