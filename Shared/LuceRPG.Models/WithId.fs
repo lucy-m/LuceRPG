@@ -20,6 +20,9 @@ module WithId =
             value = value
         }
 
+    let map (mapFn: 'T -> 'U) (withId: 'T Model): 'U Model =
+        useId (withId.id) (mapFn withId.value)
+
     let toMap (items: 'T Model List): Map<string, 'T Model> =
         items
         |> List.map (fun i -> (i.id, i))

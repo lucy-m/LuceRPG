@@ -22,9 +22,12 @@ module IntentionProcessing =
             |> Option.Some
         let now = 120L
 
-        let world = World.createWithObjs [bound] spawnPoint [player; wall]
+        let world =
+            World.createWithObjs "test-world" [bound] spawnPoint [player; wall]
 
-        let processFn = IntentionProcessing.processOne now serverSideData Map.empty world
+        let idWorld = world |> WithId.create
+
+        let processFn = IntentionProcessing.processOne now serverSideData Map.empty idWorld
         let makeIntention =
                 Intention.makePayload clientId
                 >> TestUtil.withId
@@ -57,7 +60,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``the player object is moved correctly`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 2)
@@ -91,7 +94,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``the player object is not moved`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
@@ -112,7 +115,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``the player object is not moved`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
@@ -133,7 +136,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``the player object is not moved`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 1)
@@ -159,7 +162,7 @@ module IntentionProcessing =
 
                 [<Test>]
                 let ``the player object is moved correctly`` () =
-                    let newPlayer = result.world.objects |> Map.tryFind player.id
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
                     newPlayer.IsSome |> should equal true
 
                     newPlayer.Value |> WorldObject.btmLeft |> should equal (Point.create 1 0)
@@ -220,7 +223,7 @@ module IntentionProcessing =
                             now
                             serverSideData
                             objectBusyMap
-                            world
+                            idWorld
                             intention
 
                     [<Test>]
@@ -238,7 +241,7 @@ module IntentionProcessing =
                         now
                         serverSideData
                         objectBusyMap
-                        world
+                        idWorld
 
                 [<TestFixture>]
                 module ``processing an intention from during busy period`` =
@@ -309,7 +312,7 @@ module IntentionProcessing =
                     now
                     (ServerSideData.empty |> Option.Some)
                     Map.empty
-                    world
+                    idWorld
                     intention
 
             [<Test>]
@@ -323,7 +326,7 @@ module IntentionProcessing =
             [<Test>]
             let ``adds a new player with event id`` () =
                 let newPlayer =
-                    World.objectList processResult.world
+                    World.objectList processResult.world.value
                     |> List.find (
                         fun p ->
                             p.id <> player.id
@@ -345,7 +348,7 @@ module IntentionProcessing =
             [<Test>]
             let ``adds new player to client object map`` () =
                 let newPlayer =
-                    World.objectList processResult.world
+                    World.objectList processResult.world.value
                     |> List.find (
                         fun p ->
                             p.id <> player.id
@@ -414,7 +417,7 @@ module IntentionProcessing =
                     now
                     serverSideData
                     objectBusyMap
-                    world
+                    idWorld
                     intention
 
             [<Test>]
@@ -427,7 +430,7 @@ module IntentionProcessing =
 
             [<Test>]
             let ``removes player object from world`` () =
-                processResult.world
+                processResult.world.value
                 |> World.containsObject player.id
                 |> should equal false
 
@@ -474,7 +477,7 @@ module IntentionProcessing =
                 |> WithTimestamp.create 11L
                 |> IndexedIntention.create
 
-            let processFn = IntentionProcessing.processMany now serverSideData Map.empty world
+            let processFn = IntentionProcessing.processMany now serverSideData Map.empty idWorld
 
             let i123 = processFn [intention1; intention2; intention3]
             let i213 = processFn [intention2; intention1; intention3]
@@ -514,7 +517,8 @@ module IntentionProcessing =
 
         let serverSideData = ServerSideData.create objectClientMap Map.empty |> Option.Some
 
-        let world = World.createWithObjs [bound] spawnPoint [player1; player2]
+        let world = World.createWithObjs "test-world" [bound] spawnPoint [player1; player2]
+        let idWorld = world |> WithId.create
 
         [<Test>]
         let ``world create correctly`` () =
@@ -531,7 +535,7 @@ module IntentionProcessing =
                 |> IndexedIntention.create
 
             let processResult =
-                IntentionProcessing.processOne 100L serverSideData Map.empty world intention
+                IntentionProcessing.processOne 100L serverSideData Map.empty idWorld intention
 
             [<Test>]
             let ``creates object removed events`` () =
@@ -545,11 +549,11 @@ module IntentionProcessing =
 
             [<Test>]
             let ``removes player objects from world`` () =
-                processResult.world
+                processResult.world.value
                 |> World.containsObject player1.id
                 |> should equal false
 
-                processResult.world
+                processResult.world.value
                 |> World.containsObject player2.id
                 |> should equal false
 
@@ -572,7 +576,7 @@ module IntentionProcessing =
                     100L
                     Option.None
                     Map.empty
-                    world
+                    idWorld
                     intentions
 
             [<Test>]

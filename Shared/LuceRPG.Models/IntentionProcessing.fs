@@ -79,7 +79,7 @@ module IntentionProcessing =
                         serverSideData = tServerSideData
                     }
                 else
-                    let tObj = world.objects |> Map.tryFind id
+                    let tObj = world.value.objects |> Map.tryFind id
 
                     match tObj with
                     | Option.None -> thisUnchanged
@@ -90,7 +90,7 @@ module IntentionProcessing =
                         else
                             let newObj = WorldObject.moveObject dir obj
 
-                            if not (World.canPlace newObj world)
+                            if not (World.canPlace newObj world.value)
                             then thisUnchanged
                             else
                                 let event =
@@ -134,7 +134,7 @@ module IntentionProcessing =
 
         | Intention.JoinGame username ->
             // Generates event to add a player object to the world at the spawn point
-            let spawnPoint = World.spawnPoint world
+            let spawnPoint = World.spawnPoint world.value
             let playerData = PlayerData.create username
             let obj =
                 WorldObject.create

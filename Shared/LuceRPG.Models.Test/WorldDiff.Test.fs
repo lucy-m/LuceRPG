@@ -5,11 +5,13 @@ open FsUnit
 
 [<TestFixture>]
 module WorldDiff =
+    let name = "test-world"
+    let worldId = "world"
 
     [<Test>]
     let ``incorrect spawn point`` () =
-        let world1 = World.empty [] (Point.create 1 1)
-        let world2 = World.empty [] (Point.create 2 1)
+        let world1 = World.empty name [] (Point.create 1 1) |> WithId.useId worldId
+        let world2 = World.empty name [] (Point.create 2 1) |> WithId.useId worldId
 
         let diff = WorldDiff.diff world1 world2 |> Seq.toList
         let expected = [ WorldDiff.DiffType.IncorrectSpawnPoint]
@@ -22,8 +24,8 @@ module WorldDiff =
         let extra = Rect.create 4 4 1 1
         let missing = Rect.create 5 4 1 1
 
-        let world1 = World.empty (missing::bounds) Point.zero
-        let world2 = World.empty (extra::bounds) Point.zero
+        let world1 = World.empty name (missing::bounds) Point.zero |> WithId.useId worldId
+        let world2 = World.empty name (extra::bounds) Point.zero |> WithId.useId worldId
 
         let diff = WorldDiff.diff world1 world2 |> Seq.toList
         let expected =
@@ -59,15 +61,19 @@ module WorldDiff =
 
         let world1 =
             World.createWithObjs
+                name
                 bounds
                 Point.zero
                 (missingObject::matchingObject::[unmatchingObject1])
+            |> WithId.useId worldId
 
         let world2 =
             World.createWithObjs
+                name
                 bounds
                 Point.zero
                 (extraObject::matchingObject::[unmatchingObject2])
+            |> WithId.useId worldId
 
         let diff = WorldDiff.diff world1 world2
 

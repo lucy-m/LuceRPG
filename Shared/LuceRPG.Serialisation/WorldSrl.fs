@@ -3,7 +3,10 @@
 open LuceRPG.Models
 
 module WorldSrl =
-    let serialise (w: World): byte[] =
+    let serialisePayload (w: World.Payload): byte[] =
+        let name =
+            StringSrl.serialise w.name
+
         let bounds =
             ListSrl.serialise
                 RectSrl.serialise
@@ -15,7 +18,7 @@ module WorldSrl =
         let objects =
             ListSrl.serialise
                 WorldObjectSrl.serialise
-                (World.objectList w)
+                (w.objects |> WithId.toList)
 
         let interactions =
             MapSrl.serialise
@@ -23,18 +26,26 @@ module WorldSrl =
                 StringSrl.serialise
                 w.interactions
 
-        Array.concat [bounds; spawner; objects; interactions]
+        Array.concat [name; bounds; spawner; objects; interactions]
 
-    let deserialise (bytes: byte[]): World DesrlResult =
+    let serialise (w: World): byte[] =
+        WithIdSrl.serialise serialisePayload w
+
+    let deserialisePayload (bytes: byte[]): World.Payload DesrlResult =
+        let getName = StringSrl.deserialise
         let getBounds = ListSrl.deserialise RectSrl.deserialise
         let getSpawner = PointSrl.deserialise
         let getObjects = ListSrl.deserialise WorldObjectSrl.deserialise
         let getInteractions = MapSrl.deserialise StringSrl.deserialise StringSrl.deserialise
 
-        DesrlUtil.getFour
+        DesrlUtil.getFive
+            getName
             getBounds
             getSpawner
             getObjects
             getInteractions
             World.createWithInteractions
             bytes
+
+    let deserialise (bytes: byte[]): World DesrlResult =
+        WithIdSrl.deserialise deserialisePayload bytes
