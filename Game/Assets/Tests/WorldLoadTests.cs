@@ -25,7 +25,7 @@ public class WorldLoadTests
 
     private WithId.Model<WorldObjectModule.Payload> playerModel;
     private WithId.Model<WorldObjectModule.Payload> wallModel;
-    private WorldModule.Model world;
+    private WithId.Model<WorldModule.Payload> idWorld;
     private readonly string clientId = "client-id";
     private readonly string playerName = "test-player";
     private readonly string interactionText = "Hello {player}!";
@@ -72,8 +72,9 @@ public class WorldLoadTests
         var wallInteractionMap = Tuple.Create(wallModel.id, wallInteraction.id);
         var interactionMap = new FSharpMap<string, string>(wallInteractionMap.ToSingletonEnumerable());
 
-        world = WorldModule.createWithInteractions(worldBounds, spawnPoint, objects, interactionMap);
-        var tsWorld = WithTimestamp.create(0, world);
+        var world = WorldModule.createWithInteractions("test", worldBounds, spawnPoint, objects, interactionMap);
+        idWorld = WithId.create(world);
+        var tsWorld = WithTimestamp.create(0, idWorld);
 
         var payload = new LoadWorldPayload(clientId, playerModel.id, tsWorld, interactions);
         testCommsService.OnLoad(payload);

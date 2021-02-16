@@ -76,6 +76,10 @@ module IntentionProcessing =
                 let ``nothing is delayed`` () =
                     result.delayed |> Seq.isEmpty |> should equal true
 
+                [<Test>]
+                let ``world id is unchanged`` () =
+                    result.world.id |> should equal idWorld.id
+
             [<TestFixture>]
             module ``when another client tries to move the player one square north`` =
                 let intention =
