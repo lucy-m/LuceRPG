@@ -183,7 +183,7 @@ public class WorldLoadTests
 
         // Event returned from server with same id
         var serverEventT = WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.East);
-        var serverEvent = WorldEventModule.asResult(testCommsService.LastIntentionId, 0, serverEventT);
+        var serverEvent = WorldEventModule.asResult(testCommsService.LastIntentionId, idWorld.id, 0, serverEventT);
         var tsEvent = WithTimestamp.create(testTimestampProvider.Now, serverEvent);
         var eventList = ListModule.OfSeq(new WithTimestamp.Model<WorldEventModule.Model>[] { tsEvent });
         var getSinceResult = GetSinceResultModule.Payload.NewEvents(eventList);
@@ -208,6 +208,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                     "intention1",
+                    idWorld.id,
                     0,
                     WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.North)
                 )
@@ -266,6 +267,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                         "intention1",
+                        idWorld.id,
                         0,
                         WorldEventModule.Type.NewObjectAdded(newPlayerModel)
                 )
@@ -301,6 +303,7 @@ public class WorldLoadTests
             WithTimestamp.create(1,
                 new WorldEventModule.Model(
                         "intention1",
+                        idWorld.id,
                         0,
                         WorldEventModule.Type.NewObjectRemoved(wallModel.id)
                 )

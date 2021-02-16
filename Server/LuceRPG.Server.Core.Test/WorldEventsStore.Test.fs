@@ -12,7 +12,8 @@ module WorldEventsStore =
 
     let makeEvent (t: WorldEvent.Type): WorldEvent =
         let intentionId = System.Guid.NewGuid.ToString()
-        WorldEvent.asResult intentionId 0 t
+        let worldId = System.Guid.NewGuid.ToString()
+        WorldEvent.asResult intentionId worldId 0 t
 
     [<TestFixture>]
     module ``unculled store with two events`` =

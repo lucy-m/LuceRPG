@@ -9,13 +9,20 @@ module WorldEvent =
     type Model =
         {
             resultOf: Id.Intention
+            world: Id.World
             index: int
             t: Type
         }
 
-    let asResult (intention: Id.Intention) (index: int) (t: Type): Model =
+    let asResult
+            (intention: Id.Intention)
+            (world: Id.World)
+            (index: int)
+            (t: Type)
+            : Model =
         {
             resultOf = intention
+            world = world
             index = index
             t = t
         }

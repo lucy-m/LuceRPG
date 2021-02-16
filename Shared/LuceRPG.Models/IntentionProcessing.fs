@@ -95,7 +95,7 @@ module IntentionProcessing =
                             else
                                 let event =
                                     WorldEvent.Type.Moved (id, dir)
-                                    |> WorldEvent.asResult intention.id iIntention.index
+                                    |> WorldEvent.asResult intention.id world.id iIntention.index
 
                                 let newWorld = EventApply.apply event world
 
@@ -179,7 +179,7 @@ module IntentionProcessing =
 
             let event =
                 WorldEvent.Type.ObjectAdded obj
-                |> WorldEvent.asResult intention.id iIntention.index
+                |> WorldEvent.asResult intention.id world.id iIntention.index
 
             let newWorld = EventApply.apply event world
 
@@ -213,7 +213,7 @@ module IntentionProcessing =
                         clientObjectsList
                         |> List.map (fun e ->
                                 WorldEvent.Type.ObjectRemoved e
-                                |> WorldEvent.asResult intention.id iIntention.index
+                                |> WorldEvent.asResult intention.id world.id iIntention.index
                         )
 
                     let updatedUsernameClientMap =

@@ -27,10 +27,11 @@ module WorldEventSrl =
 
     let serialise (e: WorldEvent): byte[] =
         let id = StringSrl.serialise e.resultOf
+        let worldId = StringSrl.serialise e.world
         let index = IntSrl.serialise e.index
         let payload = serialiseType e.t
 
-        Array.concat [id; index; payload]
+        Array.concat [id; worldId; index; payload]
 
     let deserialiseType (bytes: byte[]): WorldEvent.Type DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): WorldEvent.Type DesrlResult =
@@ -54,7 +55,8 @@ module WorldEventSrl =
         DesrlUtil.getTagged loadObj bytes
 
     let deserialise (bytes: byte[]): WorldEvent DesrlResult =
-        DesrlUtil.getThree
+        DesrlUtil.getFour
+            StringSrl.deserialise
             StringSrl.deserialise
             IntSrl.deserialise
             deserialiseType
