@@ -34,7 +34,7 @@ module IntentionProcessing =
                 Intention.makePayload clientId
                 >> TestUtil.withId
                 >> WithTimestamp.create now
-                >> IndexedIntention.create
+                >> IndexedIntention.create worldId
 
         [<Test>]
         let ``world created correctly`` () =
@@ -89,7 +89,7 @@ module IntentionProcessing =
                     |> Intention.makePayload "other-client"
                     |> TestUtil.withId
                     |> WithTimestamp.create 100L
-                    |> IndexedIntention.create
+                    |> IndexedIntention.create worldId
 
                 let result = processFn intention
 
@@ -185,7 +185,7 @@ module IntentionProcessing =
                         |> Intention.makePayload clientId
                         |> WithId.useId intention.tsIntention.value.id
                         |> WithTimestamp.create intention.tsIntention.timestamp
-                        |> IndexedIntention.useIndex 1
+                        |> IndexedIntention.useIndex 1 worldId
 
                     delayed.Length |> should equal 1
                     delayed |> should equal [expected]
@@ -197,7 +197,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> TestUtil.withId
                     |> WithTimestamp.create 100L
-                    |> IndexedIntention.useIndex 1
+                    |> IndexedIntention.useIndex 1 worldId
 
                 let result = processFn intention
 
@@ -260,7 +260,7 @@ module IntentionProcessing =
                         |> Intention.makePayload clientId
                         |> TestUtil.withId
                         |> WithTimestamp.create timestamp
-                        |> IndexedIntention.create
+                        |> IndexedIntention.create worldId
 
                     let result = processFn intention
 
@@ -280,7 +280,7 @@ module IntentionProcessing =
                         |> Intention.makePayload clientId
                         |> TestUtil.withId
                         |> WithTimestamp.create timestamp
-                        |> IndexedIntention.create
+                        |> IndexedIntention.create worldId
 
                     let result = processFn intention
 
@@ -314,7 +314,7 @@ module IntentionProcessing =
                 |> Intention.makePayload newClientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let processResult =
                 IntentionProcessing.processOne
@@ -397,7 +397,7 @@ module IntentionProcessing =
                 |> Intention.makePayload newClientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let processResult = processFn intention
 
@@ -424,7 +424,7 @@ module IntentionProcessing =
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let objectBusyMap = [player.id, now] |> Map.ofList
 
@@ -481,21 +481,21 @@ module IntentionProcessing =
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 9L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let intention2 =
                 Intention.LeaveGame
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 10L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let intention3 =
                 Intention.Move (player.id, Direction.North, 1uy)
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 11L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let processFn = IntentionProcessing.processMany now serverSideData Map.empty idWorld
 
@@ -556,7 +556,7 @@ module IntentionProcessing =
                 |> Intention.makePayload clientId
                 |> WithId.create
                 |> WithTimestamp.create 100L
-                |> IndexedIntention.create
+                |> IndexedIntention.create worldId
 
             let processResult =
                 IntentionProcessing.processOne 100L serverSideData Map.empty idWorld intention
@@ -592,7 +592,7 @@ module IntentionProcessing =
                     Intention.makePayload "not-the-client"
                     >> WithId.create
                     >> WithTimestamp.create 100L
-                    >> IndexedIntention.create
+                    >> IndexedIntention.create worldId
                 )
 
             let processResult =

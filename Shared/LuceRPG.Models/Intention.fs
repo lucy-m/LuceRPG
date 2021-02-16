@@ -26,20 +26,23 @@ module IndexedIntention =
     type Model =
         {
             tsIntention: Intention WithTimestamp
+            worldId: Id.World
             index: int
         }
 
-    let create (tsIntention: Intention WithTimestamp): Model =
+    let useIndex (index: int) (worldId: Id.World) (tsIntention: Intention WithTimestamp): Model =
         {
             tsIntention = tsIntention
-            index = 0
-        }
-
-    let useIndex (index: int) (tsIntention: Intention WithTimestamp): Model =
-        {
-            tsIntention = tsIntention
+            worldId = worldId
             index = index
         }
+
+    let create = useIndex 0
+
+    let applyToAllWorlds (model: Model): bool =
+        match model.tsIntention.value.value.t with
+        | Intention.Type.LeaveGame -> true
+        | _ -> false
 
 type IndexedIntention = IndexedIntention.Model
 

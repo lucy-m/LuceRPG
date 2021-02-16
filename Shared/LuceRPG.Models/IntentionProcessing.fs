@@ -124,7 +124,7 @@ module IntentionProcessing =
                                             |> Intention.makePayload clientId
                                             |> WithId.useId intention.id
                                             |> WithTimestamp.create timestamp
-                                            |> IndexedIntention.useIndex (iIntention.index + 1)
+                                            |> IndexedIntention.useIndex (iIntention.index + 1) (world.id)
                                         [intention]
 
                                 {
@@ -160,7 +160,7 @@ module IntentionProcessing =
                         |> Intention.makePayload id
                         |> WithId.create
                         |> WithTimestamp.create timestamp
-                        |> IndexedIntention.create
+                        |> IndexedIntention.create ""
 
                     [ intention ]
                 )

@@ -34,9 +34,10 @@ module IntentionSrl =
 
     let serialiseIndexed (ii: IndexedIntention): byte[] =
         let index = IntSrl.serialise ii.index
+        let worldId = StringSrl.serialise ii.worldId
         let tsIntention = WithTimestampSrl.serialise serialise ii.tsIntention
 
-        Array.append index tsIntention
+        Array.concat [index; worldId; tsIntention]
 
     let deserialiseType (bytes: byte[]): Intention.Type DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): Intention.Type DesrlResult =
@@ -72,8 +73,9 @@ module IntentionSrl =
             bytes
 
     let deserialiseIndexed (bytes: byte[]): IndexedIntention DesrlResult =
-        DesrlUtil.getTwo
+        DesrlUtil.getThree
             IntSrl.deserialise
+            StringSrl.deserialise
             (WithTimestampSrl.deserialise deserialise)
             IndexedIntention.useIndex
             bytes
