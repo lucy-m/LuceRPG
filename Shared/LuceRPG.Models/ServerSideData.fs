@@ -10,24 +10,28 @@ module ServerSideData =
             objectClientMap: ObjectClientMap
             usernameClientMap: UsernameClientMap
             clientWorldMap: ClientWorldMap
+            defaultWorld: Id.World
         }
 
     let create
             (objectClientMap: ObjectClientMap)
             (usernameClientMap: UsernameClientMap)
             (clientWorldMap: ClientWorldMap)
+            (defaultWorld: Id.World)
             : Model =
         {
             objectClientMap = objectClientMap
             usernameClientMap = usernameClientMap
             clientWorldMap = clientWorldMap
+            defaultWorld = defaultWorld
         }
 
-    let empty: Model =
+    let empty (defaultWorld: Id.World): Model =
         {
             objectClientMap = Map.empty
             usernameClientMap = Map.empty
             clientWorldMap = Map.empty
+            defaultWorld = defaultWorld
         }
 
 type ServerSideData = ServerSideData.Model

@@ -29,15 +29,15 @@ module WorldEventsStore =
     // So far the only way for ownership to be established is
     //   through intentions process results
     // A freshly loaded world will never have any ownership
-    let create (worlds: World seq): Model =
-        let worldMap = worlds |> Seq.map (fun w -> (w.id, w)) |> Map.ofSeq
+    let create (worlds: WorldCollection): Model =
+        let worldMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, w)) |> Map.ofSeq
 
         {
             lastCull = 0L
             recentEvents = Map.empty
             worldMap = worldMap
             objectBusyMap = Map.empty
-            serverSideData = ServerSideData.empty
+            serverSideData = ServerSideData.empty worlds.defaultWorld
         }
 
     let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =

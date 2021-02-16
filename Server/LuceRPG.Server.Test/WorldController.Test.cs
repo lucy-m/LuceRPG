@@ -1,6 +1,7 @@
 using LuceRPG.Adapters;
 using LuceRPG.Models;
 using LuceRPG.Serialisation;
+using LuceRPG.Server.Core;
 using LuceRPG.Server.Processors;
 using LuceRPG.Utility;
 using LuceRPGServer.Controllers;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.FSharp.Collections;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -65,7 +67,11 @@ namespace LuceRPG.Server.Test
                 "second-world",
                 WorldModule.empty("Secondville", worldBounds, spawnPoint));
 
-            worldStorer = new WorldEventsStorer(initialWorld, InteractionStore.Empty(), timestampProvider);
+            var worldCollection = WorldCollectionModule.createWithoutInteractions(
+                initialWorld.id,
+                new List<WithId.Model<WorldModule.Payload>>() { initialWorld, secondWorld });
+
+            worldStorer = new WorldEventsStorer(worldCollection, InteractionStore.Empty(), timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
             pingStorer = new LastPingStorer();
             var logService = new TestCsvLogService();

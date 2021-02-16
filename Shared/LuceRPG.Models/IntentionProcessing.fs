@@ -181,7 +181,13 @@ module IntentionProcessing =
                         ssd.clientWorldMap
                         |> Map.add clientId world.id
 
-                    ServerSideData.create objectClientMap usernameClientMap clientWorldMap
+                    let defaultWorld = ssd.defaultWorld
+
+                    ServerSideData.create
+                        objectClientMap
+                        usernameClientMap
+                        clientWorldMap
+                        defaultWorld
                 )
 
             let event =
@@ -232,7 +238,13 @@ module IntentionProcessing =
                             ssd.clientWorldMap
                             |> Map.remove clientId
 
-                        ServerSideData.create updatedObjectClientMap usernameClientMap clientWorldMap
+                        let defaultWorld = ssd.defaultWorld
+
+                        ServerSideData.create
+                            updatedObjectClientMap
+                            usernameClientMap
+                            clientWorldMap
+                            defaultWorld
 
                     Option.Some updatedServerSideData, updatedBusyMap, removeEvents
                 )

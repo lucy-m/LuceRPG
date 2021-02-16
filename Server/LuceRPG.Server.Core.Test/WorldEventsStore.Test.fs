@@ -40,7 +40,7 @@ module WorldEventsStore =
                 recentEvents = events
                 worldMap = worldMap
                 objectBusyMap = objectBusyMap
-                serverSideData = ServerSideData.empty
+                serverSideData = ServerSideData.empty worldId
             }
 
         [<TestFixture>]
@@ -87,7 +87,7 @@ module WorldEventsStore =
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
             let objectBusyMap = Map.ofList ["obj1", 100L]
-            let serverSideData = ServerSideData.create objectClientMap Map.empty Map.empty
+            let serverSideData = ServerSideData.create objectClientMap Map.empty Map.empty worldId
 
             let processResult: IntentionProcessing.ProcessResult =
                 {
@@ -168,7 +168,7 @@ module WorldEventsStore =
                 recentEvents = recentEvents
                 worldMap = worldMap
                 objectBusyMap = Map.empty
-                serverSideData = ServerSideData.empty
+                serverSideData = ServerSideData.empty worldId
             }
 
         [<Test>]

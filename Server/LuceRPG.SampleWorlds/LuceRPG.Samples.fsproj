@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LuceRPG.Server.Core\LuceRPG.Server.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="LuceRPG.Models">
       <HintPath>..\..\Shared\LuceRPG.Models\bin\Release\netstandard2.0\LuceRPG.Models.dll</HintPath>
     </Reference>

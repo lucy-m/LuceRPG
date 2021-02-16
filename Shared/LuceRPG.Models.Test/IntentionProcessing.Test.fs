@@ -20,7 +20,7 @@ module IntentionProcessing =
         let usernameClientMap = [username, clientId] |> Map.ofList
         let clientWorldMap = [clientId, worldId] |> Map.ofList
         let serverSideData =
-            ServerSideData.create objectClientMap usernameClientMap clientWorldMap
+            ServerSideData.create objectClientMap usernameClientMap clientWorldMap worldId
             |> Option.Some
         let now = 120L
 
@@ -319,7 +319,7 @@ module IntentionProcessing =
             let processResult =
                 IntentionProcessing.processOne
                     now
-                    (ServerSideData.empty |> Option.Some)
+                    (ServerSideData.empty worldId |> Option.Some)
                     Map.empty
                     idWorld
                     intention
@@ -538,7 +538,7 @@ module IntentionProcessing =
         let clientWorldMap = [clientId, worldId] |> Map.ofList
 
         let serverSideData =
-            ServerSideData.create objectClientMap Map.empty clientWorldMap
+            ServerSideData.create objectClientMap Map.empty clientWorldMap worldId
             |> Option.Some
 
         let world = World.createWithObjs "test-world" [bound] spawnPoint [player1; player2]

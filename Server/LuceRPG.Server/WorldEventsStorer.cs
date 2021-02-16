@@ -16,11 +16,11 @@ namespace LuceRPG.Server
         private readonly long _cullThreshold = TimeSpan.FromMinutes(1).Ticks;
 
         public WorldEventsStorer(
-            WithId.Model<WorldModule.Payload> initialWorld,
+            WorldCollectionModule.Model worldCollection,
             InteractionStore interactions,
             ITimestampProvider timestampProvider)
         {
-            _store = WorldEventsStoreModule.create(initialWorld.ToSingletonEnumerable());
+            _store = WorldEventsStoreModule.create(worldCollection);
             _timestampProvider = timestampProvider;
             Interactions = interactions;
         }

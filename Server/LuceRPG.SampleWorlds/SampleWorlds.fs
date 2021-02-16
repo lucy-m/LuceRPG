@@ -1,6 +1,7 @@
 ﻿namespace LuceRPG.Samples
 
 open LuceRPG.Models
+open LuceRPG.Server.Core
 
 module SampleWorlds =
     let world1: (World * Interactions) =
@@ -51,3 +52,17 @@ module SampleWorlds =
         let interactions = [sayHiInteraction]
 
         (world, interactions)
+
+    let world2: (World * Interactions) =
+        let bounds = [ Rect.create 0 0 16 16 ]
+        let spawnPoint = Point.create 4 0
+
+        let world = World.empty "world2" bounds spawnPoint |> WithId.create
+        let interactions = []
+
+        (world, interactions)
+
+    let collection =
+        WorldCollection.create
+            (fst world1).id
+            [world1; world2]
