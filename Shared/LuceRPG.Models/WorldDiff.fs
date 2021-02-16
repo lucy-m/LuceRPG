@@ -11,10 +11,7 @@ module WorldDiff =
 
     type Model = DiffType List
 
-    let diff (idFromWorld: World) (idToWorld: World): DiffType seq =
-        let fromWorld = idFromWorld.value
-        let toWorld = idToWorld.value
-
+    let diff (fromWorld: World.Payload) (toWorld: World.Payload): DiffType seq =
         let spawnPoint =
             if fromWorld.playerSpawner <> toWorld.playerSpawner
             then seq { DiffType.IncorrectSpawnPoint }

@@ -25,7 +25,7 @@ public class ConsistencyCheckTests
     private WithId.Model<WorldObjectModule.Payload> updatedToMove;
     private WithId.Model<WorldObjectModule.Payload> updatedToSnap;
 
-    private WorldModule.Model updatedWorld;
+    private WorldModule.Payload updatedWorld;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -57,15 +57,23 @@ public class ConsistencyCheckTests
         };
         var spawnPoint = PointModule.create(10, 10);
 
-        var world = WorldModule.createWithObjs(worldBounds, spawnPoint, objects);
-        var tsWorld = WithTimestamp.create(0, world);
+        var world = WorldModule.createWithObjs("test", worldBounds, spawnPoint, objects);
+        var idWorld = WithId.create(world);
+        var tsWorld = WithTimestamp.create(0, idWorld);
         var interactions = InteractionStore.Empty();
 
         var payload = new LoadWorldPayload("", "", tsWorld, interactions);
         testCommsService.OnLoad(payload);
 
-        updatedToMove = WorldObjectModule.moveObject(DirectionModule.Model.North, modelToMove);
-        updatedToSnap = WorldObjectModule.moveObjectN(DirectionModule.Model.North, 8, modelToSnap);
+        updatedToMove = WithId.useId(
+            modelToMove.id,
+            WorldObjectModule.moveObject(DirectionModule.Model.North, modelToMove.value)
+        );
+
+        updatedToSnap = WithId.useId(
+            modelToSnap.id,
+            WorldObjectModule.moveObjectN(DirectionModule.Model.North, 8, modelToSnap.value)
+        );
 
         var updatedObjects = new WithId.Model<WorldObjectModule.Payload>[]
         {
@@ -74,7 +82,7 @@ public class ConsistencyCheckTests
             modelToAdd
         };
 
-        updatedWorld = WorldModule.createWithObjs(worldBounds, spawnPoint, updatedObjects);
+        updatedWorld = WorldModule.createWithObjs("test", worldBounds, spawnPoint, updatedObjects);
     }
 
     [UnityTearDown]
@@ -97,7 +105,7 @@ public class ConsistencyCheckTests
         var actual = go.transform.position;
         var expected = wo.GetBtmLeft();
 
-        Assert.That(actual, Is.EqualTo(expected));
+        TestUtil.AssertXYMatch(actual, expected);
     }
 
     [UnityTest]
@@ -126,7 +134,7 @@ public class ConsistencyCheckTests
         ObjMatchesModelPosition(objToMove, modelToMove);
 
         // target should be set to the new location
-        Assert.That(objToMove.Target, Is.EqualTo(updatedToMove.GetBtmLeft()));
+        TestUtil.AssertXYMatch(objToMove.Target, updatedToMove.GetBtmLeft());
 
         yield return null;
     }
@@ -139,7 +147,7 @@ public class ConsistencyCheckTests
         // moves position and target to the new location
         var objToSnap = UniversalController.GetById(modelToSnap.id);
         ObjMatchesModelPosition(objToSnap, updatedToSnap);
-        Assert.That(objToSnap.Target, Is.EqualTo(updatedToSnap.GetBtmLeft()));
+        TestUtil.AssertXYMatch(objToSnap.Target, updatedToSnap.GetBtmLeft());
 
         yield return null;
     }

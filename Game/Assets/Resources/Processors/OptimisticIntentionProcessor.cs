@@ -63,7 +63,7 @@ namespace LuceRPG.Game.Processors
                 DateTime.UtcNow.Ticks,
                 FSharpOption<ServerSideDataModule.Model>.None,
                 _objectBusyMap,
-                Registry.Stores.World.World,
+                Registry.Stores.World.IdWorld,
                 intentions
             );
 

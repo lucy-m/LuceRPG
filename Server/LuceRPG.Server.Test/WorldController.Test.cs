@@ -169,7 +169,8 @@ namespace LuceRPG.Server.Test
                 // Result contains correct world
                 var tsWorld = success.tsWorld;
                 Assert.That(tsWorld.timestamp, Is.EqualTo(timestampProvider.Now));
-                Assert.That(tsWorld.value, Is.EqualTo(worldStorer.CurrentWorld));
+                Assert.That(tsWorld.value.id, Is.EqualTo(worldStorer.CurrentWorld.id));
+                Assert.That(tsWorld.value.value, Is.EqualTo(worldStorer.CurrentWorld.value));
 
                 // Object client map correct
                 var ocMapEntry = MapModule.TryFind(playerObj.id, worldStorer.ServerSideData.objectClientMap);
@@ -307,7 +308,7 @@ namespace LuceRPG.Server.Test
 
                 // ID is unchanged
                 var idNewWorld = worldStorer.CurrentWorld;
-                Assert.That(idNewWorld, Is.EqualTo(initialWorld.id));
+                Assert.That(idNewWorld.id, Is.EqualTo(initialWorld.id));
 
                 // Player is moved correctly
                 var newWorld = idNewWorld.value;

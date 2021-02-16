@@ -14,7 +14,11 @@ namespace LuceRPG.Game.Services
 {
     public interface ICommsService
     {
-        IEnumerator FetchUpdates(float consistencyCheckFreq, float pollPeriod, Action<WithTimestamp.Model<GetSinceResultModule.Payload>> onUpdate, Action<WorldModule.Model> onConsistencyCheck);
+        IEnumerator FetchUpdates(
+            float consistencyCheckFreq,
+            float pollPeriod,
+            Action<WithTimestamp.Model<GetSinceResultModule.Payload>> onUpdate,
+            Action<WorldModule.Payload> onConsistencyCheck);
 
         IEnumerator LoadWorld(Action<LoadWorldPayload> onLoad, Action<string> onError);
 
@@ -128,7 +132,7 @@ namespace LuceRPG.Game.Services
             }
         }
 
-        private IEnumerator ConsistencyCheck(Action<WorldModule.Model> onConsistencyCheck)
+        private IEnumerator ConsistencyCheck(Action<WorldModule.Payload> onConsistencyCheck)
         {
             Debug.Log("Doing consistency check");
 
@@ -146,7 +150,7 @@ namespace LuceRPG.Game.Services
 
                 if (tUpdate.HasValue())
                 {
-                    onConsistencyCheck(tUpdate.Value.value);
+                    onConsistencyCheck(tUpdate.Value.value.value);
                 }
             }
             else
@@ -159,7 +163,7 @@ namespace LuceRPG.Game.Services
             float consistencyCheckFreq,
             float pollPeriod,
             Action<WithTimestamp.Model<GetSinceResultModule.Payload>> onUpdate,
-            Action<WorldModule.Model> onConsistencyCheck
+            Action<WorldModule.Payload> onConsistencyCheck
         )
         {
             var lastConsistencyCheck = LastUpdate;
@@ -227,7 +231,7 @@ namespace LuceRPG.Game.Services
     public class TestCommsService : ICommsService
     {
         public Action<WithTimestamp.Model<GetSinceResultModule.Payload>> OnUpdate { get; private set; }
-        public Action<WorldModule.Model> OnConsistencyCheck { get; private set; }
+        public Action<WorldModule.Payload> OnConsistencyCheck { get; private set; }
         public Action<string> OnLoadError { get; private set; }
         public string LastIntentionId { get; private set; }
         public IntentionModule.Type LastIntention { get; private set; }
@@ -240,7 +244,7 @@ namespace LuceRPG.Game.Services
             float consistencyCheckFreq,
             float pollPeriod,
             Action<WithTimestamp.Model<GetSinceResultModule.Payload>> onUpdate,
-            Action<WorldModule.Model> onConsistencyCheck)
+            Action<WorldModule.Payload> onConsistencyCheck)
         {
             OnUpdate = onUpdate;
             OnConsistencyCheck = onConsistencyCheck;

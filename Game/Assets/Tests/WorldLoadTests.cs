@@ -104,7 +104,7 @@ public class WorldLoadTests
 
         // Store data is correct
         var worldStore = Registry.Stores.World;
-        Assert.That(worldStore.World, Is.EqualTo(world));
+        Assert.That(worldStore.IdWorld, Is.EqualTo(idWorld));
         Assert.That(worldStore.PlayerId, Is.EqualTo(playerModel.id));
         Assert.That(worldStore.ClientId, Is.EqualTo(clientId));
 
@@ -112,15 +112,15 @@ public class WorldLoadTests
         var playerObject = UniversalController.GetById(playerModel.id);
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
-        var expectedLocation = WorldObjectModule.btmLeft(playerModel).ToVector3();
-        Assert.That(location, Is.EqualTo(expectedLocation));
+        var expectedLocation = playerModel.GetBtmLeft();
+        TestUtil.AssertXYMatch(location, expectedLocation);
 
         //Wall loads correctly
         var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
-        expectedLocation = WorldObjectModule.btmLeft(wallModel).ToVector3();
-        Assert.That(location, Is.EqualTo(expectedLocation));
+        expectedLocation = wallModel.GetBtmLeft();
+        TestUtil.AssertXYMatch(location, expectedLocation);
 
         yield return null;
     }

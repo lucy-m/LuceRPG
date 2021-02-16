@@ -40,7 +40,7 @@ namespace LuceRPG.Game.Overlords
 
         private GameObject GetPrefab(WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var t = WorldObjectModule.t(obj);
+            var t = obj.value.t;
 
             if (t.IsWall)
             {
@@ -132,7 +132,7 @@ namespace LuceRPG.Game.Overlords
 
         private void AddObject(WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var location = WorldObjectModule.btmLeft(obj).ToVector3();
+            var location = obj.value.btmLeft.ToVector3();
             var prefab = GetPrefab(obj);
 
             if (prefab != null)
@@ -147,7 +147,7 @@ namespace LuceRPG.Game.Overlords
                 uc.Id = obj.id;
                 uc.SetModelProps(obj.value);
 
-                if (WorldObjectModule.t(obj).IsPath)
+                if (obj.value.t.IsPath)
                 {
                     var size = WorldObjectModule.size(obj.value);
                     var spriteRenderer = go.GetComponent<SpriteRenderer>();
@@ -185,7 +185,7 @@ namespace LuceRPG.Game.Overlords
         }
 
         private void OnDiff(
-            WorldModule.Model world,
+            WorldModule.Payload world,
             IReadOnlyCollection<WorldDiffModule.DiffType> diffs)
         {
             Registry.Stores.World.World = world;

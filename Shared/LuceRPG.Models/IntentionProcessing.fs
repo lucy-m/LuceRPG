@@ -228,10 +228,10 @@ module IntentionProcessing =
                 |> Option.defaultValue (Option.None, objectBusyMap, [])
 
             let updatedWorld =
-                removeEvents
-                |> List.fold (fun acc e ->
-                    EventApply.apply e acc
-                ) world
+                    removeEvents
+                        |> List.fold (fun acc e ->
+                            EventApply.apply e acc
+                    ) world
 
             {
                 events = removeEvents

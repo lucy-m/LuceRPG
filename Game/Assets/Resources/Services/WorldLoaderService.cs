@@ -26,7 +26,7 @@ namespace LuceRPG.Game.Services
 
         public IEnumerator GetUpdates(
             Action<WorldEventModule.Model> onEvent,
-            Action<WorldModule.Model, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff)
+            Action<WorldModule.Payload, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff)
         {
             if (!Registry.Stores.World.HasWorld())
             {
@@ -57,13 +57,13 @@ namespace LuceRPG.Game.Services
                 {
                     var worldUpdate =
                         ((GetSinceResultModule.Payload.World)update.value)
-                        .Item;
+                        .Item.value;
 
                     CheckConsistency(onDiff, worldUpdate);
                 }
             }
 
-            void OnConsistencyCheck(WorldModule.Model world)
+            void OnConsistencyCheck(WorldModule.Payload world)
             {
                 CheckConsistency(onDiff, world);
             }
@@ -72,8 +72,8 @@ namespace LuceRPG.Game.Services
         }
 
         private void CheckConsistency(
-            Action<WorldModule.Model, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff,
-            WorldModule.Model world)
+            Action<WorldModule.Payload, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff,
+            WorldModule.Payload world)
         {
             var diffs = WorldDiffModule.diff(Registry.Stores.World.World, world).ToArray();
             if (diffs.Any())

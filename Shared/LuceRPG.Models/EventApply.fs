@@ -8,12 +8,12 @@ module EventApply =
             tObj
             |> Option.map (fun obj ->
                 let newObj = WithId.map (WorldObject.moveObject dir) obj
-                WithId.map (World.addObject newObj) world
+                world |> WithId.map (World.addObject newObj)
             )
             |> Option.defaultValue world
 
         | WorldEvent.Type.ObjectAdded obj ->
-            WithId.map (World.addObject obj) world
+            world |> WithId.map (World.addObject obj)
 
         | WorldEvent.Type.ObjectRemoved id ->
-            WithId.map (World.removeObject id) world
+            world |> WithId.map (World.removeObject id)
