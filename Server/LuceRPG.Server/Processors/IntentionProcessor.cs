@@ -1,7 +1,9 @@
 ﻿using LuceRPG.Models;
+using LuceRPG.Server.Core;
 using LuceRPG.Utility;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace LuceRPG.Server.Processors
@@ -39,11 +41,13 @@ namespace LuceRPG.Server.Processors
                 _logger.LogDebug($"Processing {entries.Length} intentions");
                 var intentions = entries.Select(e => e.Intention).ToArray();
 
+                // Currently applying intentions to the first world only, will need
+                //   to update this
                 var processed = IntentionProcessing.processMany(
                     timestamp,
                     _store.ServerSideData,
                     _store.ObjectBusyMap,
-                    _store.CurrentWorld,
+                    _store.AllWorlds.First(),
                     intentions
                 );
 

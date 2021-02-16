@@ -7,12 +7,11 @@ open System
 
 [<TestFixture>]
 module WorldEventsStore =
-
+    let worldId = "world-id"
     let objId = System.Guid.NewGuid().ToString()
 
     let makeEvent (t: WorldEvent.Type): WorldEvent =
         let intentionId = System.Guid.NewGuid.ToString()
-        let worldId = System.Guid.NewGuid.ToString()
         WorldEvent.asResult intentionId worldId 0 t
 
     [<TestFixture>]
@@ -29,16 +28,17 @@ module WorldEventsStore =
                 value = WorldEvent.Moved (objId, Direction.East) |> makeEvent
             }
 
-        let events = [firstEvent; secondEvent]
+        let events = [worldId, seq{firstEvent; secondEvent}] |> Map.ofList
         let world = World.empty "test" [] Point.zero
-        let idWorld = world |> WithId.create
+        let idWorld = world |> WithId.useId worldId
         let objectBusyMap = ["obj1", 1000L; "obj2", 1200L] |> Map.ofList
+        let worldMap = [worldId, idWorld] |> Map.ofList
 
         let store: WorldEventsStore =
             {
                 lastCull = 0L
                 recentEvents = events
-                world = idWorld
+                worldMap = worldMap
                 objectBusyMap = objectBusyMap
                 serverSideData = ServerSideData.empty
             }
@@ -48,7 +48,7 @@ module WorldEventsStore =
             [<Test>]
             let ``getting before both events returns both events`` () =
                 let dt = 800L
-                let result = WorldEventsStore.getSince dt store
+                let result = WorldEventsStore.getSince dt worldId store
 
                 result |> should be (ofCase <@GetSinceResult.Events@>)
 
@@ -60,7 +60,7 @@ module WorldEventsStore =
             [<Test>]
             let ``getting between first and second events returns second event only`` () =
                 let dt = 1100L
-                let result = WorldEventsStore.getSince dt store
+                let result = WorldEventsStore.getSince dt worldId store
 
                 result |> should be (ofCase <@GetSinceResult.Events@>)
 
@@ -72,7 +72,7 @@ module WorldEventsStore =
             [<Test>]
             let ``getting after second event returns empty`` () =
                 let dt = 1400L
-                let result = WorldEventsStore.getSince dt store
+                let result = WorldEventsStore.getSince dt worldId store
 
                 result |> should be (ofCase <@GetSinceResult.Events@>)
 
@@ -83,7 +83,7 @@ module WorldEventsStore =
 
         [<TestFixture>]
         module ``adding a process result`` =
-            let newWorld = World.empty "test" [Rect.create 0 0 4 4] Point.zero |> WithId.create
+            let newWorld = World.empty "test" [Rect.create 0 0 4 4] Point.zero |> WithId.useId worldId
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
             let objectBusyMap = Map.ofList ["obj1", 100L]
@@ -105,15 +105,17 @@ module WorldEventsStore =
             [<Test>]
             let ``new event is added to the store`` () =
                 let matchingEvent =
-                    newStore.recentEvents
-                    |> List.tryFind (fun e -> e.value = event)
+                    newStore
+                    |> WorldEventsStore.allRecentEvents
+                    |> Seq.tryFind (fun e -> e.value = event)
 
                 matchingEvent.IsSome |> should equal true
                 matchingEvent.Value.timestamp |> should equal now
 
             [<Test>]
             let ``world is updated`` () =
-                newStore.world |> should equal newWorld
+                newStore.worldMap |> Map.containsKey worldId |> should equal true
+                newStore.worldMap |> Map.find worldId |> should equal newWorld
 
             [<Test>]
             let ``objectClientMap is updated`` () =
@@ -126,7 +128,8 @@ module WorldEventsStore =
 
             [<Test>]
             let ``removes old events`` () =
-                culledStore.recentEvents
+                culledStore
+                |> WorldEventsStore.allRecentEvents
                 |> should be (equivalent [secondEvent])
 
             [<Test>]
@@ -135,9 +138,8 @@ module WorldEventsStore =
                 |> should equal cullTimestamp
 
             [<Test>]
-            let ``world is unchanged`` () =
-                culledStore.world
-                |> should equal store.world
+            let ``world map is unchanged`` () =
+                culledStore.worldMap |> should equal store.worldMap
 
             [<Test>]
             let ``updates object busy map`` () =
@@ -149,27 +151,29 @@ module WorldEventsStore =
 
     [<TestFixture>]
     module ``culled store`` =
-        let world = World.empty "test" [] Point.zero |> WithId.create
+        let world = World.empty "test" [] Point.zero |> WithId.useId worldId
+        let worldMap = [worldId, world] |> Map.ofList
         let event: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
                 value = WorldEvent.Moved (objId, Direction.North) |> makeEvent
             }
+        let recentEvents = [worldId, seq{event}] |> Map.ofList
 
         let cullTime = 800L
 
         let store: WorldEventsStore =
             {
                 lastCull = cullTime
-                recentEvents = [event]
-                world = world
+                recentEvents = recentEvents
+                worldMap = worldMap
                 objectBusyMap = Map.empty
                 serverSideData = ServerSideData.empty
             }
 
         [<Test>]
         let ``getting before cull returns world`` () =
-            let result = WorldEventsStore.getSince 500L store
+            let result = WorldEventsStore.getSince 500L worldId store
 
             result |> should be (ofCase <@GetSinceResult.World@>)
 
@@ -180,7 +184,7 @@ module WorldEventsStore =
 
         [<Test>]
         let ``getting after cull returns events`` () =
-            let result = WorldEventsStore.getSince 900L store
+            let result = WorldEventsStore.getSince 900L worldId store
 
             result |> should be (ofCase <@GetSinceResult.Events@>)
 

@@ -4,6 +4,7 @@ using LuceRPG.Server.Core;
 using LuceRPG.Utility;
 using Microsoft.FSharp.Collections;
 using System;
+using System.Collections.Generic;
 
 namespace LuceRPG.Server
 {
@@ -19,15 +20,15 @@ namespace LuceRPG.Server
             InteractionStore interactions,
             ITimestampProvider timestampProvider)
         {
-            _store = WorldEventsStoreModule.create(initialWorld);
+            _store = WorldEventsStoreModule.create(initialWorld.ToSingletonEnumerable());
             _timestampProvider = timestampProvider;
             Interactions = interactions;
         }
 
-        public WithId.Model<WorldModule.Payload> CurrentWorld => _store.world;
         public ServerSideDataModule.Model ServerSideData => _store.serverSideData;
         public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
         public InteractionStore Interactions { get; }
+        public IEnumerable<WithId.Model<WorldModule.Payload>> AllWorlds => WorldEventsStoreModule.allWorlds(_store);
 
         public void Update(IntentionProcessing.ProcessResult result)
         {
@@ -35,9 +36,47 @@ namespace LuceRPG.Server
             _store = newStore;
         }
 
-        public GetSinceResultModule.Payload GetSince(long timestamp)
+        public GetSinceResultModule.Payload GetSince(long timestamp, string clientId)
         {
-            return WorldEventsStoreModule.getSince(timestamp, _store);
+            var worldId = GetWorldIdForClient(clientId);
+
+            if (worldId == null)
+            {
+                var failure = $"No world associated with client id";
+                return GetSinceResultModule.Payload.NewFailure(failure);
+            }
+            else
+            {
+                return WorldEventsStoreModule.getSince(timestamp, worldId, _store);
+            }
+        }
+
+        public WithId.Model<WorldModule.Payload>? GetWorld(string worldId)
+        {
+            var tWorld = MapModule.TryFind(worldId, _store.worldMap);
+
+            if (tWorld.HasValue())
+            {
+                return tWorld.Value;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string? GetWorldIdForClient(string clientId)
+        {
+            var tWorldId = MapModule.TryFind(clientId, ServerSideData.clientWorldMap);
+
+            if (tWorldId.HasValue())
+            {
+                return tWorldId.Value;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public void CullStore()

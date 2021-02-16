@@ -19,6 +19,7 @@ namespace LuceRPG.Server.Test
     public class WorldControllerTests
     {
         protected WithId.Model<WorldModule.Payload> initialWorld;
+        protected WithId.Model<WorldModule.Payload> secondWorld;
         protected PointModule.Model spawnPoint;
 
         protected IntentionProcessor intentionProcessor;
@@ -41,6 +42,11 @@ namespace LuceRPG.Server.Test
             return result as FileContentResult;
         }
 
+        protected WithId.Model<WorldModule.Payload> GetDefaultWorld()
+        {
+            return worldStorer.GetWorld(initialWorld.id);
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -52,7 +58,12 @@ namespace LuceRPG.Server.Test
             };
             spawnPoint = PointModule.create(5, 5);
 
-            initialWorld = WithId.create(WorldModule.empty("Testville", worldBounds, spawnPoint));
+            initialWorld = WithId.useId(
+                "default-world",
+                WorldModule.empty("Testville", worldBounds, spawnPoint));
+            secondWorld = WithId.useId(
+                "second-world",
+                WorldModule.empty("Secondville", worldBounds, spawnPoint));
 
             worldStorer = new WorldEventsStorer(initialWorld, InteractionStore.Empty(), timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
@@ -134,8 +145,7 @@ namespace LuceRPG.Server.Test
 
                 // Adds a player object to the world
                 var players =
-                    worldStorer
-                    .CurrentWorld
+                    GetDefaultWorld()
                     .value
                     .objects
                     .Where(kvp => kvp.Value.value.t.IsPlayer)
@@ -169,13 +179,15 @@ namespace LuceRPG.Server.Test
                 // Result contains correct world
                 var tsWorld = success.tsWorld;
                 Assert.That(tsWorld.timestamp, Is.EqualTo(timestampProvider.Now));
-                Assert.That(tsWorld.value.id, Is.EqualTo(worldStorer.CurrentWorld.id));
-                Assert.That(tsWorld.value.value, Is.EqualTo(worldStorer.CurrentWorld.value));
+                Assert.That(tsWorld.value.id, Is.EqualTo(GetDefaultWorld().id));
+                Assert.That(tsWorld.value.value, Is.EqualTo(GetDefaultWorld().value));
 
                 // Object client map correct
                 var ocMapEntry = MapModule.TryFind(playerObj.id, worldStorer.ServerSideData.objectClientMap);
                 Assert.That(ocMapEntry.HasValue(), Is.True);
                 Assert.That(ocMapEntry.Value, Is.EqualTo(success.clientId));
+
+                // Player is not added to the second world
             }
         }
 
@@ -209,7 +221,7 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // world has three objects
-                var worldObjects = WorldModule.objectList(worldStorer.CurrentWorld.value).ToArray();
+                var worldObjects = WorldModule.objectList(GetDefaultWorld().value).ToArray();
                 Assert.That(worldObjects.Length, Is.EqualTo(3));
 
                 string GetPlayerId(string playerName)
@@ -307,7 +319,7 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // ID is unchanged
-                var idNewWorld = worldStorer.CurrentWorld;
+                var idNewWorld = GetDefaultWorld();
                 Assert.That(idNewWorld.id, Is.EqualTo(initialWorld.id));
 
                 // Player is moved correctly
@@ -374,7 +386,7 @@ namespace LuceRPG.Server.Test
 
                 // Player is moved
                 var newPlayerPos2 = DirectionModule.movePoint(direction, 1, newPlayerPos);
-                var newWorld2 = worldStorer.CurrentWorld.value;
+                var newWorld2 = GetDefaultWorld().value;
                 Assert.That(newWorld2.objects[playerId1].value.btmLeft, Is.EqualTo(newPlayerPos2));
             }
 
@@ -397,7 +409,7 @@ namespace LuceRPG.Server.Test
                 intentionProcessor.Process();
 
                 // Player is not moved
-                var idNewWorld = worldStorer.CurrentWorld;
+                var idNewWorld = GetDefaultWorld();
                 var newWorld = idNewWorld.value;
 
                 Assert.That(newWorld.objects[playerId1].value.btmLeft, Is.EqualTo(spawnPoint));

@@ -10,20 +10,32 @@ module WorldEventsStore =
     type Model =
         {
             lastCull: int64
-            recentEvents: WorldEvent WithTimestamp List
-            world: World
+            recentEvents: Map<Id.World, WorldEvent WithTimestamp seq>
+            worldMap: Map<Id.World, World>
             objectBusyMap: IntentionProcessing.ObjectBusyMap
             serverSideData: ServerSideData
         }
 
+    let allRecentEvents (store: Model): WorldEvent WithTimestamp seq =
+        store.recentEvents
+        |> Map.toSeq
+        |> Seq.collect snd
+
+    let allWorlds (store: Model): World seq =
+        store.worldMap
+        |> Map.toSeq
+        |> Seq.map snd
+
     // So far the only way for ownership to be established is
     //   through intentions process results
     // A freshly loaded world will never have any ownership
-    let create (world: World): Model =
+    let create (worlds: World seq): Model =
+        let worldMap = worlds |> Seq.map (fun w -> (w.id, w)) |> Map.ofSeq
+
         {
             lastCull = 0L
-            recentEvents = []
-            world = world
+            recentEvents = Map.empty
+            worldMap = worldMap
             objectBusyMap = Map.empty
             serverSideData = ServerSideData.empty
         }
@@ -39,32 +51,57 @@ module WorldEventsStore =
             )
             |> List.ofSeq
 
-        let recentEvents = state.recentEvents @ storedEvents
+        let recentEvents =
+            storedEvents
+            |> Seq.fold (fun acc e ->
+                let existingForWorld =
+                    acc
+                    |> Map.tryFind e.value.world
+                    |> Option.defaultValue Seq.empty
+
+                let withEvent = existingForWorld |> Seq.append [e]
+
+                acc
+                |> Map.add e.value.world withEvent
+            ) state.recentEvents
+
+        let worldMap = state.worldMap |> Map.add result.world.id result.world
+
         let serverSideData = result.serverSideData |> Option.defaultValue state.serverSideData
 
         {
             lastCull = state.lastCull
             recentEvents = recentEvents
-            world = result.world
+            worldMap = worldMap
             objectBusyMap = result.objectBusyMap
             serverSideData = serverSideData
         }
 
     /// Returns recent events if available
     /// Returns whole world if events have been culled
-    let getSince (timestamp: int64) (state: Model): GetSinceResult.Payload =
-        if timestamp >= state.lastCull
-        then
-            state.recentEvents
-            |> List.filter (fun e -> e.timestamp >= timestamp)
-            |> GetSinceResult.Events
-        else
-            GetSinceResult.World state.world
+    let getSince (timestamp: int64) (worldId: Id.World) (state: Model): GetSinceResult.Payload =
+        let tWorld = state.worldMap |> Map.tryFind worldId
+
+        match tWorld with
+        | Option.None -> GetSinceResult.Failure (sprintf "Unknown world id %s" worldId)
+        | Option.Some world ->
+            if timestamp >= state.lastCull
+            then
+                state.recentEvents
+                |> Map.tryFind worldId
+                |> Option.defaultValue Seq.empty
+                |> Seq.filter (fun e -> e.timestamp >= timestamp)
+                |> List.ofSeq
+                |> GetSinceResult.Events
+            else
+                GetSinceResult.World world
 
     let cull (timestamp: int64) (state: Model): Model =
         let recentEvents =
             state.recentEvents
-            |> List.filter (fun e -> e.timestamp >= timestamp)
+            |> Map.map (fun worldId events ->
+                events |> Seq.filter (fun e -> e.timestamp >= timestamp)
+            )
 
         let culledBusyMap =
             state.objectBusyMap
@@ -73,7 +110,7 @@ module WorldEventsStore =
         {
             lastCull = timestamp
             recentEvents = recentEvents
-            world = state.world
+            worldMap = state.worldMap
             objectBusyMap = culledBusyMap
             serverSideData = state.serverSideData
         }
