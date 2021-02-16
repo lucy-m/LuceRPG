@@ -18,6 +18,9 @@ module IntentionProcessing =
     let usernameClientMap (pr: ProcessResult): ServerSideData.UsernameClientMap Option =
         pr.serverSideData |> Option.map (fun ssd -> ssd.usernameClientMap)
 
+    let clientWorldMap (pr: ProcessResult): ServerSideData.ClientWorldMap Option =
+        pr.serverSideData |> Option.map (fun ssd -> ssd.clientWorldMap)
+
     let unchanged
             (serverSideData: ServerSideData Option)
             (objectBusyMap: ObjectBusyMap)
@@ -174,7 +177,11 @@ module IntentionProcessing =
                         ssd.usernameClientMap
                         |> Map.add username clientId
 
-                    ServerSideData.create objectClientMap usernameClientMap
+                    let clientWorldMap =
+                        ssd.clientWorldMap
+                        |> Map.add clientId world.id
+
+                    ServerSideData.create objectClientMap usernameClientMap clientWorldMap
                 )
 
             let event =
@@ -216,12 +223,16 @@ module IntentionProcessing =
                                 |> WorldEvent.asResult intention.id world.id iIntention.index
                         )
 
-                    let updatedUsernameClientMap =
-                        ssd.usernameClientMap
-                        |> Map.filter(fun u cId -> cId <> clientId)
-
                     let updatedServerSideData =
-                        ServerSideData.create updatedObjectClientMap updatedUsernameClientMap
+                        let usernameClientMap =
+                            ssd.usernameClientMap
+                            |> Map.filter(fun u cId -> cId <> clientId)
+
+                        let clientWorldMap =
+                            ssd.clientWorldMap
+                            |> Map.remove clientId
+
+                        ServerSideData.create updatedObjectClientMap usernameClientMap clientWorldMap
 
                     Option.Some updatedServerSideData, updatedBusyMap, removeEvents
                 )

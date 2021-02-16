@@ -87,7 +87,7 @@ module WorldEventsStore =
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
             let objectBusyMap = Map.ofList ["obj1", 100L]
-            let serverSideData = ServerSideData.create objectClientMap Map.empty
+            let serverSideData = ServerSideData.create objectClientMap Map.empty Map.empty
 
             let processResult: IntentionProcessing.ProcessResult =
                 {

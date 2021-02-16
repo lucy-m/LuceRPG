@@ -7,6 +7,7 @@ open IntentionProcessing
 [<TestFixture>]
 module IntentionProcessing =
     let clientId = "client"
+    let worldId = "world-id"
     let username = "some-user"
     let bound = Rect.create 0 0 10 10
     let spawnPoint = Point.create 1 1
@@ -17,15 +18,16 @@ module IntentionProcessing =
         let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) |> TestUtil.withId
         let objectClientMap = [player.id, clientId] |> Map.ofList
         let usernameClientMap = [username, clientId] |> Map.ofList
+        let clientWorldMap = [clientId, worldId] |> Map.ofList
         let serverSideData =
-            ServerSideData.create objectClientMap usernameClientMap
+            ServerSideData.create objectClientMap usernameClientMap clientWorldMap
             |> Option.Some
         let now = 120L
 
         let world =
             World.createWithObjs "test-world" [bound] spawnPoint [player; wall]
 
-        let idWorld = world |> WithId.create
+        let idWorld = world |> WithId.useId worldId
 
         let processFn = IntentionProcessing.processOne now serverSideData Map.empty idWorld
         let makeIntention =
@@ -378,6 +380,14 @@ module IntentionProcessing =
                 ucm.Value |> Map.containsKey newUsername |> should equal true
                 ucm.Value |> Map.find newUsername |> should equal newClientId
 
+            [<Test>]
+            let ``adds client to the clientWorldMap`` () =
+                let cwm = IntentionProcessing.clientWorldMap processResult
+
+                cwm |> Option.isSome |> should equal true
+                cwm.Value |> Map.containsKey newClientId |> should equal true
+                cwm.Value |> Map.find newClientId |> should equal worldId
+
         [<TestFixture>]
         module ``join game for existing username`` =
             let newClientId = "new-client"
@@ -460,6 +470,10 @@ module IntentionProcessing =
                     |> Map.count
                     |> should equal 0
 
+                let cwm = IntentionProcessing.clientWorldMap processResult
+                cwm.IsSome |> should equal true
+                cwm.Value |> Map.containsKey clientId |> should equal false
+
         [<TestFixture>]
         module ``for multiple intentions`` =
             let intention1 =
@@ -521,7 +535,11 @@ module IntentionProcessing =
             ]
             |> Map.ofList
 
-        let serverSideData = ServerSideData.create objectClientMap Map.empty |> Option.Some
+        let clientWorldMap = [clientId, worldId] |> Map.ofList
+
+        let serverSideData =
+            ServerSideData.create objectClientMap Map.empty clientWorldMap
+            |> Option.Some
 
         let world = World.createWithObjs "test-world" [bound] spawnPoint [player1; player2]
         let idWorld = world |> WithId.create
