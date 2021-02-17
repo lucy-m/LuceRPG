@@ -3,46 +3,34 @@
 module IntentionProcessing =
     type ObjectBusyMap = Map<Id.WorldObject, int64>
 
-    type ProcessResult =
+    type ProcessWorldResult =
         {
             events: WorldEvent seq
             delayed: IndexedIntention seq
             world: World
             objectBusyMap: ObjectBusyMap
-            serverSideData: ServerSideData Option
         }
 
-    let objectClientMap (pr: ProcessResult): ServerSideData.ObjectClientMap Option =
-        pr.serverSideData |> Option.map (fun ssd -> ssd.objectClientMap)
-
-    let usernameClientMap (pr: ProcessResult): ServerSideData.UsernameClientMap Option =
-        pr.serverSideData |> Option.map (fun ssd -> ssd.usernameClientMap)
-
-    let clientWorldMap (pr: ProcessResult): ServerSideData.ClientWorldMap Option =
-        pr.serverSideData |> Option.map (fun ssd -> ssd.clientWorldMap)
-
-    let unchanged
-            (serverSideData: ServerSideData Option)
+    let unchangedWorld
             (objectBusyMap: ObjectBusyMap)
             (world: World)
-            : ProcessResult =
+            : ProcessWorldResult =
         {
             events = []
             delayed = []
             world = world
             objectBusyMap = objectBusyMap
-            serverSideData = serverSideData
         }
 
-    let processOne
+    let processWorld
             (now: int64)
-            (tServerSideData: ServerSideData Option)
+            (tObjectClientMap: ServerSideData.ObjectClientMap Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             (iIntention: IndexedIntention)
-            : ProcessResult =
+            : ProcessWorldResult =
 
-        let thisUnchanged = unchanged tServerSideData objectBusyMap world
+        let thisUnchanged = unchangedWorld objectBusyMap world
         let intention = iIntention.tsIntention.value
         let timestamp = iIntention.tsIntention.timestamp
         let clientId = intention.value.clientId
@@ -51,9 +39,9 @@ module IntentionProcessing =
         | Intention.Move (id, dir, amount) ->
             // May generate an event to move the object to its target location
             let clientOwnsObject =
-                tServerSideData
-                |> Option.map (fun serverSideData ->
-                    serverSideData.objectClientMap
+                tObjectClientMap
+                |> Option.map (fun objectClientMap ->
+                    objectClientMap
                     |> Map.tryFind id
                     |> Option.map (fun cId -> cId = clientId)
                     |> Option.defaultValue false
@@ -79,7 +67,6 @@ module IntentionProcessing =
                         delayed = [iIntention]
                         world = world
                         objectBusyMap = objectBusyMap
-                        serverSideData = tServerSideData
                     }
                 else
                     let tObj = world.value.objects |> Map.tryFind id
@@ -132,159 +119,285 @@ module IntentionProcessing =
                                     delayed = delayed
                                     world = newWorld
                                     objectBusyMap = newObjectBusyMap
-                                    serverSideData = tServerSideData
                                 }
 
+        // These are not processed at the world level
+        | Intention.JoinGame _ -> thisUnchanged
+        | Intention.LeaveGame _ -> thisUnchanged
+
+    type ProcessGlobalResult =
+        {
+            events: WorldEvent seq
+            delayed: IndexedIntention seq
+            worldMap: World.Map
+            objectBusyMap: ObjectBusyMap
+            serverSideData: ServerSideData
+        }
+
+    let unchangedGlobal
+            (worlds: World.Map)
+            (objectBusyMap: ObjectBusyMap)
+            (serverSideData: ServerSideData)
+            : ProcessGlobalResult =
+        {
+            events = []
+            delayed = []
+            worldMap = worlds
+            objectBusyMap = objectBusyMap
+            serverSideData = serverSideData
+        }
+
+    let processGlobal
+            (serverSideData: ServerSideData)
+            (objectBusyMap: ObjectBusyMap)
+            (worldMap: World.Map)
+            (iIntention: IndexedIntention)
+            : ProcessGlobalResult =
+
+        let thisUnchanged =  unchangedGlobal worldMap objectBusyMap serverSideData
+        let intention = iIntention.tsIntention.value
+        let timestamp = iIntention.tsIntention.timestamp
+        let clientId = intention.value.clientId
+        let worldId = serverSideData.defaultWorld
+
+        match intention.value.t with
         | Intention.JoinGame username ->
-            // Generates event to add a player object to the world at the spawn point
-            let spawnPoint = World.spawnPoint world.value
-            let playerData = PlayerData.create username
-            let obj =
-                WorldObject.create
-                    (WorldObject.Type.Player playerData)
-                    spawnPoint
-                |> WithId.create
+            let tWorld = worldMap |> Map.tryFind worldId
+            match tWorld with
+            | Option.None -> thisUnchanged
+            | Option.Some world ->
 
-            let removeExisting =
-                let existingClientId =
-                    tServerSideData
-                    |> Option.bind (fun ssd ->
-                        ssd.usernameClientMap
+                // Generates event to add a player object to the world at the spawn point
+                let spawnPoint = World.spawnPoint world.value
+                let playerData = PlayerData.create username
+                let obj =
+                    WorldObject.create
+                        (WorldObject.Type.Player playerData)
+                        spawnPoint
+                    |> WithId.create
+
+                let removeExisting =
+                    let existingClientId =
+                        serverSideData.usernameClientMap
                         |> Map.tryFind username
+
+                    existingClientId
+                    |> Option.map(fun id ->
+                        let intention =
+                            Intention.LeaveGame
+                            |> Intention.makePayload id
+                            |> WithId.create
+                            |> WithTimestamp.create timestamp
+                            |> IndexedIntention.create ""
+
+                        [ intention ]
                     )
+                    |> Option.defaultValue []
 
-                existingClientId
-                |> Option.map(fun id ->
-                    let intention =
-                        Intention.LeaveGame
-                        |> Intention.makePayload id
-                        |> WithId.create
-                        |> WithTimestamp.create timestamp
-                        |> IndexedIntention.create ""
-
-                    [ intention ]
-                )
-                |> Option.defaultValue []
-
-            let newServerSideData =
-                tServerSideData
-                |> Option.map (fun ssd ->
+                let newServerSideData =
                     let objectClientMap =
-                        ssd.objectClientMap
+                        serverSideData.worldObjectClientMap
+                        |> Map.tryFind worldId
+                        |> Option.defaultValue Map.empty
                         |> Map.add obj.id clientId
 
+                    let worldObjectClientMap =
+                        serverSideData.worldObjectClientMap
+                        |> Map.add worldId objectClientMap
+
                     let usernameClientMap =
-                        ssd.usernameClientMap
+                        serverSideData.usernameClientMap
                         |> Map.add username clientId
 
                     let clientWorldMap =
-                        ssd.clientWorldMap
+                        serverSideData.clientWorldMap
                         |> Map.add clientId world.id
 
-                    let defaultWorld = ssd.defaultWorld
+                    let defaultWorld = serverSideData.defaultWorld
 
                     ServerSideData.create
-                        objectClientMap
+                        worldObjectClientMap
                         usernameClientMap
                         clientWorldMap
                         defaultWorld
-                )
 
-            let event =
-                WorldEvent.Type.ObjectAdded obj
-                |> WorldEvent.asResult intention.id world.id iIntention.index
+                let event =
+                    WorldEvent.Type.ObjectAdded obj
+                    |> WorldEvent.asResult intention.id world.id iIntention.index
 
-            let newWorld = EventApply.apply event world
+                let newWorld = EventApply.apply event world
+                let newWorldMap = worldMap |> Map.add worldId newWorld
 
-            {
-                events = [event]
-                delayed = removeExisting
-                world = newWorld
-                objectBusyMap = objectBusyMap
-                serverSideData = newServerSideData
-            }
+                {
+                    events = [event]
+                    delayed = removeExisting
+                    worldMap = newWorldMap
+                    objectBusyMap = objectBusyMap
+                    serverSideData = newServerSideData
+                }
 
         | Intention.LeaveGame ->
             let updatedServerSideData, updatedBusyMap, removeEvents =
-                tServerSideData
-                |> Option.map (fun ssd ->
-                    // Generates events to remove all objects relating to the client ID
-                    let clientObjects, updatedObjectClientMap =
-                        ssd.objectClientMap
-                        |> Map.partition (fun oId cId -> cId = clientId)
+                // For each world,
+                //   update the objectClientMap
+                //   generate a list of object ids to remove
 
-                    let clientObjectsList =
-                        clientObjects
-                        |> Map.toList
-                        |> List.map fst
+                let wocm, toRemove =
+                    serverSideData.worldObjectClientMap
+                    |> Map.toSeq
+                    |> Seq.map (fun (worldId, ocm) ->
+                        let removeObjects, keepObjects =
+                            ocm |> Map.partition (fun oId cId -> cId = clientId)
 
-                    let updatedBusyMap =
-                        objectBusyMap
-                        |> Map.filter (fun id until -> not(List.contains id clientObjectsList))
+                        let updatedObjectClientMap = keepObjects
+                        let toRemove =
+                            removeObjects
+                            |>
+                            Map.toSeq
+                            |> Seq.map fst
+                            |> Seq.map (fun oId -> worldId, oId)
 
-                    let removeEvents =
-                        clientObjectsList
-                        |> List.map (fun e ->
-                                WorldEvent.Type.ObjectRemoved e
-                                |> WorldEvent.asResult intention.id world.id iIntention.index
-                        )
+                        worldId, updatedObjectClientMap, toRemove
+                    )
+                    |> Seq.fold (fun acc (worldId, ocm, toRemove) ->
+                        let wocm = fst acc |> Map.add worldId ocm
+                        let allToRemove = snd acc |> Seq.append toRemove
 
-                    let updatedServerSideData =
-                        let usernameClientMap =
-                            ssd.usernameClientMap
-                            |> Map.filter(fun u cId -> cId <> clientId)
+                        wocm, allToRemove
+                    ) (serverSideData.worldObjectClientMap, Seq.empty<Id.World * Id.WorldObject>)
+                    |> fun (wocm, toRemove) ->
+                        wocm, Set.ofSeq toRemove
 
-                        let clientWorldMap =
-                            ssd.clientWorldMap
-                            |> Map.remove clientId
+                // Create events to remove all objects
+                let removeEvents =
+                    toRemove
+                    |> Set.map (fun (worldId, oId) ->
+                        WorldEvent.Type.ObjectRemoved oId
+                        |> WorldEvent.asResult intention.id worldId iIntention.index
+                    )
+                    |> Set.toSeq
 
-                        let defaultWorld = ssd.defaultWorld
+                // Update busy map to remove objects
+                let updatedBusyMap =
+                    let objectIds = toRemove |> Set.map snd
 
-                        ServerSideData.create
-                            updatedObjectClientMap
-                            usernameClientMap
-                            clientWorldMap
-                            defaultWorld
+                    objectBusyMap
+                    |> Map.filter (fun oId until -> not(Set.contains oId objectIds))
 
-                    Option.Some updatedServerSideData, updatedBusyMap, removeEvents
-                )
-                |> Option.defaultValue (Option.None, objectBusyMap, [])
+                let updatedServerSideData =
+                    let usernameClientMap =
+                        serverSideData.usernameClientMap
+                        |> Map.filter(fun u cId -> cId <> clientId)
 
-            let updatedWorld =
-                    removeEvents
-                        |> List.fold (fun acc e ->
-                            EventApply.apply e acc
-                    ) world
+                    let clientWorldMap =
+                        serverSideData.clientWorldMap
+                        |> Map.remove clientId
+
+                    let defaultWorld = serverSideData.defaultWorld
+
+                    ServerSideData.create
+                        wocm
+                        usernameClientMap
+                        clientWorldMap
+                        defaultWorld
+
+                updatedServerSideData, updatedBusyMap, removeEvents
+
+            let newWorldMap =
+                removeEvents
+                |> Seq.fold (fun acc ev ->
+                    let tWorld = acc |> Map.tryFind ev.world
+                    let tUpdatedWorld = tWorld |> Option.map (EventApply.apply ev)
+
+                    tUpdatedWorld
+                    |> Option.map (fun uw -> acc |> Map.add ev.world uw)
+                    |> Option.defaultValue acc
+                ) worldMap
 
             {
                 events = removeEvents
                 delayed = []
-                world = updatedWorld
+                worldMap = newWorldMap
                 objectBusyMap = updatedBusyMap
                 serverSideData = updatedServerSideData
             }
+        | Intention.Move _ -> thisUnchanged
+
+    type ProcessManyResult =
+        {
+            events: WorldEvent seq
+            delayed: IndexedIntention seq
+            worldMap: Map<Id.World, World>
+            objectBusyMap: ObjectBusyMap
+            serverSideData: ServerSideData
+        }
+
+    let unchanged
+            (serverSideData: ServerSideData)
+            (objectBusyMap: ObjectBusyMap)
+            (worldMap: Map<Id.World, World>)
+            : ProcessManyResult =
+        {
+            events = []
+            delayed = []
+            worldMap = worldMap
+            objectBusyMap = objectBusyMap
+            serverSideData = serverSideData
+        }
 
     /// Processes many intentions sequentially
     /// Will ensure timestamps are processed in timestamp order
     let processMany
             (now: int64)
-            (serverSideData: ServerSideData Option)
+            (serverSideData: ServerSideData)
             (objectBusyMap: ObjectBusyMap)
-            (world: World)
+            (worlds: Map<Id.World, World>)
             (intentions: IndexedIntention seq)
-            : ProcessResult =
-        let initial = unchanged serverSideData objectBusyMap world
+            : ProcessManyResult =
+
+        let initial = unchanged serverSideData objectBusyMap worlds
 
         intentions
         |> Seq.sortBy (fun i -> i.tsIntention.timestamp)
         |> Seq.fold (fun acc i ->
-            let resultOne = processOne now acc.serverSideData acc.objectBusyMap acc.world i
+            let resGlobal =
+                processGlobal serverSideData acc.objectBusyMap acc.worldMap i
 
-            {
-                events = Seq.append acc.events resultOne.events
-                delayed = Seq.append acc.delayed resultOne.delayed
-                world = resultOne.world
-                objectBusyMap = resultOne.objectBusyMap
-                serverSideData = resultOne.serverSideData
-            }
+            let tWorld = resGlobal.worldMap |> Map.tryFind i.worldId
+
+            match tWorld with
+            | Option.None ->
+                printf "Intention received for unknown world id %s" i.worldId
+
+                {
+                    events = Seq.append acc.events resGlobal.events
+                    delayed = Seq.append acc.delayed resGlobal.delayed
+                    worldMap = resGlobal.worldMap
+                    objectBusyMap = resGlobal.objectBusyMap
+                    serverSideData = resGlobal.serverSideData
+                }
+            | Option.Some world ->
+                let tObjectClientMap =
+                    resGlobal.serverSideData.worldObjectClientMap
+                    |> Map.tryFind i.worldId
+
+                let resWorld =
+                    processWorld
+                        now
+                        tObjectClientMap
+                        resGlobal.objectBusyMap
+                        world
+                        i
+
+                let worldMap =
+                    resGlobal.worldMap
+                    |> Map.add i.worldId resWorld.world
+
+                {
+                    events = Seq.concat [acc.events; resGlobal.events; resWorld.events]
+                    delayed = Seq.concat [acc.delayed; resGlobal.delayed; resWorld.delayed]
+                    worldMap = worldMap
+                    objectBusyMap = resWorld.objectBusyMap
+                    serverSideData = resGlobal.serverSideData
+                }
         ) initial

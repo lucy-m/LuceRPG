@@ -217,5 +217,6 @@ module World =
         setInteractions interactions withObjects
 
     type Model = Payload WithId
+    type Map = Map<Id.World, Model>
 
 type World = World.Model

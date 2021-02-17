@@ -8,7 +8,7 @@ module ClientLogEntry =
 
     type Model = Payload WithTimestamp
 
-    let createFromProcessResult (processResult: IntentionProcessing.ProcessResult): Payload =
+    let createFromProcessResult (processResult: IntentionProcessing.ProcessManyResult): Payload =
         ProcessResult
             (processResult.events |> Seq.toList, processResult.delayed |> Seq.toList)
 
