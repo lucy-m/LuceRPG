@@ -41,13 +41,14 @@ namespace LuceRPG.Server
 
         public void Enqueue(
             WithId.Model<IntentionModule.Payload> intention,
+            string worldId,
             Action<IEnumerable<WorldEventModule.Model>>? onProcessed = null
         )
         {
             lock (_queue)
             {
                 var timestamped = WithTimestamp.create(_timestampProvider.Now, intention);
-                var indexed = IndexedIntentionModule.create(timestamped);
+                var indexed = IndexedIntentionModule.create.Invoke(worldId).Invoke(timestamped);
 
                 _queue.Enqueue((Intention: indexed, OnProcessed: onProcessed));
             }

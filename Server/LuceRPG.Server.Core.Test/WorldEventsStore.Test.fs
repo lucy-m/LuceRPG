@@ -84,18 +84,20 @@ module WorldEventsStore =
         [<TestFixture>]
         module ``adding a process result`` =
             let newWorld = World.empty "test" [Rect.create 0 0 4 4] Point.zero |> WithId.useId worldId
+            let newWorldMap = WithId.toMap [newWorld]
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
+            let wocm = [newWorld.id, objectClientMap] |> Map.ofList
             let objectBusyMap = Map.ofList ["obj1", 100L]
-            let serverSideData = ServerSideData.create objectClientMap Map.empty Map.empty worldId
+            let serverSideData = ServerSideData.create wocm Map.empty Map.empty worldId
 
-            let processResult: IntentionProcessing.ProcessResult =
+            let processResult: IntentionProcessing.ProcessManyResult =
                 {
                     events = [event]
                     delayed = []
-                    world = newWorld
+                    worldMap = newWorldMap
                     objectBusyMap = objectBusyMap
-                    serverSideData = serverSideData |> Option.Some
+                    serverSideData = serverSideData
                 }
 
             let now = 1400L
@@ -119,7 +121,7 @@ module WorldEventsStore =
 
             [<Test>]
             let ``objectClientMap is updated`` () =
-                newStore.serverSideData.objectClientMap |> should equal objectClientMap
+                newStore.serverSideData.worldObjectClientMap |> should equal wocm
 
         [<TestFixture>]
         module ``culling`` =

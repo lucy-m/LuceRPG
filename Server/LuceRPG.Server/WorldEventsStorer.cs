@@ -29,8 +29,9 @@ namespace LuceRPG.Server
         public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
         public InteractionStore Interactions { get; }
         public IEnumerable<WithId.Model<WorldModule.Payload>> AllWorlds => WorldEventsStoreModule.allWorlds(_store);
+        public FSharpMap<string, WithId.Model<WorldModule.Payload>> WorldMap => _store.worldMap;
 
-        public void Update(IntentionProcessing.ProcessResult result)
+        public void Update(IntentionProcessing.ProcessManyResult result)
         {
             var newStore = WorldEventsStoreModule.addResult(result, _timestampProvider.Now, _store);
             _store = newStore;

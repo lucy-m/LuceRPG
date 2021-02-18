@@ -12,7 +12,7 @@ namespace LuceRPG.Server
     {
         void EstablishLog(string clientId, string username);
 
-        void AddProcessResult(IntentionProcessing.ProcessResult result);
+        void AddProcessResult(IntentionProcessing.ProcessManyResult result);
 
         void AddClientLogs(
             string clientId,
@@ -60,7 +60,7 @@ namespace LuceRPG.Server
             _clientFileMap[clientId] = fileName;
         }
 
-        public void AddProcessResult(IntentionProcessing.ProcessResult result)
+        public void AddProcessResult(IntentionProcessing.ProcessManyResult result)
         {
             var logLines =
                 ToLogString
@@ -104,7 +104,7 @@ namespace LuceRPG.Server
         {
         }
 
-        public void AddProcessResult(IntentionProcessing.ProcessResult result)
+        public void AddProcessResult(IntentionProcessing.ProcessManyResult result)
         {
         }
 

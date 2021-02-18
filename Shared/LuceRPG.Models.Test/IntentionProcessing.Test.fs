@@ -9,7 +9,6 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``processWorld`` =
-
         let clientId = "client"
         let worldId = "world-id"
         let username = "some-user"
@@ -828,3 +827,54 @@ module IntentionProcessing =
                 [<Test>]
                 let ``does not move player`` () =
                     processResult.worldMap |> should equal worldMap
+
+        [<TestFixture>]
+        module ``multiple join intentions`` =
+            let now = 12L
+
+            let user1 = "user1"
+            let user2 = "user2"
+            let client1 = "client1"
+            let client2 = "client2"
+
+            let defaultWorld = World.empty "empty" [Rect.create 0 0 10 10] Point.zero |> WithId.create
+
+            let worldMap = WithId.toMap [defaultWorld]
+
+            let serverSideData = ServerSideData.empty defaultWorld.id
+
+            let intentions =
+                [
+                    Intention.JoinGame user1 |> Intention.makePayload client1
+                    Intention.JoinGame user2 |> Intention.makePayload client2
+                ]
+                |> List.map (
+                    WithId.create
+                    >> WithTimestamp.create now
+                    >> IndexedIntention.create ""
+                )
+
+            let processResult =
+                IntentionProcessing.processMany
+                    now
+                    serverSideData
+                    Map.empty
+                    worldMap
+                    intentions
+
+            [<Test>]
+            let ``adds two players to the world`` () =
+                let world = processResult.worldMap |> Map.find defaultWorld.id
+
+                world.value.objects |> Map.count |> should equal 2
+
+            [<Test>]
+            let ``worldObjectClientMap correct`` () =
+                let wocm = processResult.serverSideData.worldObjectClientMap
+                wocm |> Map.containsKey defaultWorld.id |> should equal true
+                wocm |> Map.count |> should equal 1
+
+                let ocm = wocm |> Map.find defaultWorld.id
+                ocm |> Map.count |> should equal 2
+                ocm |> Map.exists (fun pId cId -> cId = client1) |> should equal true
+                ocm |> Map.exists (fun pId cId -> cId = client2) |> should equal true

@@ -361,7 +361,7 @@ module IntentionProcessing =
         |> Seq.sortBy (fun i -> i.tsIntention.timestamp)
         |> Seq.fold (fun acc i ->
             let resGlobal =
-                processGlobal serverSideData acc.objectBusyMap acc.worldMap i
+                processGlobal acc.serverSideData acc.objectBusyMap acc.worldMap i
 
             let tWorld = resGlobal.worldMap |> Map.tryFind i.worldId
 

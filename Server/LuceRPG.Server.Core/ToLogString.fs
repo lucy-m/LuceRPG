@@ -6,7 +6,7 @@ module ToLogString =
 
     let processResult
             (timestamp: int64)
-            (result: IntentionProcessing.ProcessResult)
+            (result: IntentionProcessing.ProcessManyResult)
             : string seq =
 
         let eventType = "Process Result"

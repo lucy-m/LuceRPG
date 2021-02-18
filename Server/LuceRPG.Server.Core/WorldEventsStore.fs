@@ -40,7 +40,7 @@ module WorldEventsStore =
             serverSideData = ServerSideData.empty worlds.defaultWorld
         }
 
-    let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =
+    let addResult (result: IntentionProcessing.ProcessManyResult) (now: int64) (state: Model): Model =
         let storedEvents =
             result.events
             |> Seq.map (fun e ->
@@ -65,16 +65,12 @@ module WorldEventsStore =
                 |> Map.add e.value.world withEvent
             ) state.recentEvents
 
-        let worldMap = state.worldMap |> Map.add result.world.id result.world
-
-        let serverSideData = result.serverSideData |> Option.defaultValue state.serverSideData
-
         {
             lastCull = state.lastCull
             recentEvents = recentEvents
-            worldMap = worldMap
+            worldMap = result.worldMap
             objectBusyMap = result.objectBusyMap
-            serverSideData = serverSideData
+            serverSideData = result.serverSideData
         }
 
     /// Returns recent events if available

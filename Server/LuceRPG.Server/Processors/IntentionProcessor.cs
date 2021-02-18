@@ -47,7 +47,7 @@ namespace LuceRPG.Server.Processors
                     timestamp,
                     _store.ServerSideData,
                     _store.ObjectBusyMap,
-                    _store.AllWorlds.First(),
+                    _store.WorldMap,
                     intentions
                 );
 

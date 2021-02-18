@@ -94,7 +94,7 @@ namespace LuceRPGServer.Controllers
                     intentionProcessed = true;
                 }
 
-                _queue.Enqueue(intention, Action);
+                _queue.Enqueue(intention, "", Action);
 
                 var attempts = 0;
                 while (!intentionProcessed && attempts < MaxJoinGameAttempts)
@@ -188,11 +188,22 @@ namespace LuceRPGServer.Controllers
             await stream.CopyToAsync(memoryStream);
             var bytes = memoryStream.ToArray();
 
-            var intention = IntentionSrl.deserialise(bytes);
+            var tIntention = IntentionSrl.deserialise(bytes);
 
-            if (intention.HasValue())
+            if (tIntention.HasValue())
             {
-                _queue.Enqueue(intention.Value.value);
+                var intention = tIntention.Value.value;
+                var clientId = intention.value.clientId;
+                var worldId = _worldStore.GetWorldIdForClient(clientId);
+
+                if (worldId != null)
+                {
+                    _queue.Enqueue(intention, worldId);
+                }
+                else
+                {
+                    _logger.LogWarning($"Intention received from client ID without world {clientId}");
+                }
             }
             else
             {
