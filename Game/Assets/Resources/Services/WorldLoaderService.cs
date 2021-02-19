@@ -53,13 +53,23 @@ namespace LuceRPG.Game.Services
                         }
                     }
                 }
-                else
+                else if (update.value.IsWorld)
                 {
                     var worldUpdate =
                         ((GetSinceResultModule.Payload.World)update.value)
                         .Item.value;
 
+                    // If the world IDs differ here then need to reload the world
+
                     CheckConsistency(onDiff, worldUpdate);
+                }
+                else
+                {
+                    var failure =
+                        ((GetSinceResultModule.Payload.Failure)update.value)
+                        .Item;
+
+                    Debug.LogError(failure);
                 }
             }
 
