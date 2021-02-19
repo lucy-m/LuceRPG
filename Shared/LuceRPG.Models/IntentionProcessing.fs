@@ -65,8 +65,8 @@ module IntentionProcessing =
                     {
                         events = []
                         delayed = [iIntention]
-                        world = world
                         objectBusyMap = objectBusyMap
+                        world = world
                     }
                 else
                     let tObj = world.value.objects |> Map.tryFind id
@@ -117,11 +117,12 @@ module IntentionProcessing =
                                 {
                                     events = [event]
                                     delayed = delayed
-                                    world = newWorld
                                     objectBusyMap = newObjectBusyMap
+                                    world = newWorld
                                 }
 
         // These are not processed at the world level
+        | Intention.JoinWorld _ -> thisUnchanged
         | Intention.JoinGame _ -> thisUnchanged
         | Intention.LeaveGame _ -> thisUnchanged
 
@@ -158,10 +159,10 @@ module IntentionProcessing =
         let intention = iIntention.tsIntention.value
         let timestamp = iIntention.tsIntention.timestamp
         let clientId = intention.value.clientId
-        let worldId = serverSideData.defaultWorld
 
         match intention.value.t with
         | Intention.JoinGame username ->
+            let worldId = serverSideData.defaultWorld
             let tWorld = worldMap |> Map.tryFind worldId
             match tWorld with
             | Option.None -> thisUnchanged
@@ -223,13 +224,17 @@ module IntentionProcessing =
 
                 let event =
                     WorldEvent.Type.ObjectAdded obj
-                    |> WorldEvent.asResult intention.id world.id iIntention.index
+                    |> WorldEvent.asResult intention.id worldId iIntention.index
 
                 let newWorld = EventApply.apply event world
                 let newWorldMap = worldMap |> Map.add worldId newWorld
 
+                let joinedWorldEvent =
+                    WorldEvent.JoinedWorld clientId
+                    |> WorldEvent.asResult intention.id worldId (iIntention.index + 1)
+
                 {
-                    events = [event]
+                    events = [event; joinedWorldEvent]
                     delayed = removeExisting
                     worldMap = newWorldMap
                     objectBusyMap = objectBusyMap
@@ -321,6 +326,61 @@ module IntentionProcessing =
                 objectBusyMap = updatedBusyMap
                 serverSideData = updatedServerSideData
             }
+
+        | Intention.JoinWorld (worldId, obj) ->
+            let tWorld = worldMap |> Map.tryFind worldId
+
+            match tWorld with
+            | Option.None -> thisUnchanged
+            | Option.Some world ->
+                // Try to add the object to the world
+                let tEventType =
+                    if World.canPlace obj world.value
+                    then WorldEvent.Type.ObjectAdded obj |> Option.Some
+                    else
+                        let atSpawnPoint = WithId.map (WorldObject.atLocation world.value.playerSpawner) obj
+                        if World.canPlace atSpawnPoint world.value
+                        then WorldEvent.Type.ObjectAdded atSpawnPoint |> Option.Some
+                        else Option.None
+
+                match tEventType with
+                | Option.None -> thisUnchanged
+                | Option.Some eventType ->
+                    // apply the event to the world
+                    let event = WorldEvent.asResult intention.id worldId iIntention.index eventType
+                    let newWorld = EventApply.apply event world
+                    let newWorldMap = worldMap |> Map.add worldId newWorld
+
+                    // Add the object to the objectClientMap
+                    let wocm =
+                        ServerSideData.addToWocm
+                            worldId
+                            obj.id
+                            clientId
+                            serverSideData.worldObjectClientMap
+
+                    // Change the clientWorldMap to be the new world
+                    let cwm = serverSideData.clientWorldMap |> Map.add clientId worldId
+
+                    let updatedServerSideData =
+                        {
+                            serverSideData with
+                                worldObjectClientMap = wocm
+                                clientWorldMap = cwm
+                        }
+
+                    let joinedWorldEvent =
+                        WorldEvent.JoinedWorld clientId
+                        |> WorldEvent.asResult intention.id worldId (iIntention.index + 1)
+
+                    {
+                        events = [event; joinedWorldEvent]
+                        delayed = []
+                        worldMap = newWorldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = updatedServerSideData
+                    }
+
         | Intention.Move _ -> thisUnchanged
 
     type ProcessManyResult =

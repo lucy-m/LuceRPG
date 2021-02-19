@@ -5,6 +5,7 @@ module WorldEvent =
         | Moved of Id.WorldObject * Direction
         | ObjectAdded of WorldObject
         | ObjectRemoved of Id.WorldObject
+        | JoinedWorld of Id.Client
 
     type Model =
         {
@@ -32,5 +33,6 @@ module WorldEvent =
         | Type.Moved (id, _) -> id |> Option.Some
         | Type.ObjectAdded o -> o.id |> Option.Some
         | Type.ObjectRemoved id -> id |> Option.Some
+        | Type.JoinedWorld _ -> Option.None
 
 type WorldEvent = WorldEvent.Model

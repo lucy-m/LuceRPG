@@ -369,6 +369,16 @@ module IntentionProcessing =
                 |> Map.containsKey player.id
                 |> should equal true
 
+            [<Test>]
+            let ``join world does nothing`` () =
+                let newPlayer = TestUtil.makePlayer (Point.create 3 3)
+                let intention = makeIntention (Intention.JoinWorld (worldId, newPlayer))
+                let result = processFn intention
+
+                result.world.value.objects
+                |> Map.containsKey newPlayer.id
+                |> should equal false
+
     [<TestFixture>]
     module ``processGlobal`` =
 
@@ -400,11 +410,12 @@ module IntentionProcessing =
             module ``join game for new username`` =
                 let newClientId = "new-client"
                 let newUsername = "new-username"
+                let intentionId = "intention"
 
                 let intention =
                     Intention.JoinGame newUsername
                     |> Intention.makePayload newClientId
-                    |> WithId.create
+                    |> WithId.useId intentionId
                     |> WithTimestamp.create 100L
                     |> IndexedIntention.create ""
 
@@ -419,9 +430,15 @@ module IntentionProcessing =
                 let ``creates object added event`` () =
                     let events = processResult.events |> Seq.toList
 
-                    events |> List.length |> should equal 1
+                    events |> List.length |> should equal 2
                     events.Head.resultOf |> should equal intention.tsIntention.value.id
                     events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
+
+                    let expectedJoinedWorld =
+                        WorldEvent.JoinedWorld newClientId
+                        |> WorldEvent.asResult intentionId world1.id 1
+
+                    events.Tail.Head |> should equal expectedJoinedWorld
 
                 [<Test>]
                 let ``adds a new object to default world`` () =
@@ -505,11 +522,12 @@ module IntentionProcessing =
             [<TestFixture>]
             module ``join game for existing username`` =
                 let newClientId = "new-client"
+                let intentionId = "intention"
 
                 let intention =
                     Intention.JoinGame existingUsername
                     |> Intention.makePayload newClientId
-                    |> WithId.create
+                    |> WithId.useId intentionId
                     |> WithTimestamp.create 100L
                     |> IndexedIntention.create ""
 
@@ -521,12 +539,18 @@ module IntentionProcessing =
                         intention
 
                 [<Test>]
-                let ``creates object added event`` () =
+                let ``creates object added event and joined world event`` () =
                     let events = processResult.events |> Seq.toList
 
-                    events |> List.length |> should equal 1
+                    events |> List.length |> should equal 2
                     events.Head.resultOf |> should equal intention.tsIntention.value.id
                     events.Head.t |> should be (ofCase <@WorldEvent.ObjectAdded@>)
+
+                    let expectedJoinedWorld =
+                        WorldEvent.JoinedWorld newClientId
+                        |> WorldEvent.asResult intentionId world1.id 1
+
+                    events.Tail.Head |> should equal expectedJoinedWorld
 
                 [<Test>]
                 let ``delays a leave game intention for old client id`` () =
@@ -828,6 +852,114 @@ module IntentionProcessing =
                 let ``does not move player`` () =
                     processResult.worldMap |> should equal worldMap
 
+            [<TestFixture>]
+            module ``joinWorld`` =
+
+                [<TestFixture>]
+                module ``for valid location`` =
+                    let obj = TestUtil.makePlayer (Point.create 2 2)
+
+                    let intention =
+                        Intention.JoinWorld (world2.id, obj)
+                        |> Intention.makePayload existingClient
+                        |> WithId.create
+                        |> WithTimestamp.create now
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processMany
+                            now
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            [intention]
+
+                    [<Test>]
+                    let ``objectClientMap is correct`` () =
+                        let wocm = processResult.serverSideData.worldObjectClientMap
+
+                        // Existing player should be unchanged
+                        let ocm1 = [existingPlayer.id, existingClient] |> Map.ofList
+                        wocm |> Map.containsKey world1.id |> should equal true
+                        wocm |> Map.find world1.id |> should equal ocm1
+
+                        // New player should be added
+                        let ocm2 = [obj.id, existingClient] |> Map.ofList
+                        wocm |> Map.containsKey world2.id |> should equal true
+                        wocm |> Map.find world2.id |> should equal ocm2
+
+                    [<Test>]
+                    let ``clientWorldMap is updated`` () =
+                        let expected = [existingClient, world2.id] |> Map.ofList
+                        processResult.serverSideData.clientWorldMap |> should equal expected
+
+                    [<Test>]
+                    let ``player is added to the location`` () =
+                        processResult.worldMap |> Map.containsKey world1.id |> should equal true
+                        processResult.worldMap |> Map.containsKey world2.id |> should equal true
+
+                        let resultWorld1 = processResult.worldMap |> Map.find world1.id
+                        resultWorld1.value.objects |> Map.containsKey obj.id |> should equal false
+
+                        let resultWorld2 = processResult.worldMap |> Map.find world2.id
+                        resultWorld2.value.objects |> Map.containsKey obj.id |> should equal true
+
+                        let resultObj = resultWorld2.value.objects |> Map.find obj.id
+                        resultObj.value.btmLeft |> should equal obj.value.btmLeft
+
+                    [<Test>]
+                    let ``creates correct events`` () =
+                        let events = processResult.events |> Seq.toList
+
+                        events.Length |> should equal 2
+                        events.Head.t |> should be (ofCase <@WorldEvent.Type.ObjectAdded@>)
+
+                        let secondEvent = WorldEvent.Type.JoinedWorld existingClient
+                        events.Tail.Head.t |> should equal secondEvent
+
+                [<TestFixture>]
+                module ``for invalid location`` =
+                    let obj = TestUtil.makePlayer (Point.create 100 100)
+
+                    let intention =
+                        Intention.JoinWorld (world2.id, obj)
+                        |> Intention.makePayload existingClient
+                        |> WithId.create
+                        |> WithTimestamp.create now
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processMany
+                            now
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            [intention]
+
+                    [<Test>]
+                    let ``objectClientMap is correct`` () =
+                        let wocm = processResult.serverSideData.worldObjectClientMap
+
+                        // New player should be added
+                        let ocm2 = [obj.id, existingClient] |> Map.ofList
+                        wocm |> Map.containsKey world2.id |> should equal true
+                        wocm |> Map.find world2.id |> should equal ocm2
+
+                    [<Test>]
+                    let ``clientWorldMap is updated`` () =
+                        let expected = [existingClient, world2.id] |> Map.ofList
+                        processResult.serverSideData.clientWorldMap |> should equal expected
+
+                    [<Test>]
+                    let ``player is added to the spawn point`` () =
+                        processResult.worldMap |> Map.containsKey world2.id |> should equal true
+
+                        let resultWorld2 = processResult.worldMap |> Map.find world2.id
+                        resultWorld2.value.objects |> Map.containsKey obj.id |> should equal true
+
+                        let resultObj = resultWorld2.value.objects |> Map.find obj.id
+                        resultObj.value.btmLeft |> should equal spawnPoint
+
         [<TestFixture>]
         module ``multiple join intentions`` =
             let now = 12L
@@ -878,3 +1010,4 @@ module IntentionProcessing =
                 ocm |> Map.count |> should equal 2
                 ocm |> Map.exists (fun pId cId -> cId = client1) |> should equal true
                 ocm |> Map.exists (fun pId cId -> cId = client2) |> should equal true
+

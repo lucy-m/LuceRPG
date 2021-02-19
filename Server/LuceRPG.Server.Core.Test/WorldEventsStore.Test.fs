@@ -8,6 +8,8 @@ open System
 [<TestFixture>]
 module WorldEventsStore =
     let worldId = "world-id"
+    let clientId = "client-id"
+    let joinedClientId = "joined-client-id"
     let objId = System.Guid.NewGuid().ToString()
 
     let makeEvent (t: WorldEvent.Type): WorldEvent =
@@ -16,6 +18,12 @@ module WorldEventsStore =
 
     [<TestFixture>]
     module ``unculled store with two events`` =
+        let joinedEvent: WorldEvent WithTimestamp =
+            {
+                timestamp = 500L
+                value = WorldEvent.JoinedWorld joinedClientId |> makeEvent
+            }
+
         let firstEvent: WorldEvent WithTimestamp =
             {
                 timestamp = 1000L
@@ -28,11 +36,18 @@ module WorldEventsStore =
                 value = WorldEvent.Moved (objId, Direction.East) |> makeEvent
             }
 
-        let events = [worldId, seq{firstEvent; secondEvent}] |> Map.ofList
+        let events = [worldId, seq{firstEvent; secondEvent; joinedEvent}] |> Map.ofList
         let world = World.empty "test" [] Point.zero
         let idWorld = world |> WithId.useId worldId
         let objectBusyMap = ["obj1", 1000L; "obj2", 1200L] |> Map.ofList
         let worldMap = [worldId, idWorld] |> Map.ofList
+
+        let serverSideData =
+            let clientWorldMap = [clientId, worldId; joinedClientId, worldId] |> Map.ofList
+            {
+                ServerSideData.empty worldId
+                    with clientWorldMap = clientWorldMap
+            }
 
         let store: WorldEventsStore =
             {
@@ -40,7 +55,7 @@ module WorldEventsStore =
                 recentEvents = events
                 worldMap = worldMap
                 objectBusyMap = objectBusyMap
-                serverSideData = ServerSideData.empty worldId
+                serverSideData = serverSideData
             }
 
         [<TestFixture>]
@@ -48,7 +63,7 @@ module WorldEventsStore =
             [<Test>]
             let ``getting before both events returns both events`` () =
                 let dt = 800L
-                let result = WorldEventsStore.getSince dt worldId store
+                let result = WorldEventsStore.getSince dt clientId store
 
                 result |> should be (ofCase <@GetSinceResult.Events@>)
 
@@ -60,25 +75,31 @@ module WorldEventsStore =
             [<Test>]
             let ``getting between first and second events returns second event only`` () =
                 let dt = 1100L
-                let result = WorldEventsStore.getSince dt worldId store
-
-                result |> should be (ofCase <@GetSinceResult.Events@>)
+                let result = WorldEventsStore.getSince dt clientId store
 
                 match result with
                 | GetSinceResult.Events es ->
-                        es |> should be (equivalent [secondEvent])
+                    es |> should be (equivalent [secondEvent])
                 | _ -> failwith "Incorrect case"
 
             [<Test>]
             let ``getting after second event returns empty`` () =
                 let dt = 1400L
-                let result = WorldEventsStore.getSince dt worldId store
-
-                result |> should be (ofCase <@GetSinceResult.Events@>)
+                let result = WorldEventsStore.getSince dt clientId store
 
                 match result with
                 | GetSinceResult.Events es ->
-                        es |> should be (equivalent [])
+                    es |> should be (equivalent [])
+                | _ -> failwith "Incorrect case"
+
+            [<Test>]
+            let ``getting for client ID with joined event returns world`` () =
+                let dt = 400L
+                let result = WorldEventsStore.getSince  dt joinedClientId store
+
+                match result with
+                | GetSinceResult.World w ->
+                    w |> should equal idWorld
                 | _ -> failwith "Incorrect case"
 
         [<TestFixture>]
@@ -164,18 +185,25 @@ module WorldEventsStore =
 
         let cullTime = 800L
 
+        let serverSideData =
+            let clientWorldMap = [clientId, worldId] |> Map.ofList
+            {
+                ServerSideData.empty worldId
+                    with clientWorldMap = clientWorldMap
+            }
+
         let store: WorldEventsStore =
             {
                 lastCull = cullTime
                 recentEvents = recentEvents
                 worldMap = worldMap
                 objectBusyMap = Map.empty
-                serverSideData = ServerSideData.empty worldId
+                serverSideData = serverSideData
             }
 
         [<Test>]
         let ``getting before cull returns world`` () =
-            let result = WorldEventsStore.getSince 500L worldId store
+            let result = WorldEventsStore.getSince 500L clientId store
 
             result |> should be (ofCase <@GetSinceResult.World@>)
 
@@ -186,7 +214,7 @@ module WorldEventsStore =
 
         [<Test>]
         let ``getting after cull returns events`` () =
-            let result = WorldEventsStore.getSince 900L worldId store
+            let result = WorldEventsStore.getSince 900L clientId store
 
             result |> should be (ofCase <@GetSinceResult.Events@>)
 

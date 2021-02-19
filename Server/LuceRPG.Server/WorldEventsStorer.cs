@@ -39,17 +39,7 @@ namespace LuceRPG.Server
 
         public GetSinceResultModule.Payload GetSince(long timestamp, string clientId)
         {
-            var worldId = GetWorldIdForClient(clientId);
-
-            if (worldId == null)
-            {
-                var failure = $"No world associated with client id";
-                return GetSinceResultModule.Payload.NewFailure(failure);
-            }
-            else
-            {
-                return WorldEventsStoreModule.getSince(timestamp, worldId, _store);
-            }
+            return WorldEventsStoreModule.getSince(timestamp, clientId, _store);
         }
 
         public WithId.Model<WorldModule.Payload>? GetWorld(string worldId)

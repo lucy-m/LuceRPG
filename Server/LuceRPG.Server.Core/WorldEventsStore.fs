@@ -75,20 +75,43 @@ module WorldEventsStore =
 
     /// Returns recent events if available
     /// Returns whole world if events have been culled
-    let getSince (timestamp: int64) (worldId: Id.World) (state: Model): GetSinceResult.Payload =
-        let tWorld = state.worldMap |> Map.tryFind worldId
+    ///   or if the client has changed world
+    let getSince
+            (timestamp: int64)
+            (clientId: Id.Client)
+            (state: Model)
+            : GetSinceResult.Payload =
+        let tWorldId = state.serverSideData.clientWorldMap |> Map.tryFind clientId
+        let tWorld =
+            tWorldId
+            |> Option.bind (fun worldId ->
+                state.worldMap |> Map.tryFind worldId
+            )
 
         match tWorld with
-        | Option.None -> GetSinceResult.Failure (sprintf "Unknown world id %s" worldId)
+        | Option.None -> GetSinceResult.Failure (sprintf "Unknown world for client id %s" clientId)
         | Option.Some world ->
             if timestamp >= state.lastCull
             then
-                state.recentEvents
-                |> Map.tryFind worldId
-                |> Option.defaultValue Seq.empty
-                |> Seq.filter (fun e -> e.timestamp >= timestamp)
-                |> List.ofSeq
-                |> GetSinceResult.Events
+                let events =
+                    state.recentEvents
+                    |> Map.tryFind world.id
+                    |> Option.defaultValue Seq.empty
+                    |> Seq.filter (fun e -> e.timestamp >= timestamp)
+                    |> List.ofSeq
+
+                let worldChanges =
+                    events
+                    |> List.choose (fun e ->
+                        match e.value.t with
+                        | WorldEvent.Type.JoinedWorld cId -> Option.Some cId
+                        | _ -> Option.None
+                    )
+                    |> List.filter (fun cId -> clientId = cId)
+
+                if worldChanges |> List.isEmpty
+                then GetSinceResult.Events events
+                else GetSinceResult.World world
             else
                 GetSinceResult.World world
 

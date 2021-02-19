@@ -36,4 +36,19 @@ module ServerSideData =
             defaultWorld = defaultWorld
         }
 
+    let addToWocm
+            (worldId: Id.World)
+            (objectId: Id.WorldObject)
+            (clientId: Id.Client)
+            (model: WorldObjectClientMap)
+            : WorldObjectClientMap =
+        let ocm =
+            model
+            |> Map.tryFind worldId
+            |> Option.defaultValue Map.empty
+            |> Map.add objectId clientId
+
+        model
+        |> Map.add worldId ocm
+
 type ServerSideData = ServerSideData.Model

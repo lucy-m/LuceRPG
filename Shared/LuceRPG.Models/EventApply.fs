@@ -20,3 +20,5 @@ module EventApply =
 
             | WorldEvent.Type.ObjectRemoved id ->
                 world |> WithId.map (World.removeObject id)
+
+            | WorldEvent.Type.JoinedWorld _ -> world

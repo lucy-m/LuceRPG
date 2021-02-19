@@ -68,6 +68,12 @@ module WorldObject =
     let moveObject (direction: Direction) (obj: Payload): Payload =
         moveObjectN direction 1 obj
 
+    let atLocation (btmLeft: Point) (obj: Payload): Payload =
+        {
+            obj with
+                btmLeft = btmLeft
+        }
+
     /// Time taken by the object to move one square
     let travelTime (obj: Payload): int64 =
         match obj.t with
