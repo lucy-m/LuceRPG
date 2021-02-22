@@ -962,7 +962,7 @@ module IntentionProcessing =
 
                         leaveWorlds.Length |> should equal 1
                         let (index, wId) = leaveWorlds.Head
-                        index |> should equal 2
+                        index |> should equal 1
                         wId |> should equal world1.id
 
                 [<TestFixture>]

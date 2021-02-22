@@ -442,15 +442,12 @@ namespace LuceRPG.Server.Test
             }
 
             [Test]
-            public void JoinWorldIntention()
+            public void WarpIntention()
             {
-                var playerData = PlayerDataModule.create(user1);
-                var player =
-                    WorldObjectModule.create(
-                        WorldObjectModule.TypeModule.Model.NewPlayer(playerData),
-                        PointModule.create(2, 0));
-                var idPlayer = WithId.create(player);
-                var t = IntentionModule.Type.NewJoinWorld(secondWorld.id, idPlayer);
+                timestampProvider.Now = 300L;
+
+                var toPoint = PointModule.create(5, 6);
+                var t = IntentionModule.Type.NewWarp(secondWorld.id, toPoint, playerId1);
                 var payload = IntentionModule.makePayload(client1, t);
                 var intention = WithId.create(payload);
                 var bytes = IntentionSrl.serialise(intention);
@@ -463,25 +460,50 @@ namespace LuceRPG.Server.Test
 
                 intentionProcessor.Process();
 
-                // player is added to the second world
+                // Does nothing initially
+                var resultInitialWorld = worldStorer.GetWorld(initialWorld.id);
+                var initialContainsPlayer1 =
+                    MapModule.ContainsKey(
+                        playerId1,
+                        resultInitialWorld.value.objects
+                    );
+                Assert.That(initialContainsPlayer1, Is.True);
+
+                // Two intentions are placed in queue
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(2));
+
+                // Processing again
+                intentionProcessor.Process();
+
+                // Removes player 1 from initialWorld
+                resultInitialWorld = worldStorer.GetWorld(initialWorld.id);
+                initialContainsPlayer1 =
+                    MapModule.ContainsKey(
+                        playerId1,
+                        resultInitialWorld.value.objects
+                    );
+                Assert.That(initialContainsPlayer1, Is.False);
+
+                // Adds player 1 to secondWorld
                 var resultSecondWorld = worldStorer.GetWorld(secondWorld.id);
-                Assert.That(resultSecondWorld.value.objects.Count, Is.EqualTo(1));
-                Assert.That(resultSecondWorld.value.objects.ContainsKey(idPlayer.id), Is.True);
+                var secondContainsPlayer1 =
+                    MapModule.ContainsKey(
+                        playerId1,
+                        resultSecondWorld.value.objects
+                    );
+                Assert.That(secondContainsPlayer1, Is.True);
 
-                // player is not added to the first world
-                var resultFirstWorld = worldStorer.GetWorld(initialWorld.id);
-                Assert.That(resultFirstWorld.value.objects.ContainsKey(idPlayer.id), Is.False);
+                // Player 1 is placed at the warp point
+                var resultPlayer1 =
+                    MapModule.Find(
+                        playerId1,
+                        resultSecondWorld.value.objects
+                    );
+                Assert.That(resultPlayer1.value.btmLeft, Is.EqualTo(toPoint));
 
-                // get state returns world2 data
-                var getAllState = worldController.GetAllState(client1);
-                var fileContent = AsFileContentResult(getAllState).FileContents;
-                var deserialisedWorld = WorldSrl.deserialise(fileContent);
-                Assert.That(deserialisedWorld.HasValue(), Is.True);
-                Assert.That(deserialisedWorld.Value.value.id, Is.EqualTo(secondWorld.id));
-
-                // get since result returns all of world2
-                var getSince = worldController.GetSince(80, client1);
-                fileContent = AsFileContentResult(getSince).FileContents;
+                // Get since for client 1 returns secondWorld
+                var getSince1 = worldController.GetSince(0, client1);
+                var fileContent = AsFileContentResult(getSince1).FileContents;
                 var deserialisedGetSince = GetSinceResultSrl.deserialise(fileContent);
 
                 Assert.That(deserialisedGetSince.HasValue(), Is.True);
@@ -493,23 +515,24 @@ namespace LuceRPG.Server.Test
 
                 Assert.That(world.id, Is.EqualTo(secondWorld.id));
 
-                // get since result returns a world changed event
-                //var getSince = worldController.GetSince(80, client1);
-                //fileContent = AsFileContentResult(getSince).FileContents;
-                //var deserialisedGetSince = GetSinceResultSrl.deserialise(fileContent);
+                // Get since for client 2 includes remove object event for player1
+                var getSince2 = worldController.GetSince(timestampProvider.Now - 10, client2);
+                fileContent = AsFileContentResult(getSince2).FileContents;
+                deserialisedGetSince = GetSinceResultSrl.deserialise(fileContent);
 
-                //Assert.That(deserialisedGetSince.HasValue(), Is.True);
-                //Assert.That(deserialisedGetSince.Value.value.value.IsEvents, Is.True);
+                Assert.That(deserialisedGetSince.HasValue(), Is.True);
+                Assert.That(deserialisedGetSince.Value.value.value.IsEvents, Is.True);
 
-                //var events =
-                //    ((GetSinceResultModule.Payload.Events)deserialisedGetSince.Value.value.value)
-                //    .Item;
-                //Assert.That(events.Count(e => e.value.t.IsWorldChanged), Is.EqualTo(1));
+                var events =
+                    ((GetSinceResultModule.Payload.Events)deserialisedGetSince.Value.value.value)
+                    .Item;
+                Assert.That(events.Length, Is.EqualTo(1));
 
-                //var worldChanged =
-                //    (WorldEventModule.Type.WorldChanged)events.First(e => e.value.t.IsWorldChanged).value.t;
-                //Assert.That(worldChanged.Item1, Is.EqualTo(client1));
-                //Assert.That(worldChanged.Item2, Is.EqualTo(secondWorld.id));
+                var e = events.Head;
+                Assert.That(e.value.t.IsObjectRemoved, Is.True);
+
+                var objectRemoved = ((WorldEventModule.Type.ObjectRemoved)e.value.t).Item;
+                Assert.That(objectRemoved, Is.EqualTo(playerId1));
             }
         }
     }

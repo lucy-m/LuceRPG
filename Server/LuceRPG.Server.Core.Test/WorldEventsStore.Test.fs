@@ -119,6 +119,7 @@ module WorldEventsStore =
                     worldMap = newWorldMap
                     objectBusyMap = objectBusyMap
                     serverSideData = serverSideData
+                    logs = []
                 }
 
             let now = 1400L

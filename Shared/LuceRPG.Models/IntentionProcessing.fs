@@ -510,7 +510,7 @@ module IntentionProcessing =
                     |> Intention.makePayload clientId
                     |> WithId.create
                     |> WithTimestamp.create timestamp
-                    |> IndexedIntention.useIndex (iIntention.index + 2) fromWorldId
+                    |> IndexedIntention.useIndex (iIntention.index + 1) fromWorldId
 
                 let delayed = [joinWorldIntention; leaveWorldIntention]
 
