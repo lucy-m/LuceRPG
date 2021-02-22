@@ -3,7 +3,7 @@
 module Intention =
     type Type =
         | Move of Id.WorldObject * Direction * byte
-        | JoinWorld of Id.World * WorldObject
+        | JoinWorld of WorldObject
         | JoinGame of string
         | LeaveGame
         | LeaveWorld

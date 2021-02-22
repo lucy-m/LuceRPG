@@ -23,11 +23,7 @@ module IntentionSrl =
                 ]
             | Intention.JoinGame username -> StringSrl.serialise username
             | Intention.LeaveGame -> [||]
-            | Intention.JoinWorld (wId, obj) ->
-                Array.concat [
-                    StringSrl.serialise wId
-                    WorldObjectSrl.serialise obj
-                ]
+            | Intention.JoinWorld obj -> WorldObjectSrl.serialise obj
             | Intention.LeaveWorld -> [||]
             | Intention.Warp (worldId, point, objectId) ->
                 Array.concat [
@@ -70,11 +66,8 @@ module IntentionSrl =
             | 3uy ->
                 DesrlResult.create Intention.LeaveGame 0
             | 4uy ->
-                DesrlUtil.getTwo
-                    StringSrl.deserialise
-                    WorldObjectSrl.deserialise
-                    (fun wId obj -> Intention.JoinWorld (wId, obj))
-                    objectBytes
+                WorldObjectSrl.deserialise objectBytes
+                |> DesrlResult.map Intention.JoinWorld
             | 5uy ->
                 DesrlResult.create Intention.LeaveWorld 0
             | 6uy ->

@@ -372,7 +372,7 @@ module IntentionProcessing =
             [<Test>]
             let ``join world does nothing`` () =
                 let newPlayer = TestUtil.makePlayer (Point.create 3 3)
-                let intention = makeIntention (Intention.JoinWorld (worldId, newPlayer))
+                let intention = makeIntention (Intention.JoinWorld newPlayer)
                 let result = processFn intention
 
                 result.world.value.objects
@@ -885,8 +885,8 @@ module IntentionProcessing =
                             delayed
                             |> List.choose (fun i ->
                                 match i.tsIntention.value.value.t with
-                                | Intention.JoinWorld (wId, obj) ->
-                                    Option.Some (i.index, wId, obj)
+                                | Intention.JoinWorld obj ->
+                                    Option.Some (i.index, i.worldId, obj)
                                 | _ -> Option.None
                             )
 
@@ -1032,11 +1032,11 @@ module IntentionProcessing =
                     let obj = TestUtil.makePlayer (Point.create 2 2)
 
                     let intention =
-                        Intention.JoinWorld (world2.id, obj)
+                        Intention.JoinWorld obj
                         |> Intention.makePayload existingClient
                         |> WithId.create
                         |> WithTimestamp.create now
-                        |> IndexedIntention.create world1.id
+                        |> IndexedIntention.create world2.id
 
                     let processResult =
                         IntentionProcessing.processMany
@@ -1094,11 +1094,11 @@ module IntentionProcessing =
                     let obj = TestUtil.makePlayer (Point.create 100 100)
 
                     let intention =
-                        Intention.JoinWorld (world2.id, obj)
+                        Intention.JoinWorld obj
                         |> Intention.makePayload existingClient
                         |> WithId.create
                         |> WithTimestamp.create now
-                        |> IndexedIntention.create world1.id
+                        |> IndexedIntention.create world2.id
 
                     let processResult =
                         IntentionProcessing.processMany

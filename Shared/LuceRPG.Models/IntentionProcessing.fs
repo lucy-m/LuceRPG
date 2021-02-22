@@ -330,7 +330,8 @@ module IntentionProcessing =
                 serverSideData = updatedServerSideData
             }
 
-        | Intention.JoinWorld (worldId, obj) ->
+        | Intention.JoinWorld obj ->
+            let worldId = iIntention.worldId
             let tWorld = worldMap |> Map.tryFind worldId
 
             match tWorld with
@@ -475,7 +476,7 @@ module IntentionProcessing =
             match (tToWorld, tObject) with
             | Option.Some toWorld, Option.Some obj ->
                 let joinWorldIntention =
-                    Intention.JoinWorld (toWorld.id, obj)
+                    Intention.JoinWorld obj
                     |> Intention.makePayload clientId
                     |> WithId.create
                     |> WithTimestamp.create timestamp
