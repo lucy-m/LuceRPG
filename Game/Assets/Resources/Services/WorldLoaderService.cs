@@ -25,6 +25,7 @@ namespace LuceRPG.Game.Services
         }
 
         public IEnumerator GetUpdates(
+            Action onWorldChange,
             Action<WorldEventModule.Model> onEvent,
             Action<WorldModule.Payload, IReadOnlyCollection<WorldDiffModule.DiffType>> onDiff)
         {
@@ -57,11 +58,16 @@ namespace LuceRPG.Game.Services
                 {
                     var worldUpdate =
                         ((GetSinceResultModule.Payload.World)update.value)
-                        .Item.value;
+                        .Item;
 
                     // If the world IDs differ here then need to reload the world
+                    if (worldUpdate.id != Registry.Stores.World.WorldId)
+                    {
+                        Debug.Log("Reloading world");
+                        Registry.Stores.World.LoadFrom(worldUpdate);
+                    }
 
-                    CheckConsistency(onDiff, worldUpdate);
+                    CheckConsistency(onDiff, worldUpdate.value);
                 }
                 else
                 {

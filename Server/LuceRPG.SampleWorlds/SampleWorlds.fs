@@ -4,6 +4,9 @@ open LuceRPG.Models
 open LuceRPG.Server.Core
 
 module SampleWorlds =
+    let world1Id = System.Guid.NewGuid().ToString()
+    let world2Id = System.Guid.NewGuid().ToString()
+
     let world1: (World * Interactions) =
         let bounds =
             [
@@ -18,6 +21,11 @@ module SampleWorlds =
             let playerData = PlayerData.create "Harry"
             let t = WorldObject.Type.NPC playerData
             WorldObject.create t (Point.create 16 4)
+            |> WithId.create
+
+        let warp =
+            let t = WorldObject.Type.Warp (world2Id, Point.zero)
+            WorldObject.create t (Point.create -4 8)
             |> WithId.create
 
         let walls =
@@ -45,9 +53,9 @@ module SampleWorlds =
                 "sampleville"
                 bounds
                 spawnPoint
-                (npc::walls)
+                (npc::warp::walls)
                 interactionMap
-            |> WithId.create
+            |> WithId.useId world1Id
 
         let interactions = [sayHiInteraction]
 
@@ -57,7 +65,7 @@ module SampleWorlds =
         let bounds = [ Rect.create 0 0 16 16 ]
         let spawnPoint = Point.create 4 0
 
-        let world = World.empty "world2" bounds spawnPoint |> WithId.create
+        let world = World.empty "world2" bounds spawnPoint |> WithId.useId world2Id
         let interactions = []
 
         (world, interactions)

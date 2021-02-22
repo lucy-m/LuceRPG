@@ -15,9 +15,10 @@ namespace LuceRPG.Game.Overlords
         public GameObject WallPrefab = null;
         public GameObject PathPrefab = null;
         public GameObject PlayerPrefab = null;
+        public GameObject NpcPrefab = null;
+        public GameObject WarpPrefab = null;
         public GameObject BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
-        public GameObject NpcPrefab = null;
         public GameObject UnitNamePrefab = null;
         public Canvas WorldTextCanvas = null;
 
@@ -57,6 +58,10 @@ namespace LuceRPG.Game.Overlords
             else if (t.IsNPC)
             {
                 return NpcPrefab;
+            }
+            else if (t.IsWarp)
+            {
+                return WarpPrefab;
             }
 
             return null;
