@@ -855,6 +855,63 @@ module IntentionProcessing =
                         processResult.serverSideData.clientWorldMap
                         |> should equal serverSideData.clientWorldMap
 
+            [<TestFixture>]
+            module ``warp`` =
+                [<TestFixture>]
+                module ``from world1 to world2 valid point`` =
+                    let toPoint = Point.create 7 1
+
+                    let intention =
+                        Intention.Warp (world2.id, toPoint, player1.id)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``delays joinWorld and leaveWorld intentions`` () =
+                        let delayed = processResult.delayed |> Seq.toList
+
+                        delayed.Length |> should equal 2
+
+                        let joinWorlds =
+                            delayed
+                            |> List.choose (fun i ->
+                                match i.tsIntention.value.value.t with
+                                | Intention.JoinWorld (wId, obj) ->
+                                    Option.Some (i.index, wId, obj)
+                                | _ -> Option.None
+                            )
+
+                        joinWorlds.Length |> should equal 1
+
+                        let (index, wId, obj) = joinWorlds.Head
+                        index |> should equal 1
+                        wId |> should equal world2.id
+                        obj.id |> should equal player1.id
+                        obj.value.btmLeft |> should equal toPoint
+
+                        let leaveWorlds =
+                            delayed
+                            |> List.choose (fun i ->
+                                match i.tsIntention.value.value.t with
+                                | Intention.LeaveWorld ->
+                                    Option.Some (i.index, i.worldId)
+                                | _ -> Option.None
+                            )
+
+                        leaveWorlds.Length |> should equal 1
+                        let (index, wId) = leaveWorlds.Head
+                        index |> should equal 2
+                        wId |> should equal world1.id
+
     [<TestFixture>]
     module ``processMany`` =
 

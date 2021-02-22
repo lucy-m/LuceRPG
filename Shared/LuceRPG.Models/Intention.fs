@@ -7,6 +7,7 @@ module Intention =
         | JoinGame of string
         | LeaveGame
         | LeaveWorld
+        | Warp of Id.World * Point * Id.WorldObject
 
     type Payload =
         {

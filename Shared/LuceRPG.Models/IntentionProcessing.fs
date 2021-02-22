@@ -126,6 +126,7 @@ module IntentionProcessing =
         | Intention.JoinGame _ -> thisUnchanged
         | Intention.LeaveGame _ -> thisUnchanged
         | Intention.LeaveWorld _ -> thisUnchanged
+        | Intention.Warp _ -> thisUnchanged
 
     type ProcessGlobalResult =
         {
@@ -453,6 +454,50 @@ module IntentionProcessing =
                     objectBusyMap = updatedBusyMap
                     serverSideData = updatedServerSideData
                 }
+
+        | Intention.Warp (toWorldId, toPoint, objectId) ->
+            // If world ID exists and object ID points to a valid
+            //   object in the current world then create JoinWorld
+            //   and LeaveWorld intentions
+            let fromWorldId = iIntention.worldId
+            let tToWorld = worldMap |> Map.tryFind toWorldId
+            let tFromWorld = worldMap |> Map.tryFind fromWorldId
+            let tObject =
+                tFromWorld
+                |> Option.bind (fun fromWorld ->
+                    fromWorld.value.objects
+                    |> Map.tryFind objectId
+                )
+                |> Option.map (fun oldPosition ->
+                    WithId.map (WorldObject.atLocation toPoint) oldPosition
+                )
+
+            match (tToWorld, tObject) with
+            | Option.Some toWorld, Option.Some obj ->
+                let joinWorldIntention =
+                    Intention.JoinWorld (toWorld.id, obj)
+                    |> Intention.makePayload clientId
+                    |> WithId.create
+                    |> WithTimestamp.create timestamp
+                    |> IndexedIntention.useIndex (iIntention.index + 1) toWorld.id
+
+                let leaveWorldIntention =
+                    Intention.LeaveWorld
+                    |> Intention.makePayload clientId
+                    |> WithId.create
+                    |> WithTimestamp.create timestamp
+                    |> IndexedIntention.useIndex (iIntention.index + 2) fromWorldId
+
+                let delayed = [joinWorldIntention; leaveWorldIntention]
+
+                {
+                    events = []
+                    delayed = delayed
+                    worldMap = worldMap
+                    objectBusyMap = objectBusyMap
+                    serverSideData = serverSideData
+                }
+            | _ -> thisUnchanged
 
         | Intention.Move _ -> thisUnchanged
 
