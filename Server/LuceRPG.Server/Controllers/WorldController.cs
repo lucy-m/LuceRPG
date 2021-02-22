@@ -117,7 +117,7 @@ namespace LuceRPGServer.Controllers
                         clientId,
                         playerObject.id,
                         WithTimestamp.create(_timestampProvider.Now, world),
-                        WithId.toList(_worldStore.Interactions.Value)
+                        _worldStore.GetInteractions(world.id)
                     ))
                     : GetJoinGameResultModule.Model.NewFailure("Could not join game");
 

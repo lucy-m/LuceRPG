@@ -71,7 +71,7 @@ namespace LuceRPG.Server.Test
                 initialWorld.id,
                 new List<WithId.Model<WorldModule.Payload>>() { initialWorld, secondWorld });
 
-            worldStorer = new WorldEventsStorer(worldCollection, InteractionStore.Empty(), timestampProvider);
+            worldStorer = new WorldEventsStorer(worldCollection, timestampProvider);
             intentionQueue = new IntentionQueue(timestampProvider);
             pingStorer = new LastPingStorer();
             var logService = new TestCsvLogService();
@@ -501,17 +501,17 @@ namespace LuceRPG.Server.Test
                     );
                 Assert.That(resultPlayer1.value.btmLeft, Is.EqualTo(toPoint));
 
-                // Get since for client 1 returns secondWorld
+                // Get since for client 1 returns secondWorld as worldChanged
                 var getSince1 = worldController.GetSince(0, client1);
                 var fileContent = AsFileContentResult(getSince1).FileContents;
                 var deserialisedGetSince = GetSinceResultSrl.deserialise(fileContent);
 
                 Assert.That(deserialisedGetSince.HasValue(), Is.True);
-                Assert.That(deserialisedGetSince.Value.value.value.IsWorld, Is.True);
+                Assert.That(deserialisedGetSince.Value.value.value.IsWorldChanged, Is.True);
 
                 var world =
-                    ((GetSinceResultModule.Payload.World)deserialisedGetSince.Value.value.value)
-                    .Item;
+                    ((GetSinceResultModule.Payload.WorldChanged)deserialisedGetSince.Value.value.value)
+                    .Item1;
 
                 Assert.That(world.id, Is.EqualTo(secondWorld.id));
 

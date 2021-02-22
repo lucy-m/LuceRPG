@@ -35,6 +35,7 @@ namespace LuceRPG.Game.Overlords
         {
             yield return Registry.Services.WorldLoader.LoadWorld(LoadWorldGameObjects);
             yield return Registry.Services.WorldLoader.GetUpdates(
+                OnWorldChanged,
                 we => OnWorldEvent(we, UpdateSource.Server),
                 OnDiff);
         }
@@ -103,6 +104,31 @@ namespace LuceRPG.Game.Overlords
                     AddObject(obj);
                 }
             }
+        }
+
+        private void OnWorldChanged()
+        {
+            StartCoroutine(OnWorldChangedEnum());
+        }
+
+        private IEnumerator OnWorldChangedEnum()
+        {
+            // Delete all existing objects
+            foreach (var kvp in UniversalController.Controllers)
+            {
+                var uc = kvp.Value;
+                Destroy(uc.gameObject);
+            }
+
+            var bgs = GameObject.FindGameObjectsWithTag("Background");
+            foreach (var bg in bgs)
+            {
+                Destroy(bg);
+            }
+
+            yield return null;
+
+            LoadWorldGameObjects();
         }
 
         private void OnWorldEvent(WorldEventModule.Model worldEvent, UpdateSource source)

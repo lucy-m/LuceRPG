@@ -54,6 +54,7 @@ module WorldEventsStore =
                 lastCull = 0L
                 recentEvents = events
                 worldMap = worldMap
+                interactionMap = Map.empty
                 objectBusyMap = objectBusyMap
                 serverSideData = serverSideData
             }
@@ -98,7 +99,7 @@ module WorldEventsStore =
                 let result = WorldEventsStore.getSince  dt joinedClientId store
 
                 match result with
-                | GetSinceResult.World w ->
+                | GetSinceResult.WorldChanged (w, i) ->
                     w |> should equal idWorld
                 | _ -> failwith "Incorrect case"
 
@@ -198,6 +199,7 @@ module WorldEventsStore =
                 lastCull = cullTime
                 recentEvents = recentEvents
                 worldMap = worldMap
+                interactionMap = Map.empty
                 objectBusyMap = Map.empty
                 serverSideData = serverSideData
             }

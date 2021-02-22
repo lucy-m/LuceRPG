@@ -17,17 +17,14 @@ namespace LuceRPG.Server
 
         public WorldEventsStorer(
             WorldCollectionModule.Model worldCollection,
-            InteractionStore interactions,
             ITimestampProvider timestampProvider)
         {
             _store = WorldEventsStoreModule.create(worldCollection);
             _timestampProvider = timestampProvider;
-            Interactions = interactions;
         }
 
         public ServerSideDataModule.Model ServerSideData => _store.serverSideData;
         public FSharpMap<string, long> ObjectBusyMap => _store.objectBusyMap;
-        public InteractionStore Interactions { get; }
         public IEnumerable<WithId.Model<WorldModule.Payload>> AllWorlds => WorldEventsStoreModule.allWorlds(_store);
         public FSharpMap<string, WithId.Model<WorldModule.Payload>> WorldMap => _store.worldMap;
 
@@ -40,6 +37,19 @@ namespace LuceRPG.Server
         public GetSinceResultModule.Payload GetSince(long timestamp, string clientId)
         {
             return WorldEventsStoreModule.getSince(timestamp, clientId, _store);
+        }
+
+        public FSharpList<WithId.Model<FSharpList<InteractionModule.One>>> GetInteractions(string worldId)
+        {
+            var fromStore = MapModule.TryFind(worldId, _store.interactionMap);
+            if (fromStore.HasValue())
+            {
+                return fromStore.Value;
+            }
+            else
+            {
+                return ListModule.Empty<WithId.Model<FSharpList<InteractionModule.One>>>();
+            }
         }
 
         public WithId.Model<WorldModule.Payload>? GetWorld(string worldId)

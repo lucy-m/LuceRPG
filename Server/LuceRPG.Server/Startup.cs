@@ -28,10 +28,6 @@ namespace LuceRPGServer
         {
             services.AddSingleton<IntentionQueue>();
             services.AddSingleton(SampleWorlds.collection);
-            services.AddSingleton(y =>
-                new InteractionStore(
-                    WorldCollectionModule.interactionMap(y.GetService<WorldCollectionModule.Model>())));
-            services.AddSingleton(new InteractionStore(WithId.toMap(SampleWorlds.world1.Item2)));
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
             services.AddSingleton<ICredentialService, CredentialService>();

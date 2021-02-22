@@ -62,10 +62,21 @@ module SampleWorlds =
         (world, interactions)
 
     let world2: (World * Interactions) =
-        let bounds = [ Rect.create 0 0 16 16 ]
+        let bounds = [ Rect.create 0 0 8 8 ]
         let spawnPoint = Point.create 4 0
 
-        let world = World.empty "world2" bounds spawnPoint |> WithId.useId world2Id
+        let warp =
+            let t = WorldObject.Type.Warp (world1Id, Point.create 2 5)
+            WorldObject.create t (Point.create 1 6)
+            |> WithId.create
+
+        let world =
+            World.createWithObjs
+                "world2"
+                bounds
+                spawnPoint
+                [warp]
+                |> WithId.useId world2Id
         let interactions = []
 
         (world, interactions)

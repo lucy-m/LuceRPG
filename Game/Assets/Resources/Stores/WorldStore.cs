@@ -9,7 +9,7 @@ namespace LuceRPG.Game.Stores
         public string PlayerId { get; private set; }
         public string ClientId { get; private set; }
         public WithId.Model<WorldModule.Payload> IdWorld { get; set; }
-        public InteractionStore Interactions { get; private set; }
+        public InteractionStore Interactions { get; set; }
         public long LastUpdate { get; set; }
 
         public string WorldId => IdWorld.id;

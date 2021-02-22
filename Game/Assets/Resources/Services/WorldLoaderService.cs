@@ -1,4 +1,5 @@
-﻿using LuceRPG.Game.Models;
+﻿using LuceRPG.Adapters;
+using LuceRPG.Game.Models;
 using LuceRPG.Models;
 using Microsoft.FSharp.Collections;
 using System;
@@ -60,14 +61,23 @@ namespace LuceRPG.Game.Services
                         ((GetSinceResultModule.Payload.World)update.value)
                         .Item;
 
-                    // If the world IDs differ here then need to reload the world
-                    if (worldUpdate.id != Registry.Stores.World.WorldId)
-                    {
-                        Debug.Log("Reloading world");
-                        Registry.Stores.World.LoadFrom(worldUpdate);
-                    }
-
                     CheckConsistency(onDiff, worldUpdate.value);
+                }
+                else if (update.value.IsWorldChanged)
+                {
+                    var newWorld =
+                        ((GetSinceResultModule.Payload.WorldChanged)update.value)
+                        .Item1;
+
+                    var interactions =
+                        ((GetSinceResultModule.Payload.WorldChanged)update.value)
+                        .Item2;
+                    var interactionStore = new InteractionStore(WithId.toMap(interactions));
+
+                    Registry.Stores.World.IdWorld = newWorld;
+                    Registry.Stores.World.Interactions = interactionStore;
+
+                    onWorldChange();
                 }
                 else
                 {

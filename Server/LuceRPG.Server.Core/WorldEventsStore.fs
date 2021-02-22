@@ -12,6 +12,7 @@ module WorldEventsStore =
             lastCull: int64
             recentEvents: Map<Id.World, WorldEvent WithTimestamp seq>
             worldMap: Map<Id.World, World>
+            interactionMap: Map<Id.World, Interactions>
             objectBusyMap: IntentionProcessing.ObjectBusyMap
             serverSideData: ServerSideData
         }
@@ -31,11 +32,13 @@ module WorldEventsStore =
     // A freshly loaded world will never have any ownership
     let create (worlds: WorldCollection): Model =
         let worldMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, w)) |> Map.ofSeq
+        let interactionMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, i)) |> Map.ofSeq
 
         {
             lastCull = 0L
             recentEvents = Map.empty
             worldMap = worldMap
+            interactionMap = interactionMap
             objectBusyMap = Map.empty
             serverSideData = ServerSideData.empty worlds.defaultWorld
         }
@@ -69,6 +72,7 @@ module WorldEventsStore =
             lastCull = state.lastCull
             recentEvents = recentEvents
             worldMap = result.worldMap
+            interactionMap = state.interactionMap
             objectBusyMap = result.objectBusyMap
             serverSideData = result.serverSideData
         }
@@ -111,7 +115,13 @@ module WorldEventsStore =
 
                 if worldChanges |> List.isEmpty
                 then GetSinceResult.Events events
-                else GetSinceResult.World world
+                else
+                    let interactions =
+                        state.interactionMap
+                        |> Map.tryFind world.id
+                        |> Option.defaultValue []
+
+                    GetSinceResult.WorldChanged (world, interactions)
             else
                 GetSinceResult.World world
 
@@ -130,6 +140,7 @@ module WorldEventsStore =
             lastCull = timestamp
             recentEvents = recentEvents
             worldMap = state.worldMap
+            interactionMap = state.interactionMap
             objectBusyMap = culledBusyMap
             serverSideData = state.serverSideData
         }

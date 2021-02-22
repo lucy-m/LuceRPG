@@ -17,12 +17,17 @@ module GetSinceResultSrl =
             | GetSinceResult.Events _ -> 1uy
             | GetSinceResult.World _ -> 2uy
             | GetSinceResult.Failure _ -> 3uy
+            | GetSinceResult.WorldChanged _ -> 4uy
 
         let addtInfo =
             match result with
             | GetSinceResult.Events e -> serialiseEvents e
             | GetSinceResult.World w -> WorldSrl.serialise w
             | GetSinceResult.Failure f -> StringSrl.serialise f
+            | GetSinceResult.WorldChanged (w,is) ->
+                Array.append
+                    (WorldSrl.serialise w)
+                    (ListSrl.serialise InteractionSrl.serialise is)
 
         Array.append [|label|] addtInfo
 
@@ -38,6 +43,12 @@ module GetSinceResultSrl =
             | 3uy ->
                 StringSrl.deserialise objectBytes
                 |> DesrlResult.map GetSinceResult.Failure
+            | 4uy ->
+                DesrlUtil.getTwo
+                    WorldSrl.deserialise
+                    (ListSrl.deserialise InteractionSrl.deserialise)
+                    (fun w is -> GetSinceResult.WorldChanged(w, is))
+                    objectBytes
             | _ ->
                 printfn "Unknown GetResult tag %u" tag
                 Option.None
