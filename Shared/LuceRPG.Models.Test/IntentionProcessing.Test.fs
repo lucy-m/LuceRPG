@@ -349,6 +349,10 @@ module IntentionProcessing =
                     let ``nothing happens`` () =
                         result.events |> Seq.isEmpty |> should equal true
 
+                    [<Test>]
+                    let ``logs`` () =
+                        result.log.IsSome |> should equal true
+
             [<Test>]
             let ``join game does nothing`` () =
                 let intention =
@@ -911,6 +915,60 @@ module IntentionProcessing =
                         let (index, wId) = leaveWorlds.Head
                         index |> should equal 2
                         wId |> should equal world1.id
+
+                [<TestFixture>]
+                module ``from world1 to invalid world`` =
+                    let toPoint = Point.create 100 100
+                    let toWorld = "not-a-world"
+
+                    let intention =
+                        Intention.Warp (toWorld, toPoint, player1.id)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``does nothing`` () =
+                        processResult.delayed |> Seq.isEmpty |> should equal true
+
+                    [<Test>]
+                    let ``logs`` () =
+                        processResult.log.IsSome |> should equal true
+
+                [<TestFixture>]
+                module ``for invalid object`` =
+                    let toPoint = Point.create 100 100
+                    let objectId = "not-an-object"
+
+                    let intention =
+                        Intention.Warp (world2.id, toPoint, objectId)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``does nothing`` () =
+                        processResult.delayed |> Seq.isEmpty |> should equal true
+
+                    [<Test>]
+                    let ``logs`` () =
+                        processResult.log.IsSome |> should equal true
 
     [<TestFixture>]
     module ``processMany`` =

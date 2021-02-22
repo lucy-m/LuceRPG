@@ -9,17 +9,20 @@ module IntentionProcessing =
             delayed: IndexedIntention seq
             world: World
             objectBusyMap: ObjectBusyMap
+            log: string Option
         }
 
     let unchangedWorld
             (objectBusyMap: ObjectBusyMap)
             (world: World)
+            (log: string Option)
             : ProcessWorldResult =
         {
             events = []
             delayed = []
             world = world
             objectBusyMap = objectBusyMap
+            log = log
         }
 
     let processWorld
@@ -30,7 +33,8 @@ module IntentionProcessing =
             (iIntention: IndexedIntention)
             : ProcessWorldResult =
 
-        let thisUnchanged = unchangedWorld objectBusyMap world
+        let thisIgnored = unchangedWorld objectBusyMap world Option.None
+        let thisUnchanged (log: string) = unchangedWorld objectBusyMap world (Option.Some log)
         let intention = iIntention.tsIntention.value
         let timestamp = iIntention.tsIntention.timestamp
         let clientId = intention.value.clientId
@@ -49,7 +53,7 @@ module IntentionProcessing =
                 |> Option.defaultValue true
 
             if not clientOwnsObject
-            then thisUnchanged
+            then thisUnchanged (sprintf "Client %s does not own object %s" clientId id)
             else
                 let tBusyUntil =
                     objectBusyMap
@@ -67,21 +71,22 @@ module IntentionProcessing =
                         delayed = [iIntention]
                         objectBusyMap = objectBusyMap
                         world = world
+                        log = Option.None
                     }
                 else
                     let tObj = world.value.objects |> Map.tryFind id
 
                     match tObj with
-                    | Option.None -> thisUnchanged
+                    | Option.None -> thisUnchanged (sprintf "Unknown object %s in world %s" id world.id)
                     | Option.Some obj ->
                         let travelTime = WorldObject.travelTime obj.value
                         if travelTime <= 0L
-                        then thisUnchanged
+                        then thisUnchanged (sprintf "Object %s cannot move" id)
                         else
                             let newObj = WithId.map (WorldObject.moveObject dir) obj
 
                             if not (World.canPlace newObj world.value)
-                            then thisUnchanged
+                            then thisIgnored
                             else
                                 let event =
                                     WorldEvent.Type.Moved (id, dir)
@@ -119,14 +124,15 @@ module IntentionProcessing =
                                     delayed = delayed
                                     objectBusyMap = newObjectBusyMap
                                     world = newWorld
+                                    log = Option.None
                                 }
 
         // These are not processed at the world level
-        | Intention.JoinWorld _ -> thisUnchanged
-        | Intention.JoinGame _ -> thisUnchanged
-        | Intention.LeaveGame _ -> thisUnchanged
-        | Intention.LeaveWorld _ -> thisUnchanged
-        | Intention.Warp _ -> thisUnchanged
+        | Intention.JoinWorld _ -> thisIgnored
+        | Intention.JoinGame _ -> thisIgnored
+        | Intention.LeaveGame _ -> thisIgnored
+        | Intention.LeaveWorld _ -> thisIgnored
+        | Intention.Warp _ -> thisIgnored
 
     type ProcessGlobalResult =
         {
@@ -135,12 +141,14 @@ module IntentionProcessing =
             worldMap: World.Map
             objectBusyMap: ObjectBusyMap
             serverSideData: ServerSideData
+            log: string Option
         }
 
     let unchangedGlobal
             (worlds: World.Map)
             (objectBusyMap: ObjectBusyMap)
             (serverSideData: ServerSideData)
+            (log: string Option)
             : ProcessGlobalResult =
         {
             events = []
@@ -148,6 +156,7 @@ module IntentionProcessing =
             worldMap = worlds
             objectBusyMap = objectBusyMap
             serverSideData = serverSideData
+            log = log
         }
 
     let processGlobal
@@ -157,7 +166,8 @@ module IntentionProcessing =
             (iIntention: IndexedIntention)
             : ProcessGlobalResult =
 
-        let thisUnchanged =  unchangedGlobal worldMap objectBusyMap serverSideData
+        let thisUnchanged (log: string) = unchangedGlobal worldMap objectBusyMap serverSideData (Option.Some log)
+        let thisIgnored = unchangedGlobal worldMap objectBusyMap serverSideData Option.None
         let intention = iIntention.tsIntention.value
         let timestamp = iIntention.tsIntention.timestamp
         let clientId = intention.value.clientId
@@ -167,7 +177,7 @@ module IntentionProcessing =
             let worldId = serverSideData.defaultWorld
             let tWorld = worldMap |> Map.tryFind worldId
             match tWorld with
-            | Option.None -> thisUnchanged
+            | Option.None -> thisUnchanged (sprintf "Default world id %s is invalid" worldId)
             | Option.Some world ->
 
                 // Generates event to add a player object to the world at the spawn point
@@ -241,6 +251,7 @@ module IntentionProcessing =
                     worldMap = newWorldMap
                     objectBusyMap = objectBusyMap
                     serverSideData = newServerSideData
+                    log = Option.None
                 }
 
         | Intention.LeaveGame ->
@@ -328,6 +339,7 @@ module IntentionProcessing =
                 worldMap = newWorldMap
                 objectBusyMap = updatedBusyMap
                 serverSideData = updatedServerSideData
+                log = Option.None
             }
 
         | Intention.JoinWorld obj ->
@@ -335,7 +347,7 @@ module IntentionProcessing =
             let tWorld = worldMap |> Map.tryFind worldId
 
             match tWorld with
-            | Option.None -> thisUnchanged
+            | Option.None -> thisUnchanged (sprintf "Cannot join unknown world %s" worldId)
             | Option.Some world ->
                 // Try to add the object to the world
                 let tEventType =
@@ -348,7 +360,7 @@ module IntentionProcessing =
                         else Option.None
 
                 match tEventType with
-                | Option.None -> thisUnchanged
+                | Option.None -> thisUnchanged (sprintf "No valid location to place object in world %s" worldId)
                 | Option.Some eventType ->
                     // apply the event to the world
                     let event = WorldEvent.asResult intention.id worldId iIntention.index eventType
@@ -383,6 +395,7 @@ module IntentionProcessing =
                         worldMap = newWorldMap
                         objectBusyMap = objectBusyMap
                         serverSideData = updatedServerSideData
+                        log = Option.None
                     }
 
         | Intention.LeaveWorld ->
@@ -394,7 +407,7 @@ module IntentionProcessing =
             let tWorld = worldMap |> Map.tryFind worldId
 
             match tWorld with
-            | Option.None -> thisUnchanged
+            | Option.None -> thisUnchanged (sprintf "Cannot leave unknown world %s" worldId)
             | Option.Some world ->
                 let toRemove, newOcm =
                     serverSideData.worldObjectClientMap
@@ -454,6 +467,7 @@ module IntentionProcessing =
                     worldMap = newWorldMap
                     objectBusyMap = updatedBusyMap
                     serverSideData = updatedServerSideData
+                    log = Option.None
                 }
 
         | Intention.Warp (toWorldId, toPoint, objectId) ->
@@ -497,10 +511,11 @@ module IntentionProcessing =
                     worldMap = worldMap
                     objectBusyMap = objectBusyMap
                     serverSideData = serverSideData
+                    log = Option.None
                 }
-            | _ -> thisUnchanged
+            | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
 
-        | Intention.Move _ -> thisUnchanged
+        | Intention.Move _ -> thisIgnored
 
     type ProcessManyResult =
         {
@@ -509,6 +524,7 @@ module IntentionProcessing =
             worldMap: Map<Id.World, World>
             objectBusyMap: ObjectBusyMap
             serverSideData: ServerSideData
+            logs: string seq
         }
 
     let unchanged
@@ -522,6 +538,7 @@ module IntentionProcessing =
             worldMap = worldMap
             objectBusyMap = objectBusyMap
             serverSideData = serverSideData
+            logs = []
         }
 
     /// Processes many intentions sequentially
@@ -541,6 +558,10 @@ module IntentionProcessing =
         |> Seq.fold (fun acc i ->
             let resGlobal =
                 processGlobal acc.serverSideData acc.objectBusyMap acc.worldMap i
+            let globalLog =
+                match resGlobal.log with
+                | Option.Some log -> Seq.singleton log
+                | Option.None -> Seq.empty
 
             let tWorld = resGlobal.worldMap |> Map.tryFind i.worldId
 
@@ -554,6 +575,7 @@ module IntentionProcessing =
                     worldMap = resGlobal.worldMap
                     objectBusyMap = resGlobal.objectBusyMap
                     serverSideData = resGlobal.serverSideData
+                    logs = Seq.append acc.logs globalLog
                 }
             | Option.Some world ->
                 let tObjectClientMap =
@@ -568,6 +590,11 @@ module IntentionProcessing =
                         world
                         i
 
+                let worldLog =
+                    match resWorld.log with
+                    | Option.Some log -> Seq.singleton log
+                    | Option.None -> Seq.empty
+
                 let worldMap =
                     resGlobal.worldMap
                     |> Map.add i.worldId resWorld.world
@@ -578,5 +605,6 @@ module IntentionProcessing =
                     worldMap = worldMap
                     objectBusyMap = resWorld.objectBusyMap
                     serverSideData = resGlobal.serverSideData
+                    logs = Seq.concat [acc.logs; globalLog; worldLog]
                 }
         ) initial
