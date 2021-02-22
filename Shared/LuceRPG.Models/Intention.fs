@@ -6,6 +6,7 @@ module Intention =
         | JoinWorld of Id.World * WorldObject
         | JoinGame of string
         | LeaveGame
+        | LeaveWorld
 
     type Payload =
         {

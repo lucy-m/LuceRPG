@@ -22,3 +22,9 @@ module EventApply =
                 world |> WithId.map (World.removeObject id)
 
             | WorldEvent.Type.JoinedWorld _ -> world
+
+    let applyMany (events: WorldEvent seq) (world: World): World =
+        events
+        |> Seq.fold (fun acc e ->
+            apply e acc
+        ) world

@@ -125,6 +125,7 @@ module IntentionProcessing =
         | Intention.JoinWorld _ -> thisUnchanged
         | Intention.JoinGame _ -> thisUnchanged
         | Intention.LeaveGame _ -> thisUnchanged
+        | Intention.LeaveWorld _ -> thisUnchanged
 
     type ProcessGlobalResult =
         {
@@ -242,6 +243,7 @@ module IntentionProcessing =
                 }
 
         | Intention.LeaveGame ->
+            // Removes all refs to the client from all world
             let updatedServerSideData, updatedBusyMap, removeEvents =
                 // For each world,
                 //   update the objectClientMap
@@ -284,10 +286,10 @@ module IntentionProcessing =
 
                 // Update busy map to remove objects
                 let updatedBusyMap =
-                    let objectIds = toRemove |> Set.map snd
-
-                    objectBusyMap
-                    |> Map.filter (fun oId until -> not(Set.contains oId objectIds))
+                    toRemove
+                    |> Set.fold (fun acc (wId, oId) ->
+                        acc |> Map.remove oId
+                    ) objectBusyMap
 
                 let updatedServerSideData =
                     let usernameClientMap =
@@ -380,6 +382,77 @@ module IntentionProcessing =
                         objectBusyMap = objectBusyMap
                         serverSideData = updatedServerSideData
                     }
+
+        | Intention.LeaveWorld ->
+            // Removes client data from the specified world
+            // Objects
+            // Object busy map
+            // ObjectClientMap
+            let worldId = iIntention.worldId
+            let tWorld = worldMap |> Map.tryFind worldId
+
+            match tWorld with
+            | Option.None -> thisUnchanged
+            | Option.Some world ->
+                let toRemove, newOcm =
+                    serverSideData.worldObjectClientMap
+                    |> Map.tryFind worldId
+                    |> Option.defaultValue Map.empty
+                    |> Map.partition (fun oId cId ->
+                        cId = clientId
+                    )
+                    |> fun (toRemove, newOcm) ->
+                        toRemove |> Map.toList |> List.map fst, newOcm
+
+                let removeEvents =
+                    toRemove
+                    |> List.map (fun oId ->
+                        WorldEvent.Type.ObjectRemoved oId
+                        |> WorldEvent.asResult intention.id worldId iIntention.index
+                    )
+
+                let newWorldMap =
+                    let newWorld = EventApply.applyMany removeEvents world
+                    worldMap |> Map.add worldId newWorld
+
+                let updatedBusyMap =
+                    toRemove
+                    |> List.fold (fun acc oId ->
+                        acc |> Map.remove oId
+                    ) objectBusyMap
+
+                let updatedServerSideData =
+                    let worldObjectClientMap =
+                        serverSideData.worldObjectClientMap
+                        |> Map.add worldId newOcm
+
+                    let clientWorldMap =
+                        // Remove the client -> world entry if it
+                        //   is this world
+                        let tCurrentWorld =
+                            serverSideData.clientWorldMap
+                            |> Map.tryFind clientId
+
+                        match tCurrentWorld with
+                        | Option.None -> serverSideData.clientWorldMap
+                        | Option.Some currentWorld ->
+                            if currentWorld = worldId
+                            then serverSideData.clientWorldMap |> Map.remove clientId
+                            else serverSideData.clientWorldMap
+
+                    {
+                        serverSideData with
+                            worldObjectClientMap = worldObjectClientMap
+                            clientWorldMap = clientWorldMap
+                    }
+
+                {
+                    events = removeEvents
+                    delayed = []
+                    worldMap = newWorldMap
+                    objectBusyMap = updatedBusyMap
+                    serverSideData = updatedServerSideData
+                }
 
         | Intention.Move _ -> thisUnchanged
 

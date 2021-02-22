@@ -740,6 +740,121 @@ module IntentionProcessing =
                     |> World.containsObject player2.id
                     |> should equal false
 
+                [<Test>]
+                let ``removes entry from clientWorldMap`` () =
+                    processResult.serverSideData.clientWorldMap
+                    |> Map.containsKey clientId
+                    |> should equal false
+
+            [<TestFixture>]
+            module ``leave world`` =
+                [<TestFixture>]
+                module ``from first world`` =
+                    let intention =
+                        Intention.LeaveWorld
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``creates events to remove first world object`` () =
+                        let events = processResult.events |> Set.ofSeq
+
+                        let expected =
+                            [
+                                WorldEvent.asResult
+                                    intention.tsIntention.value.id
+                                    world1.id
+                                    0
+                                    (WorldEvent.ObjectRemoved player1.id)
+                            ]
+                            |> Set.ofList
+
+                        events |> should equal expected
+
+                    [<Test>]
+                    let ``removes only first world player`` () =
+                        processResult.worldMap
+                        |> Map.find world1.id
+                        |> fun w -> w.value
+                        |> World.containsObject player1.id
+                        |> should equal false
+
+                        processResult.worldMap
+                        |> Map.find world2.id
+                        |> fun w -> w.value
+                        |> World.containsObject player2.id
+                        |> should equal true
+
+                    [<Test>]
+                    let ``removes entry from clientWorldMap`` () =
+                        processResult.serverSideData.clientWorldMap
+                        |> Map.containsKey clientId
+                        |> should equal false
+
+                [<TestFixture>]
+                module ``from second world`` =
+                    let intention =
+                        Intention.LeaveWorld
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world2.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``creates events to remove second world object`` () =
+                        let events = processResult.events |> Set.ofSeq
+
+                        let expected =
+                            [
+                                WorldEvent.asResult
+                                    intention.tsIntention.value.id
+                                    world2.id
+                                    0
+                                    (WorldEvent.ObjectRemoved player2.id)
+                            ]
+                            |> Set.ofList
+
+                        events |> should equal expected
+
+                    [<Test>]
+                    let ``removes only second world player`` () =
+                        processResult.worldMap
+                        |> Map.find world1.id
+                        |> fun w -> w.value
+                        |> World.containsObject player1.id
+                        |> should equal true
+
+                        processResult.worldMap
+                        |> Map.find world2.id
+                        |> fun w -> w.value
+                        |> World.containsObject player2.id
+                        |> should equal false
+
+                    [<Test>]
+                    let ``clientWorldMap is unchanged`` () =
+                        processResult.serverSideData.clientWorldMap
+                        |> Map.containsKey clientId
+                        |> should equal true
+
+                        processResult.serverSideData.clientWorldMap
+                        |> should equal serverSideData.clientWorldMap
+
     [<TestFixture>]
     module ``processMany`` =
 

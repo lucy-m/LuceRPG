@@ -10,6 +10,7 @@ module IntentionSrl =
             | Intention.JoinGame _ -> 2uy
             | Intention.LeaveGame -> 3uy
             | Intention.JoinWorld _ -> 4uy
+            | Intention.LeaveWorld -> 5uy
 
         let addtInfo =
             match i with
@@ -26,6 +27,7 @@ module IntentionSrl =
                     StringSrl.serialise wId
                     WorldObjectSrl.serialise obj
                 ]
+            | Intention.LeaveWorld -> [||]
 
         Array.append [|label|] addtInfo
 
@@ -66,6 +68,8 @@ module IntentionSrl =
                     WorldObjectSrl.deserialise
                     (fun wId obj -> Intention.JoinWorld (wId, obj))
                     objectBytes
+            | 5uy ->
+                DesrlResult.create Intention.LeaveWorld 0
             | _ ->
                 printfn "Unknown Intention tag %u" tag
                 Option.None
