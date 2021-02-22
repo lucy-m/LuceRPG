@@ -208,15 +208,10 @@ module IntentionProcessing =
                     |> Option.defaultValue []
 
                 let newServerSideData =
-                    let objectClientMap =
-                        serverSideData.worldObjectClientMap
-                        |> Map.tryFind worldId
-                        |> Option.defaultValue Map.empty
-                        |> Map.add obj.id clientId
-
                     let worldObjectClientMap =
-                        serverSideData.worldObjectClientMap
-                        |> Map.add worldId objectClientMap
+                        ServerSideData.addToWocm
+                            worldId obj.id clientId
+                            serverSideData.worldObjectClientMap
 
                     let usernameClientMap =
                         serverSideData.usernameClientMap
