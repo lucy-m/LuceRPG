@@ -21,18 +21,12 @@ module IntentionProcessing =
             let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) |> TestUtil.withId
             let objectClientMap = [player.id, clientId] |> Map.ofList
             let tObjectClientMap = objectClientMap |> Option.Some
-            let usernameClientMap = [username, clientId] |> Map.ofList
-            let clientWorldMap = [clientId, worldId] |> Map.ofList
-            let wocm = [worldId, objectClientMap] |> Map.ofList
-            let serverSideData =
-                ServerSideData.create wocm usernameClientMap clientWorldMap worldId
             let now = 120L
 
             let world =
                 World.createWithObjs "test-world" [bound] spawnPoint [player; wall]
 
             let idWorld = world |> WithId.useId worldId
-            let worldMap = [idWorld.id, idWorld] |> Map.ofList
 
             let processFn =
                 IntentionProcessing.processWorld
@@ -42,10 +36,10 @@ module IntentionProcessing =
                     idWorld
 
             let makeIntention =
-                    Intention.makePayload clientId
-                    >> TestUtil.withId
-                    >> WithTimestamp.create now
-                    >> IndexedIntention.create worldId
+                Intention.makePayload clientId
+                >> TestUtil.withId
+                >> WithTimestamp.create now
+                >> IndexedIntention.create worldId
 
             [<Test>]
             let ``world created correctly`` () =
@@ -382,6 +376,61 @@ module IntentionProcessing =
                 result.world.value.objects
                 |> Map.containsKey newPlayer.id
                 |> should equal false
+
+        [<TestFixture>]
+        module ``for a world with a player and a warp pad`` =
+            let player = TestUtil.makePlayer (Point.create 1 1)
+            let toWorld = "to-world-id"
+            let toPoint = Point.zero
+            let warp =
+                WorldObject.create
+                    (WorldObject.Type.Warp(toWorld, toPoint))
+                    (Point.create 3 1)
+                |> TestUtil.withId
+
+            let now = 120L
+
+            let world =
+                World.createWithObjs "test-world" [bound] spawnPoint [player; warp]
+
+            let idWorld = world |> WithId.useId worldId
+
+            [<Test>]
+            let ``move east delays warp intention`` () =
+                let intention =
+                    Intention.Move (player.id, Direction.East, 5uy)
+                    |> Intention.makePayload clientId
+                    |> TestUtil.withId
+                    |> WithTimestamp.create now
+                    |> IndexedIntention.create worldId
+
+                let processResult =
+                    IntentionProcessing.processWorld
+                        now
+                        Option.None
+                        Map.empty
+                        idWorld
+                        intention
+
+                let delayed = processResult.delayed |> List.ofSeq
+                delayed.Length |> should equal 1
+
+                let warpIntentions =
+                    delayed
+                    |> List.choose (fun i ->
+                        match i.tsIntention.value.value.t with
+                        | Intention.Type.Warp (wId, point, objId) ->
+                            Option.Some (wId, point, objId, i.worldId)
+                        | _ -> Option.None
+                    )
+
+                warpIntentions.Length |> should equal 1
+
+                let (toWorldId, point, objId, fromWorldId) = warpIntentions.Head
+                toWorldId |> should equal toWorld
+                point |> should equal toPoint
+                objId |> should equal player.id
+                fromWorldId |> should equal idWorld.id
 
     [<TestFixture>]
     module ``processGlobal`` =

@@ -108,16 +108,30 @@ module IntentionProcessing =
                                     |> Map.add id movementEnd
 
                                 let delayed =
-                                    if amount = 1uy
-                                    then []
-                                    else
+                                    // Check if the object is now on a warp
+                                    let tWarp = World.getWarp id newWorld.value
+                                    match tWarp with
+                                    | Option.Some (worldId, toPoint) ->
                                         let intention =
-                                            Intention.Move (id, dir, amount - 1uy)
+                                            Intention.Warp (worldId, toPoint, id)
                                             |> Intention.makePayload clientId
                                             |> WithId.useId intention.id
                                             |> WithTimestamp.create timestamp
                                             |> IndexedIntention.useIndex (iIntention.index + 1) (world.id)
                                         [intention]
+
+                                    // Otherwise continue moving
+                                    | Option.None ->
+                                        if amount = 1uy
+                                        then []
+                                        else
+                                            let intention =
+                                                Intention.Move (id, dir, amount - 1uy)
+                                                |> Intention.makePayload clientId
+                                                |> WithId.useId intention.id
+                                                |> WithTimestamp.create timestamp
+                                                |> IndexedIntention.useIndex (iIntention.index + 1) (world.id)
+                                            [intention]
 
                                 {
                                     events = [event]

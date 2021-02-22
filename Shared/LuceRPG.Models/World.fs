@@ -93,6 +93,18 @@ module World =
 
         isNotBlocked && inBounds
 
+    let getWarp (id: Id.WorldObject) (world: Payload): (Id.World * Point) Option =
+        let tObject = world.objects |> Map.tryFind id
+        let tPoints = tObject |> Option.map (WithId.value >> WorldObject.getPoints)
+        let tWarp =
+            tPoints
+            |> Option.bind (fun points ->
+                points
+                |> List.tryPick (fun p -> world.warps |> Map.tryFind p)
+            )
+
+        tWarp |> Option.map (fun (objId, worldId, point) -> (worldId, point))
+
     let removeObject (id: Id.WorldObject) (world: Payload): Payload =
         let newObjects =
             world.objects

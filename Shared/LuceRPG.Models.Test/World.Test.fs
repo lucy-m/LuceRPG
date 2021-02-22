@@ -212,6 +212,25 @@ module World =
                         p |> should equal toPoint
 
                 [<TestFixture>]
+                module ``when the warp overlaps a player`` =
+                    let playerPoint = Direction.movePoint Direction.North 1 btmLeft
+                    let player = TestUtil.makePlayer playerPoint
+                    let withPlayer = World.addObject player added
+
+                    [<Test>]
+                    let ``player is added correctly`` () =
+                        withPlayer.objects |> Map.containsKey player.id |> should equal true
+
+                    [<Test>]
+                    let ``getWarps returns correct warp`` () =
+                        let gotWarp = World.getWarp player.id withPlayer
+                        gotWarp.IsSome |> should equal true
+
+                        let (gotWorldId, gotToPoint) = gotWarp.Value
+                        gotWorldId |> should equal toWorldId
+                        gotToPoint |> should equal toPoint
+
+                [<TestFixture>]
                 module ``removing the warp`` =
                     let removed = World.removeObject warp.id added
 
