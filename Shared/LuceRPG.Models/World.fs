@@ -14,6 +14,7 @@ module World =
             objects: Map<Id.WorldObject, WorldObject>
             interactions: InteractionMap
             blocked: Map<Point, BlockedType>
+            warps: Map<Point, Id.WorldObject * Id.World * Point>
             playerSpawner: Point
         }
 
@@ -41,6 +42,7 @@ module World =
             objects = Map.empty
             interactions = Map.empty
             blocked = blocked
+            warps = Map.empty
             playerSpawner = playerSpawner
         }
 
@@ -108,11 +110,18 @@ module World =
             world.interactions
             |> Map.remove id
 
+        let newWarps =
+            world.warps
+            |> Map.filter (fun p (oId, wId, toPoint) ->
+                oId <> id
+            )
+
         {
             world with
                 objects = newObjects
                 blocked = newBlocked
                 interactions = newInteractions
+                warps = newWarps
         }
 
     let spawnPoint (world: Payload): Point =
@@ -160,12 +169,23 @@ module World =
                     existingIdRemoved.blocked
 
             let objects =
-                    Map.add obj.id obj existingIdRemoved.objects
+                Map.add obj.id obj existingIdRemoved.objects
+
+            let warps =
+                match obj.value.t with
+                | WorldObject.Type.Warp (worldId, toPoint) ->
+                    // Add the warp to the warps map
+                    points
+                    |> List.fold (fun acc p ->
+                        acc |> Map.add p (obj.id, worldId, toPoint)
+                    ) world.warps
+                | _ -> world.warps
 
             {
                 world with
                     blocked = blocked
                     objects = objects
+                    warps = warps
             }
 
     /// Adds many objects

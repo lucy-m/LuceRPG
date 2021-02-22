@@ -175,6 +175,50 @@ module World =
 
                 World.containsObject wall.id withWall |> should equal false
 
+            [<TestFixture>]
+            module ``adding a warp`` =
+                let toWorldId = "other-world"
+                let toPoint = Point.zero
+                let btmLeft = Point.create 5 4
+                let warp =
+                    WorldObject.create (WorldObject.Type.Warp (toWorldId, toPoint)) btmLeft
+                    |> TestUtil.withId
+
+                let added = World.addObject warp emptyWorld
+
+                [<Test>]
+                let ``warp object is added`` () =
+                    added.objects |> Map.containsKey warp.id |> should equal true
+                    added.objects |> Map.find warp.id |> should equal warp
+
+                [<Test>]
+                let ``warps map is correct`` () =
+                    let expectedPoints = WorldObject.getPoints warp.value
+
+                    expectedPoints
+                    |> List.forall (fun p ->
+                        added.warps |> Map.containsKey p
+                        &&
+                            added.warps
+                            |> Map.find p
+                            |> fun (woId, wId, p) -> woId = warp.id
+                    )
+                    |> should equal true
+
+                    added.warps
+                    |> Map.find btmLeft
+                    |> fun (woId, wId, p) ->
+                        wId |> should equal toWorldId
+                        p |> should equal toPoint
+
+                [<TestFixture>]
+                module ``removing the warp`` =
+                    let removed = World.removeObject warp.id added
+
+                    [<Test>]
+                    let ``updates the warps map correctly`` () =
+                        removed.warps |> Map.isEmpty |> should equal true
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =

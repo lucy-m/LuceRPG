@@ -10,6 +10,7 @@ module WorldObjectSrl =
             | WorldObject.Type.Path _ -> 2uy
             | WorldObject.Type.Player _ -> 3uy
             | WorldObject.Type.NPC _ -> 4uy
+            | WorldObject.Type.Warp _ -> 5uy
 
         let addtInfo =
             match t with
@@ -18,6 +19,8 @@ module WorldObjectSrl =
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
             | WorldObject.Type.Player d -> PlayerDataSrl.serialise d
             | WorldObject.Type.NPC d -> PlayerDataSrl.serialise d
+            | WorldObject.Type.Warp (worldId, point) ->
+                Array.append (StringSrl.serialise worldId) (PointSrl.serialise point)
 
         Array.append [|label|] addtInfo
 
@@ -37,6 +40,12 @@ module WorldObjectSrl =
             | 4uy ->
                 PlayerDataSrl.deserialise objectBytes
                 |> DesrlResult.map (fun d -> WorldObject.Type.NPC d)
+            | 5uy ->
+                DesrlUtil.getTwo
+                    StringSrl.deserialise
+                    PointSrl.deserialise
+                    (fun worldId point -> WorldObject.Type.Warp(worldId, point))
+                    objectBytes
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None

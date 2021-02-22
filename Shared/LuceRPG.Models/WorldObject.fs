@@ -7,6 +7,7 @@ module WorldObject =
             | Path of int * int
             | Player of PlayerData
             | NPC of PlayerData
+            | Warp of Id.World * Point
 
     type Type = Type.Model
 
@@ -31,6 +32,7 @@ module WorldObject =
         | Type.Path _ -> false
         | Type.Player _ -> false
         | Type.NPC _ -> true
+        | Type.Warp _ -> false
 
     let size (obj: Payload): Point =
         let p2x2 = Point.create 2 2
@@ -40,6 +42,7 @@ module WorldObject =
         | Type.Path (w,h) -> Point.create w h
         | Type.Player _ -> p2x2
         | Type.NPC _ -> p2x2
+        | Type.Warp _ -> p2x2
 
     let getPoints (obj: Payload): Point List =
         let objSize = size obj
