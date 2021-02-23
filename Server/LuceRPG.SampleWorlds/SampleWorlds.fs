@@ -65,19 +65,35 @@ module SampleWorlds =
         let bounds = [ Rect.create 0 0 8 8 ]
         let spawnPoint = Point.create 4 0
 
+        let npc =
+            let playerData = PlayerData.create "Bobby"
+            let t = WorldObject.Type.NPC playerData
+            WorldObject.create t (Point.create 6 4)
+            |> WithId.create
+
         let warp =
-            let t = WorldObject.Type.Warp (world1Id, Point.create 2 5)
+            let t = WorldObject.Type.Warp (world1Id, Point.create -4 6)
             WorldObject.create t (Point.create 1 6)
             |> WithId.create
 
+        let sayHiInteraction: Interaction =
+            let sayHi = Interaction.One.Chat "Oh goodness, {player}! You found my secret hideout!"
+            let payload = [sayHi]
+            WithId.create(payload)
+
+        let interactionMap: World.InteractionMap =
+            Map.ofList [npc.id, sayHiInteraction.id]
+
         let world =
-            World.createWithObjs
+            World.createWithInteractions
                 "world2"
                 bounds
                 spawnPoint
-                [warp]
+                [warp; npc]
+                interactionMap
                 |> WithId.useId world2Id
-        let interactions = []
+
+        let interactions = [sayHiInteraction]
 
         (world, interactions)
 

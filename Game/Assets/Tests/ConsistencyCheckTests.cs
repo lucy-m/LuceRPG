@@ -85,19 +85,6 @@ public class ConsistencyCheckTests
         updatedWorld = WorldModule.createWithObjs("test", worldBounds, spawnPoint, updatedObjects);
     }
 
-    [UnityTearDown]
-    public IEnumerator TearDown()
-    {
-        Debug.Log("Tearing down");
-        var objects = GameObject.FindObjectsOfType<GameObject>();
-        foreach (var o in objects)
-        {
-            MonoBehaviour.Destroy(o);
-        }
-
-        yield return null;
-    }
-
     private static void ObjMatchesModelPosition(
         UniversalController go,
         WithId.Model<WorldObjectModule.Payload> wo)

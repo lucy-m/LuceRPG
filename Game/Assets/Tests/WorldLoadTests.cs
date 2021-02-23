@@ -67,7 +67,7 @@ public class WorldLoadTests
             playerModel,
             wallModel
         };
-        var spawnPoint = PointModule.create(10, 10);
+        var spawnPoint = PointModule.create(0, 1);
 
         var wallInteractionMap = Tuple.Create(wallModel.id, wallInteraction.id);
         var interactionMap = new FSharpMap<string, string>(wallInteractionMap.ToSingletonEnumerable());
@@ -78,21 +78,6 @@ public class WorldLoadTests
 
         var payload = new LoadWorldPayload(clientId, playerModel.id, tsWorld, interactions);
         testCommsService.OnLoad(payload);
-    }
-
-    [UnityTearDown]
-    public IEnumerator TearDown()
-    {
-        Debug.Log("Tearing down");
-        var objects = GameObject.FindObjectsOfType<GameObject>();
-        foreach (var o in objects)
-        {
-            MonoBehaviour.Destroy(o);
-        }
-
-        yield return null;
-
-        yield return null;
     }
 
     [UnityTest]
@@ -353,5 +338,56 @@ public class WorldLoadTests
         Assert.That(sbc.Text.text, Is.EqualTo(expected));
 
         yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator WorldChangeHandledCorrectly()
+    {
+        var updateTime = 90L;
+
+        // Player is at 4,8 and must be in bounds
+        var bounds = RectModule.create(0, 0, 6, 12).ToSingletonEnumerable();
+        var newWall = WithId.create(WorldObjectModule.create(
+                WorldObjectModule.TypeModule.Model.Wall, PointModule.create(0, 4)
+            ));
+
+        var newWallText = "New wall";
+        var wallInteraction = WithId.create(InteractionModule.One.NewChat(newWallText).ToSingletonEnumerable());
+        var interactionStore = InteractionStore.OfInteractions(wallInteraction);
+
+        var objects = new WithId.Model<WorldObjectModule.Payload>[]
+        {
+            playerModel,
+            newWall
+        };
+
+        var newInteractionMap = new FSharpMap<string, string>(
+            Tuple.Create(newWall.id, wallInteraction.id).ToSingletonEnumerable()
+        );
+        var newWorld = WithId.create(
+            WorldModule.createWithInteractions("world-2", bounds, PointModule.zero, objects, newInteractionMap)
+        );
+
+        var getSinceResult = WithTimestamp.create(
+            updateTime,
+            GetSinceResultModule.Payload.NewWorldChanged(
+                    newWorld,
+                    WithId.toList(interactionStore.Value)
+            )
+        );
+        testCommsService.OnUpdate(getSinceResult);
+        yield return null;
+        yield return null;
+
+        // Player and new wall objects are present
+        // Old wall is not present
+        var playerObject = UniversalController.GetById(playerModel.id);
+        Assert.That(playerObject, Is.Not.Null);
+
+        var wallObject = UniversalController.GetById(wallModel.id);
+        Assert.That(wallObject, Is.Null);
+
+        var newWallObject = UniversalController.GetById(newWall.id);
+        Assert.That(newWallObject, Is.Not.Null);
     }
 }
