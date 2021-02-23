@@ -7,18 +7,18 @@ namespace LuceRPG.Game.Models
     {
         public string ClientId { get; }
         public string PlayerId { get; }
-        public WithTimestamp.Model<WorldModule.Model> TsWorld { get; }
+        public WithTimestamp.Model<WithId.Model<WorldModule.Payload>> IdWorld { get; }
         public InteractionStore Interactions { get; }
 
         public LoadWorldPayload(
             string clientId,
             string playerId,
-            WithTimestamp.Model<WorldModule.Model> tsWorld,
+            WithTimestamp.Model<WithId.Model<WorldModule.Payload>> idWorld,
             InteractionStore interactions)
         {
             ClientId = clientId;
             PlayerId = playerId;
-            TsWorld = tsWorld;
+            IdWorld = idWorld;
             Interactions = interactions;
         }
     }

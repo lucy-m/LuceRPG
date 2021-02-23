@@ -11,7 +11,7 @@ module WorldDiff =
 
     type Model = DiffType List
 
-    let diff (fromWorld: World) (toWorld: World): DiffType seq =
+    let diff (fromWorld: World.Payload) (toWorld: World.Payload): DiffType seq =
         let spawnPoint =
             if fromWorld.playerSpawner <> toWorld.playerSpawner
             then seq { DiffType.IncorrectSpawnPoint }
@@ -42,7 +42,7 @@ module WorldDiff =
             let extraObjects =
                 toWorld
                 |> World.objectList
-                |> List.map WorldObject.id
+                |> List.map WithId.id
                 |> List.filter (fun oId ->
                     fromWorld.objects
                     |> Map.containsKey oId
@@ -53,7 +53,7 @@ module WorldDiff =
             let matchingIds, missingIds =
                 fromWorld
                 |> World.objectList
-                |> List.map WorldObject.id
+                |> List.map WithId.id
                 |> List.partition (fun oId ->
                     toWorld.objects
                     |> Map.containsKey oId
@@ -76,15 +76,14 @@ module WorldDiff =
             let unmatchingPositions =
                 unmatchingObjects
                 |> List.filter (fun (fromObj, toObj) ->
-                    WorldObject.btmLeft fromObj
-                    <> WorldObject.btmLeft toObj
+                    fromObj.value.btmLeft <> toObj.value.btmLeft
                 )
                 |> List.map (fun (fromObj, toObj) ->
                     DiffType.UnmatchingObjectPosition
                         (
                             fromObj.id,
-                            WorldObject.btmLeft fromObj,
-                            WorldObject.btmLeft toObj
+                            fromObj.value.btmLeft,
+                            toObj.value.btmLeft
                         )
                 )
 

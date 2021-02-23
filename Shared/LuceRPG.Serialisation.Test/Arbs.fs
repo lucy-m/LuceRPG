@@ -37,7 +37,8 @@ type SerialisationArbs() =
         Gen.zip3 id objType btmLeft
         |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.useId id)
 
-    static member genWorld: Gen<World> =
+    static member genWorld: Gen<World.Payload> =
+        let name = Arb.generate<string>
         let bounds = Gen.listOf Arb.generate<Rect>
         let point =
             bounds
@@ -67,10 +68,12 @@ type SerialisationArbs() =
             )
 
         let world =
-            Gen.zip (Gen.zip bounds point)
+            Gen.zip3
+                    name
+                    (Gen.zip bounds point)
                     (Gen.zip objects interactions)
-            |> Gen.map (fun ((bs, p), (os, is)) ->
-                World.createWithInteractions bs p os is
+            |> Gen.map (fun (n, (bs, p), (os, is)) ->
+                World.createWithInteractions n bs p os is
             )
 
         world
@@ -95,5 +98,5 @@ type SerialisationArbs() =
     static member string (): Arbitrary<string> = Arb.fromGen SerialisationArbs.genString
     static member rect (): Arbitrary<Rect> = Arb.fromGen SerialisationArbs.genRect
     static member worldObject (): Arbitrary<WorldObject> = Arb.fromGen SerialisationArbs.genWorldObject
-    static member world (): Arbitrary<World> = Arb.fromGen SerialisationArbs.genWorld
+    static member world (): Arbitrary<World.Payload> = Arb.fromGen SerialisationArbs.genWorld
     static member getJoinGameResult (): Arbitrary<GetJoinGameResult> = Arb.fromGen SerialisationArbs.genGetJoinGameResult

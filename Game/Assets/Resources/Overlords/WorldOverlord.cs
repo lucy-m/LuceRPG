@@ -15,9 +15,10 @@ namespace LuceRPG.Game.Overlords
         public GameObject WallPrefab = null;
         public GameObject PathPrefab = null;
         public GameObject PlayerPrefab = null;
-        public GameObject BackgroundPrefab = null;
-        public GameObject CameraPrefab = null;
         public GameObject NpcPrefab = null;
+        public GameObject WarpPrefab = null;
+        public BackgroundController BackgroundPrefab = null;
+        public GameObject CameraPrefab = null;
         public GameObject UnitNamePrefab = null;
         public Canvas WorldTextCanvas = null;
 
@@ -34,13 +35,14 @@ namespace LuceRPG.Game.Overlords
         {
             yield return Registry.Services.WorldLoader.LoadWorld(LoadWorldGameObjects);
             yield return Registry.Services.WorldLoader.GetUpdates(
+                OnWorldChanged,
                 we => OnWorldEvent(we, UpdateSource.Server),
                 OnDiff);
         }
 
         private GameObject GetPrefab(WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var t = WorldObjectModule.t(obj);
+            var t = obj.value.t;
 
             if (t.IsWall)
             {
@@ -58,6 +60,10 @@ namespace LuceRPG.Game.Overlords
             {
                 return NpcPrefab;
             }
+            else if (t.IsWarp)
+            {
+                return WarpPrefab;
+            }
 
             return null;
         }
@@ -74,19 +80,8 @@ namespace LuceRPG.Game.Overlords
             {
                 foreach (var bound in world.bounds)
                 {
-                    var location = bound.GetCenterLocation();
-
-                    if (BackgroundPrefab != null)
-                    {
-                        var bg = Instantiate(BackgroundPrefab, location, Quaternion.identity);
-                        var spriteRenderer = bg.GetComponent<SpriteRenderer>();
-
-                        if (spriteRenderer != null)
-                        {
-                            var size = new Vector2(bound.size.x, bound.size.y);
-                            spriteRenderer.size = size;
-                        }
-                    }
+                    var bc = Instantiate(BackgroundPrefab, bound.btmLeft.ToVector3(), Quaternion.identity);
+                    bc.Rect = bound;
                 }
 
                 var objectCount = world.objects.Count;
@@ -98,6 +93,31 @@ namespace LuceRPG.Game.Overlords
                     AddObject(obj);
                 }
             }
+        }
+
+        private void OnWorldChanged()
+        {
+            StartCoroutine(OnWorldChangedEnum());
+        }
+
+        private IEnumerator OnWorldChangedEnum()
+        {
+            // Delete all existing objects
+            foreach (var kvp in UniversalController.Controllers)
+            {
+                var uc = kvp.Value;
+                Destroy(uc.gameObject);
+            }
+
+            var bgs = GameObject.FindObjectsOfType<BackgroundController>();
+            foreach (var bg in bgs)
+            {
+                Destroy(bg.gameObject);
+            }
+
+            yield return null;
+
+            LoadWorldGameObjects();
         }
 
         private void OnWorldEvent(WorldEventModule.Model worldEvent, UpdateSource source)
@@ -132,7 +152,7 @@ namespace LuceRPG.Game.Overlords
 
         private void AddObject(WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var location = WorldObjectModule.btmLeft(obj).ToVector3();
+            var location = obj.value.btmLeft.ToVector3();
             var prefab = GetPrefab(obj);
 
             if (prefab != null)
@@ -147,7 +167,7 @@ namespace LuceRPG.Game.Overlords
                 uc.Id = obj.id;
                 uc.SetModelProps(obj.value);
 
-                if (WorldObjectModule.t(obj).IsPath)
+                if (obj.value.t.IsPath)
                 {
                     var size = WorldObjectModule.size(obj.value);
                     var spriteRenderer = go.GetComponent<SpriteRenderer>();
@@ -185,7 +205,7 @@ namespace LuceRPG.Game.Overlords
         }
 
         private void OnDiff(
-            WorldModule.Model world,
+            WorldModule.Payload world,
             IReadOnlyCollection<WorldDiffModule.DiffType> diffs)
         {
             Registry.Stores.World.World = world;

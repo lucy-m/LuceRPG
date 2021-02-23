@@ -35,7 +35,7 @@ namespace LuceRPG.Server.Processors
                 _logger.LogDebug($"Removing {leaveIntentions.Length} stale clients");
                 foreach (var i in leaveIntentions)
                 {
-                    _queue.Enqueue(i);
+                    _queue.Enqueue(i, "");
                 }
             }
         }

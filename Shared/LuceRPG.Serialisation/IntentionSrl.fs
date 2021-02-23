@@ -9,6 +9,9 @@ module IntentionSrl =
             | Intention.Move  _-> 1uy
             | Intention.JoinGame _ -> 2uy
             | Intention.LeaveGame -> 3uy
+            | Intention.JoinWorld _ -> 4uy
+            | Intention.LeaveWorld -> 5uy
+            | Intention.Warp _ -> 6uy
 
         let addtInfo =
             match i with
@@ -20,6 +23,14 @@ module IntentionSrl =
                 ]
             | Intention.JoinGame username -> StringSrl.serialise username
             | Intention.LeaveGame -> [||]
+            | Intention.JoinWorld obj -> WorldObjectSrl.serialise obj
+            | Intention.LeaveWorld -> [||]
+            | Intention.Warp (worldId, point, objectId) ->
+                Array.concat [
+                    StringSrl.serialise worldId
+                    PointSrl.serialise point
+                    StringSrl.serialise objectId
+                ]
 
         Array.append [|label|] addtInfo
 
@@ -34,9 +45,10 @@ module IntentionSrl =
 
     let serialiseIndexed (ii: IndexedIntention): byte[] =
         let index = IntSrl.serialise ii.index
+        let worldId = StringSrl.serialise ii.worldId
         let tsIntention = WithTimestampSrl.serialise serialise ii.tsIntention
 
-        Array.append index tsIntention
+        Array.concat [index; worldId; tsIntention]
 
     let deserialiseType (bytes: byte[]): Intention.Type DesrlResult =
         let loadObj (tag: byte) (objectBytes: byte[]): Intention.Type DesrlResult =
@@ -50,9 +62,21 @@ module IntentionSrl =
                     objectBytes
             | 2uy ->
                 StringSrl.deserialise objectBytes
-                |> DesrlResult.map (fun s -> Intention.JoinGame s)
+                |> DesrlResult.map Intention.JoinGame
             | 3uy ->
                 DesrlResult.create Intention.LeaveGame 0
+            | 4uy ->
+                WorldObjectSrl.deserialise objectBytes
+                |> DesrlResult.map Intention.JoinWorld
+            | 5uy ->
+                DesrlResult.create Intention.LeaveWorld 0
+            | 6uy ->
+                DesrlUtil.getThree
+                    StringSrl.deserialise
+                    PointSrl.deserialise
+                    StringSrl.deserialise
+                    (fun wId p oId -> Intention.Warp(wId, p, oId))
+                    objectBytes
             | _ ->
                 printfn "Unknown Intention tag %u" tag
                 Option.None
@@ -72,8 +96,9 @@ module IntentionSrl =
             bytes
 
     let deserialiseIndexed (bytes: byte[]): IndexedIntention DesrlResult =
-        DesrlUtil.getTwo
+        DesrlUtil.getThree
             IntSrl.deserialise
+            StringSrl.deserialise
             (WithTimestampSrl.deserialise deserialise)
             IndexedIntention.useIndex
             bytes

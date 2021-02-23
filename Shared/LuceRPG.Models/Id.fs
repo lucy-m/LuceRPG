@@ -5,6 +5,7 @@ module Id =
     type Intention = string
     type Client = string
     type Interaction = string
+    type World = string
 
     let make (): string =
         System.Guid.NewGuid().ToString()

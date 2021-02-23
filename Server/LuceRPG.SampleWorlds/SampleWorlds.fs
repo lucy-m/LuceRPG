@@ -1,8 +1,12 @@
 ﻿namespace LuceRPG.Samples
 
 open LuceRPG.Models
+open LuceRPG.Server.Core
 
 module SampleWorlds =
+    let world1Id = System.Guid.NewGuid().ToString()
+    let world2Id = System.Guid.NewGuid().ToString()
+
     let world1: (World * Interactions) =
         let bounds =
             [
@@ -17,6 +21,11 @@ module SampleWorlds =
             let playerData = PlayerData.create "Harry"
             let t = WorldObject.Type.NPC playerData
             WorldObject.create t (Point.create 16 4)
+            |> WithId.create
+
+        let warp =
+            let t = WorldObject.Type.Warp (world2Id, Point.zero)
+            WorldObject.create t (Point.create -4 8)
             |> WithId.create
 
         let walls =
@@ -39,7 +48,56 @@ module SampleWorlds =
         let interactionMap: World.InteractionMap =
             Map.ofList [npc.id, sayHiInteraction.id]
 
-        let world = World.createWithInteractions bounds spawnPoint (npc::walls) interactionMap
+        let world =
+            World.createWithInteractions
+                "sampleville"
+                bounds
+                spawnPoint
+                (npc::warp::walls)
+                interactionMap
+            |> WithId.useId world1Id
+
         let interactions = [sayHiInteraction]
 
         (world, interactions)
+
+    let world2: (World * Interactions) =
+        let bounds = [ Rect.create 0 0 8 8 ]
+        let spawnPoint = Point.create 4 0
+
+        let npc =
+            let playerData = PlayerData.create "Bobby"
+            let t = WorldObject.Type.NPC playerData
+            WorldObject.create t (Point.create 6 4)
+            |> WithId.create
+
+        let warp =
+            let t = WorldObject.Type.Warp (world1Id, Point.create -4 6)
+            WorldObject.create t (Point.create 1 6)
+            |> WithId.create
+
+        let sayHiInteraction: Interaction =
+            let sayHi = Interaction.One.Chat "Oh goodness, {player}! You found my secret hideout!"
+            let payload = [sayHi]
+            WithId.create(payload)
+
+        let interactionMap: World.InteractionMap =
+            Map.ofList [npc.id, sayHiInteraction.id]
+
+        let world =
+            World.createWithInteractions
+                "world2"
+                bounds
+                spawnPoint
+                [warp; npc]
+                interactionMap
+                |> WithId.useId world2Id
+
+        let interactions = [sayHiInteraction]
+
+        (world, interactions)
+
+    let collection =
+        WorldCollection.create
+            (fst world1).id
+            [world1; world2]

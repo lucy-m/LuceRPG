@@ -7,6 +7,9 @@ module WithId =
             value: 'T
         }
 
+    let id (t: 'T Model): string = t.id
+    let value (t: 'T Model): 'T = t.value
+
     let useId (id: string) (value: 'T): 'T Model =
         {
             id = id
@@ -19,6 +22,9 @@ module WithId =
             id = id
             value = value
         }
+
+    let map (mapFn: 'T -> 'U) (withId: 'T Model): 'U Model =
+        useId (withId.id) (mapFn withId.value)
 
     let toMap (items: 'T Model List): Map<string, 'T Model> =
         items
