@@ -10,25 +10,40 @@ module WorldEventsStore =
     type Model =
         {
             lastCull: int64
-            recentEvents: WorldEvent WithTimestamp List
-            world: World
+            recentEvents: Map<Id.World, WorldEvent WithTimestamp seq>
+            worldMap: Map<Id.World, World>
+            interactionMap: Map<Id.World, Interactions>
             objectBusyMap: IntentionProcessing.ObjectBusyMap
             serverSideData: ServerSideData
         }
 
+    let allRecentEvents (store: Model): WorldEvent WithTimestamp seq =
+        store.recentEvents
+        |> Map.toSeq
+        |> Seq.collect snd
+
+    let allWorlds (store: Model): World seq =
+        store.worldMap
+        |> Map.toSeq
+        |> Seq.map snd
+
     // So far the only way for ownership to be established is
     //   through intentions process results
     // A freshly loaded world will never have any ownership
-    let create (world: World): Model =
+    let create (worlds: WorldCollection): Model =
+        let worldMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, w)) |> Map.ofSeq
+        let interactionMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, i)) |> Map.ofSeq
+
         {
             lastCull = 0L
-            recentEvents = []
-            world = world
+            recentEvents = Map.empty
+            worldMap = worldMap
+            interactionMap = interactionMap
             objectBusyMap = Map.empty
-            serverSideData = ServerSideData.empty
+            serverSideData = ServerSideData.empty worlds.defaultWorld
         }
 
-    let addResult (result: IntentionProcessing.ProcessResult) (now: int64) (state: Model): Model =
+    let addResult (result: IntentionProcessing.ProcessManyResult) (now: int64) (state: Model): Model =
         let storedEvents =
             result.events
             |> Seq.map (fun e ->
@@ -39,32 +54,83 @@ module WorldEventsStore =
             )
             |> List.ofSeq
 
-        let recentEvents = state.recentEvents @ storedEvents
-        let serverSideData = result.serverSideData |> Option.defaultValue state.serverSideData
+        let recentEvents =
+            storedEvents
+            |> Seq.fold (fun acc e ->
+                let existingForWorld =
+                    acc
+                    |> Map.tryFind e.value.world
+                    |> Option.defaultValue Seq.empty
+
+                let withEvent = existingForWorld |> Seq.append [e]
+
+                acc
+                |> Map.add e.value.world withEvent
+            ) state.recentEvents
 
         {
             lastCull = state.lastCull
             recentEvents = recentEvents
-            world = result.world
+            worldMap = result.worldMap
+            interactionMap = state.interactionMap
             objectBusyMap = result.objectBusyMap
-            serverSideData = serverSideData
+            serverSideData = result.serverSideData
         }
 
     /// Returns recent events if available
     /// Returns whole world if events have been culled
-    let getSince (timestamp: int64) (state: Model): GetSinceResult.Payload =
-        if timestamp >= state.lastCull
-        then
-            state.recentEvents
-            |> List.filter (fun e -> e.timestamp >= timestamp)
-            |> GetSinceResult.Events
-        else
-            GetSinceResult.World state.world
+    ///   or if the client has changed world
+    let getSince
+            (timestamp: int64)
+            (clientId: Id.Client)
+            (state: Model)
+            : GetSinceResult.Payload =
+        let tWorldId = state.serverSideData.clientWorldMap |> Map.tryFind clientId
+        let tWorld =
+            tWorldId
+            |> Option.bind (fun worldId ->
+                state.worldMap |> Map.tryFind worldId
+            )
+
+        match tWorld with
+        | Option.None -> GetSinceResult.Failure (sprintf "Unknown world for client id %s" clientId)
+        | Option.Some world ->
+            if timestamp >= state.lastCull
+            then
+                let events =
+                    state.recentEvents
+                    |> Map.tryFind world.id
+                    |> Option.defaultValue Seq.empty
+                    |> Seq.filter (fun e -> e.timestamp >= timestamp)
+                    |> List.ofSeq
+
+                let worldChanges =
+                    events
+                    |> List.choose (fun e ->
+                        match e.value.t with
+                        | WorldEvent.Type.JoinedWorld cId -> Option.Some cId
+                        | _ -> Option.None
+                    )
+                    |> List.filter (fun cId -> clientId = cId)
+
+                if worldChanges |> List.isEmpty
+                then GetSinceResult.Events events
+                else
+                    let interactions =
+                        state.interactionMap
+                        |> Map.tryFind world.id
+                        |> Option.defaultValue []
+
+                    GetSinceResult.WorldChanged (world, interactions)
+            else
+                GetSinceResult.World world
 
     let cull (timestamp: int64) (state: Model): Model =
         let recentEvents =
             state.recentEvents
-            |> List.filter (fun e -> e.timestamp >= timestamp)
+            |> Map.map (fun worldId events ->
+                events |> Seq.filter (fun e -> e.timestamp >= timestamp)
+            )
 
         let culledBusyMap =
             state.objectBusyMap
@@ -73,7 +139,8 @@ module WorldEventsStore =
         {
             lastCull = timestamp
             recentEvents = recentEvents
-            world = state.world
+            worldMap = state.worldMap
+            interactionMap = state.interactionMap
             objectBusyMap = culledBusyMap
             serverSideData = state.serverSideData
         }

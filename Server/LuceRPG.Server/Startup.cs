@@ -2,6 +2,7 @@ using LuceRPG.Adapters;
 using LuceRPG.Models;
 using LuceRPG.Samples;
 using LuceRPG.Server;
+using LuceRPG.Server.Core;
 using LuceRPG.Server.Processors;
 using LuceRPG.Utility;
 using Microsoft.AspNetCore.Builder;
@@ -26,8 +27,7 @@ namespace LuceRPGServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IntentionQueue>();
-            services.AddSingleton(SampleWorlds.world1.Item1);
-            services.AddSingleton(new InteractionStore(WithId.toMap(SampleWorlds.world1.Item2)));
+            services.AddSingleton(SampleWorlds.collection);
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
             services.AddSingleton<ICredentialService, CredentialService>();

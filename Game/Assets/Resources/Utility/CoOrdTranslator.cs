@@ -25,7 +25,7 @@ namespace LuceRPG.Game.Utility
 
         public static Vector3 GetBtmLeft(this WithId.Model<WorldObjectModule.Payload> obj)
         {
-            var btmLeft = WorldObjectModule.btmLeft(obj);
+            var btmLeft = obj.value.btmLeft;
             return btmLeft.ToVector3();
         }
 

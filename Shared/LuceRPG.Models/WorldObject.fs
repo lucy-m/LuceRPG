@@ -7,6 +7,7 @@ module WorldObject =
             | Path of int * int
             | Player of PlayerData
             | NPC of PlayerData
+            | Warp of Id.World * Point
 
     type Type = Type.Model
 
@@ -16,7 +17,8 @@ module WorldObject =
             btmLeft: Point
         }
 
-    type Model = Payload WithId
+    let t (wo: Payload): Type = wo.t
+    let btmLeft (wo: Payload): Point = wo.btmLeft
 
     let create (t: Type) (btmLeft: Point): Payload =
         {
@@ -24,16 +26,13 @@ module WorldObject =
             btmLeft = btmLeft
         }
 
-    let btmLeft (wo: Model): Point = wo.value.btmLeft
-    let t (wo: Model): Type = wo.value.t
-    let id (wo: Model): Id.WorldObject = wo.id
-
-    let isBlocking (obj: Model): bool =
-        match obj.value.t with
+    let isBlocking (obj: Payload): bool =
+        match obj.t with
         | Type.Wall -> true
         | Type.Path _ -> false
         | Type.Player _ -> false
         | Type.NPC _ -> true
+        | Type.Warp _ -> false
 
     let size (obj: Payload): Point =
         let p2x2 = Point.create 2 2
@@ -43,6 +42,7 @@ module WorldObject =
         | Type.Path (w,h) -> Point.create w h
         | Type.Player _ -> p2x2
         | Type.NPC _ -> p2x2
+        | Type.Warp _ -> p2x2
 
     let getPoints (obj: Payload): Point List =
         let objSize = size obj
@@ -60,19 +60,22 @@ module WorldObject =
 
         blocked
 
-    let moveObjectN (direction: Direction) (amount: int) (obj: Model): Model =
-        let newBtmLeft = Direction.movePoint direction amount obj.value.btmLeft
+    let moveObjectN (direction: Direction) (amount: int) (obj: Payload): Payload =
+        let newBtmLeft = Direction.movePoint direction amount obj.btmLeft
 
         {
             obj with
-                value = {
-                    obj.value with
-                        btmLeft = newBtmLeft
-                }
+                btmLeft = newBtmLeft
         }
 
-    let moveObject (direction: Direction) (obj: Model): Model =
+    let moveObject (direction: Direction) (obj: Payload): Payload =
         moveObjectN direction 1 obj
+
+    let atLocation (btmLeft: Point) (obj: Payload): Payload =
+        {
+            obj with
+                btmLeft = btmLeft
+        }
 
     /// Time taken by the object to move one square
     let travelTime (obj: Payload): int64 =
@@ -80,8 +83,8 @@ module WorldObject =
         | Type.Player _ -> System.TimeSpan.FromMilliseconds(float(250)).Ticks
         | _ -> 0L
 
-    let isPlayer (obj: Model): bool =
-        match t obj with
+    let isPlayer (obj: Payload): bool =
+        match obj.t with
         | Type.Player _ -> true
         | _ -> false
 
@@ -90,5 +93,7 @@ module WorldObject =
         | Type.Player pd -> Option.Some pd.name
         | Type.NPC pd -> Option.Some pd.name
         | _ -> Option.None
+
+    type Model = Payload WithId
 
 type WorldObject = WorldObject.Model

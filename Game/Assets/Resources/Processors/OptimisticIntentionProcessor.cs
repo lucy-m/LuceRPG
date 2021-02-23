@@ -45,10 +45,12 @@ namespace LuceRPG.Game.Processors
         public string Process(IntentionModule.Type intention)
         {
             var timestamp = Registry.Providers.Timestamp.Now;
+            var worldId = Registry.Stores.World.WorldId;
+
             var payload = IntentionModule.makePayload("", intention);
             var withId = WithId.create(payload);
             var withTimestamp = WithTimestamp.create(timestamp, withId);
-            var indexed = IndexedIntentionModule.create(withTimestamp);
+            var indexed = IndexedIntentionModule.create.Invoke(worldId).Invoke(withTimestamp);
 
             _intentions[withId.id] = timestamp;
 
@@ -59,41 +61,46 @@ namespace LuceRPG.Game.Processors
 
         private void ProcessMany(IEnumerable<IndexedIntentionModule.Model> intentions)
         {
-            var processResult = IntentionProcessing.processMany(
-                DateTime.UtcNow.Ticks,
-                FSharpOption<ServerSideDataModule.Model>.None,
-                _objectBusyMap,
-                Registry.Stores.World.World,
-                intentions
-            );
-
-            var logs = ClientLogEntryModule.createFromProcessResult(processResult);
-            Registry.Processors.Logs.AddLog(logs);
-
-            _objectBusyMap = processResult.objectBusyMap;
-
-            foreach (var we in processResult.events)
+            foreach (var i in intentions)
             {
-                foreach (var handler in _onEventHandlers)
-                {
-                    handler(we);
-                }
-            }
+                var now = Registry.Providers.Timestamp.Now;
 
-            foreach (var e in processResult.events)
-            {
-                if (!_eventsProduced.TryGetValue(e.resultOf, out var indexDict))
+                var processResult = IntentionProcessing.processWorld(
+                        now,
+                        FSharpOption<FSharpMap<string, string>>.None,
+                        _objectBusyMap,
+                        Registry.Stores.World.IdWorld,
+                        i
+                    );
+
+                _objectBusyMap = processResult.objectBusyMap;
+
+                foreach (var we in processResult.events)
                 {
-                    _eventsProduced[e.resultOf] = new Dictionary<int, WorldEventModule.Model>();
-                    indexDict = _eventsProduced[e.resultOf];
+                    foreach (var handler in _onEventHandlers)
+                    {
+                        handler(we);
+                    }
                 }
 
-                indexDict[e.index] = e;
-            }
+                foreach (var e in processResult.events)
+                {
+                    if (!_eventsProduced.TryGetValue(e.resultOf, out var indexDict))
+                    {
+                        _eventsProduced[e.resultOf] = new Dictionary<int, WorldEventModule.Model>();
+                        indexDict = _eventsProduced[e.resultOf];
+                    }
 
-            foreach (var d in processResult.delayed)
-            {
-                Add(d);
+                    indexDict[e.index] = e;
+                }
+
+                foreach (var d in processResult.delayed)
+                {
+                    Add(d);
+                }
+
+                var logs = ClientLogEntryModule.createFromProcessResult(processResult);
+                Registry.Processors.Logs.AddLog(logs);
             }
         }
 

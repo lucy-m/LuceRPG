@@ -14,6 +14,8 @@ module WorldEventFields =
                 sprintf "Added %s" o.id
             | WorldEvent.Type.ObjectRemoved id ->
                 sprintf "Removed %s" id
+            | WorldEvent.Type.JoinedWorld cId ->
+                sprintf "Client joined %s" cId
 
         let resultOf = sprintf "Result of %s" e.resultOf
         let index = sprintf "Index %i" e.index

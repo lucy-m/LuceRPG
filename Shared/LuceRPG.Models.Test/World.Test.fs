@@ -13,7 +13,7 @@ module World =
         module ``for a rect world`` =
             let bounds = Rect.create 0 0 10 8
             let spawnPoint = Point.create 0 4
-            let emptyWorld = World.empty [bounds] spawnPoint
+            let emptyWorld = World.empty "test-world" [bounds] spawnPoint
 
             [<TestFixture>]
             module ``with a wall`` =
@@ -57,7 +57,7 @@ module World =
                     let newWall =
                         WithId.useId
                             wall.id
-                            (WorldObject.create (WorldObject.t wall) (Point.create 3 4))
+                            (WorldObject.create wall.value.t (Point.create 3 4))
                     let newWorld = World.addObject newWall world
 
                     [<Test>]
@@ -175,6 +175,69 @@ module World =
 
                 World.containsObject wall.id withWall |> should equal false
 
+            [<TestFixture>]
+            module ``adding a warp`` =
+                let toWorldId = "other-world"
+                let toPoint = Point.zero
+                let btmLeft = Point.create 5 4
+                let warp =
+                    WorldObject.create (WorldObject.Type.Warp (toWorldId, toPoint)) btmLeft
+                    |> TestUtil.withId
+
+                let added = World.addObject warp emptyWorld
+
+                [<Test>]
+                let ``warp object is added`` () =
+                    added.objects |> Map.containsKey warp.id |> should equal true
+                    added.objects |> Map.find warp.id |> should equal warp
+
+                [<Test>]
+                let ``warps map is correct`` () =
+                    let expectedPoints = WorldObject.getPoints warp.value
+
+                    expectedPoints
+                    |> List.forall (fun p ->
+                        added.warps |> Map.containsKey p
+                        &&
+                            added.warps
+                            |> Map.find p
+                            |> fun (woId, wId, p) -> woId = warp.id
+                    )
+                    |> should equal true
+
+                    added.warps
+                    |> Map.find btmLeft
+                    |> fun (woId, wId, p) ->
+                        wId |> should equal toWorldId
+                        p |> should equal toPoint
+
+                [<TestFixture>]
+                module ``when the warp overlaps a player`` =
+                    let playerPoint = Direction.movePoint Direction.North 1 btmLeft
+                    let player = TestUtil.makePlayer playerPoint
+                    let withPlayer = World.addObject player added
+
+                    [<Test>]
+                    let ``player is added correctly`` () =
+                        withPlayer.objects |> Map.containsKey player.id |> should equal true
+
+                    [<Test>]
+                    let ``getWarps returns correct warp`` () =
+                        let gotWarp = World.getWarp player.id withPlayer
+                        gotWarp.IsSome |> should equal true
+
+                        let (gotWorldId, gotToPoint) = gotWarp.Value
+                        gotWorldId |> should equal toWorldId
+                        gotToPoint |> should equal toPoint
+
+                [<TestFixture>]
+                module ``removing the warp`` =
+                    let removed = World.removeObject warp.id added
+
+                    [<Test>]
+                    let ``updates the warps map correctly`` () =
+                        removed.warps |> Map.isEmpty |> should equal true
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =
@@ -182,7 +245,7 @@ module World =
                     Rect.create 0 0 5 2
                     Rect.create 3 -4 4 4
                 ]
-            let emptyWorld = World.empty bounds (Point.create 0 2)
+            let emptyWorld = World.empty "two-rects" bounds (Point.create 0 2)
 
             [<Test>]
             let ``wall can be placed in first rect`` () =

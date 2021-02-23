@@ -6,6 +6,7 @@ TagManager:
   tags:
   - UnitName
   - WorldText
+  - Background
   layers:
   - Default
   - TransparentFX

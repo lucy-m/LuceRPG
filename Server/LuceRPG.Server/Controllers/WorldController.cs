@@ -64,6 +64,8 @@ namespace LuceRPGServer.Controllers
                 _logger.LogInformation($"Request to join game from {username}");
 
                 WithId.Model<WorldObjectModule.Payload>? playerObject = null;
+                string? worldId = null;
+
                 bool intentionProcessed = false;
                 var clientId = Guid.NewGuid().ToString();
 
@@ -78,18 +80,21 @@ namespace LuceRPGServer.Controllers
                     var objectAdded =
                         events
                             .Where(e => e.t.IsObjectAdded)
-                            .Select(e => (WorldEventModule.Type.ObjectAdded)e.t);
-                    var playerAdded = objectAdded.FirstOrDefault(a => a.Item.value.t.IsPlayer);
+                            .Select(e => (Event: e, ObjectAdded: ((WorldEventModule.Type.ObjectAdded)e.t).Item));
+                    var playerAdded = objectAdded.Where(a => a.ObjectAdded.value.t.IsPlayer).ToArray();
 
-                    if (playerAdded != null)
+                    if (playerAdded.Any())
                     {
-                        playerObject = playerAdded.Item;
+                        var (Event, ObjectAdded) = playerAdded[0];
+
+                        playerObject = ObjectAdded;
+                        worldId = Event.world;
                     }
 
                     intentionProcessed = true;
                 }
 
-                _queue.Enqueue(intention, Action);
+                _queue.Enqueue(intention, "", Action);
 
                 var attempts = 0;
                 while (!intentionProcessed && attempts < MaxJoinGameAttempts)
@@ -98,15 +103,21 @@ namespace LuceRPGServer.Controllers
                     Thread.Sleep(50);
                 }
 
+                var world = worldId != null ? _worldStore.GetWorld(worldId) : null;
                 _logger.LogDebug($"Join game result player ID {playerObject?.id}");
 
-                var joinGameResult = playerObject != null
+                if (playerObject != null && world == null)
+                {
+                    _logger.LogError($"Player ID {playerObject.id} was added to an invalid world");
+                }
+
+                var joinGameResult = playerObject != null && world != null
                     ? GetJoinGameResultModule.Model.NewSuccess(
                         GetJoinGameResultModule.SuccessPayloadModule.create(
                         clientId,
                         playerObject.id,
-                        WithTimestamp.create(_timestampProvider.Now, _worldStore.CurrentWorld),
-                        WithId.toList(_worldStore.Interactions.Value)
+                        WithTimestamp.create(_timestampProvider.Now, world),
+                        _worldStore.GetInteractions(world.id)
                     ))
                     : GetJoinGameResultModule.Model.NewFailure("Could not join game");
 
@@ -119,7 +130,7 @@ namespace LuceRPGServer.Controllers
         [HttpGet("since")]
         public ActionResult GetSince(long timestamp, string clientId)
         {
-            var result = _worldStore.GetSince(timestamp);
+            var result = _worldStore.GetSince(timestamp, clientId);
             var newTimestamp = _timestampProvider.Now;
 
             _pingStorer.Update(clientId, newTimestamp);
@@ -134,21 +145,39 @@ namespace LuceRPGServer.Controllers
         public ActionResult GetAllState(string clientId)
         {
             _logger.LogDebug($"Consistency check from {clientId}");
-            var result = _worldStore.CurrentWorld;
-            var serialised = WorldSrl.serialise(result);
 
-            return File(serialised, RawBytesContentType);
+            var worldId = _worldStore.GetWorldIdForClient(clientId);
+            if (worldId != null)
+            {
+                var result = _worldStore.GetWorld(worldId);
+
+                if (result != null)
+                {
+                    var serialised = WorldSrl.serialise(result);
+
+                    return File(serialised, RawBytesContentType);
+                }
+            }
+
+            return Ok();
         }
 
         [HttpGet("dump")]
-        public string Dump()
+        public string Dump(string worldId)
         {
-            var world = _worldStore.CurrentWorld;
-            var dump = ASCIIWorld.dump(world);
+            var world = _worldStore.GetWorld(worldId);
+            if (world != null)
+            {
+                var dump = ASCIIWorld.dump(world.value);
 
-            Console.WriteLine(dump);
+                Console.WriteLine(dump);
 
-            return dump;
+                return dump;
+            }
+            else
+            {
+                return "Unknown world ID";
+            }
         }
 
         [HttpPut("intention")]
@@ -159,11 +188,22 @@ namespace LuceRPGServer.Controllers
             await stream.CopyToAsync(memoryStream);
             var bytes = memoryStream.ToArray();
 
-            var intention = IntentionSrl.deserialise(bytes);
+            var tIntention = IntentionSrl.deserialise(bytes);
 
-            if (intention.HasValue())
+            if (tIntention.HasValue())
             {
-                _queue.Enqueue(intention.Value.value);
+                var intention = tIntention.Value.value;
+                var clientId = intention.value.clientId;
+                var worldId = _worldStore.GetWorldIdForClient(clientId);
+
+                if (worldId != null)
+                {
+                    _queue.Enqueue(intention, worldId);
+                }
+                else
+                {
+                    _logger.LogWarning($"Intention received from client ID without world {clientId}");
+                }
             }
             else
             {
