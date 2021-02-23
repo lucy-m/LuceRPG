@@ -17,7 +17,7 @@ namespace LuceRPG.Game.Overlords
         public GameObject PlayerPrefab = null;
         public GameObject NpcPrefab = null;
         public GameObject WarpPrefab = null;
-        public GameObject BackgroundPrefab = null;
+        public BackgroundController BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
         public GameObject UnitNamePrefab = null;
         public Canvas WorldTextCanvas = null;
@@ -80,19 +80,8 @@ namespace LuceRPG.Game.Overlords
             {
                 foreach (var bound in world.bounds)
                 {
-                    var location = bound.GetCenterLocation();
-
-                    if (BackgroundPrefab != null)
-                    {
-                        var bg = Instantiate(BackgroundPrefab, location, Quaternion.identity);
-                        var spriteRenderer = bg.GetComponent<SpriteRenderer>();
-
-                        if (spriteRenderer != null)
-                        {
-                            var size = new Vector2(bound.size.x, bound.size.y);
-                            spriteRenderer.size = size;
-                        }
-                    }
+                    var bc = Instantiate(BackgroundPrefab, bound.btmLeft.ToVector3(), Quaternion.identity);
+                    bc.Rect = bound;
                 }
 
                 var objectCount = world.objects.Count;
@@ -120,10 +109,10 @@ namespace LuceRPG.Game.Overlords
                 Destroy(uc.gameObject);
             }
 
-            var bgs = GameObject.FindGameObjectsWithTag("Background");
+            var bgs = GameObject.FindObjectsOfType<BackgroundController>();
             foreach (var bg in bgs)
             {
-                Destroy(bg);
+                Destroy(bg.gameObject);
             }
 
             yield return null;

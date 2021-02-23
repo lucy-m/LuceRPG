@@ -13,6 +13,7 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -389,5 +390,10 @@ public class WorldLoadTests
 
         var newWallObject = UniversalController.GetById(newWall.id);
         Assert.That(newWallObject, Is.Not.Null);
+
+        // Backgrounds are correct
+        var bcs = GameObject.FindObjectsOfType<BackgroundController>();
+        Assert.That(bcs.Length, Is.EqualTo(1));
+        Assert.That(bcs.Single().Rect, Is.EqualTo(bounds.Single()));
     }
 }
