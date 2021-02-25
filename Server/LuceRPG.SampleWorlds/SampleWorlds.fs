@@ -18,7 +18,7 @@ module SampleWorlds =
         let spawnPoint = Point.create 2 5
 
         let npc =
-            let charData = CharacterData.create "Harry"
+            let charData = CharacterData.randomized "Harry"
             let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 16 4)
             |> WithId.create
@@ -66,7 +66,7 @@ module SampleWorlds =
         let spawnPoint = Point.create 4 0
 
         let npc =
-            let charData = CharacterData.create "Bobby"
+            let charData = CharacterData.randomized "Bobby"
             let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 6 4)
             |> WithId.create

@@ -10,7 +10,7 @@ public static class TestUtil
     )
     {
         name ??= Guid.NewGuid().ToString();
-        var playerData = CharacterDataModule.create(name);
+        var playerData = CharacterDataModule.randomized(name);
         var topLeft = PointModule.create(x, y);
 
         var payload = WorldObjectModule.create(
