@@ -5,8 +5,8 @@ module WorldObject =
         type Model =
             | Wall
             | Path of int * int
-            | Player of PlayerData
-            | NPC of PlayerData
+            | Player of CharacterData
+            | NPC of CharacterData
             | Warp of Id.World * Point
 
     type Type = Type.Model

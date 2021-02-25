@@ -1,6 +1,6 @@
 ﻿namespace LuceRPG.Models
 
-module PlayerData =
+module CharacterData =
     type Model =
         {
             name: string
@@ -11,4 +11,4 @@ module PlayerData =
             name = name
         }
 
-type PlayerData = PlayerData.Model
+type CharacterData = CharacterData.Model

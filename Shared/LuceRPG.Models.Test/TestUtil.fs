@@ -8,7 +8,7 @@ module TestUtil =
         WithId.useId guid t
 
     let makePlayerWithName (btmLeft: Point) (name: string): WorldObject =
-        let playerData = PlayerData.create name
+        let playerData = CharacterData.create name
         let payload = WorldObject.create (WorldObject.Type.Player playerData) btmLeft
 
         WithId.create payload

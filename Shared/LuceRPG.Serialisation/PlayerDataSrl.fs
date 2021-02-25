@@ -3,11 +3,11 @@
 open LuceRPG.Models
 
 module PlayerDataSrl =
-    let serialise (d: PlayerData): byte[] =
+    let serialise (d: CharacterData): byte[] =
         let name = StringSrl.serialise d.name
 
         name
 
-    let deserialise (bytes: byte[]): PlayerData DesrlResult =
+    let deserialise (bytes: byte[]): CharacterData DesrlResult =
         StringSrl.deserialise bytes
-        |> DesrlResult.map PlayerData.create
+        |> DesrlResult.map CharacterData.create

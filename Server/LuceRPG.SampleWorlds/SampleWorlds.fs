@@ -18,8 +18,8 @@ module SampleWorlds =
         let spawnPoint = Point.create 2 5
 
         let npc =
-            let playerData = PlayerData.create "Harry"
-            let t = WorldObject.Type.NPC playerData
+            let charData = CharacterData.create "Harry"
+            let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 16 4)
             |> WithId.create
 
@@ -66,8 +66,8 @@ module SampleWorlds =
         let spawnPoint = Point.create 4 0
 
         let npc =
-            let playerData = PlayerData.create "Bobby"
-            let t = WorldObject.Type.NPC playerData
+            let charData = CharacterData.create "Bobby"
+            let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 6 4)
             |> WithId.create
 
