@@ -88,11 +88,15 @@ module WorldObject =
         | Type.Player _ -> true
         | _ -> false
 
-    let getName (obj: Payload): string Option =
+    let getCharacterData (obj: Payload): CharacterData Option =
         match obj.t with
-        | Type.Player pd -> Option.Some pd.name
-        | Type.NPC pd -> Option.Some pd.name
+        | Type.Player cd -> Option.Some cd
+        | Type.NPC cd -> Option.Some cd
         | _ -> Option.None
+
+    let getName (obj: Payload): string Option =
+        getCharacterData obj
+        |> Option.map (fun cd -> cd.name)
 
     type Model = Payload WithId
 

@@ -17,10 +17,24 @@ module SampleWorlds =
 
         let spawnPoint = Point.create 2 5
 
-        let npc =
-            let charData = CharacterData.randomized "Harry"
+        let harry =
+            let charData =
+                CharacterData.create
+                    CharacterData.HairStyle.Long
+                    CharacterData.HairColour.caramel
+                    "Harry"
             let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 16 4)
+            |> WithId.create
+
+        let barry =
+            let charData =
+                CharacterData.create
+                    CharacterData.HairStyle.Short
+                    CharacterData.HairColour.cocoa85
+                    "Barry"
+            let t = WorldObject.Type.NPC charData
+            WorldObject.create t (Point.create 18 4)
             |> WithId.create
 
         let warp =
@@ -46,14 +60,14 @@ module SampleWorlds =
             WithId.create(payload)
 
         let interactionMap: World.InteractionMap =
-            Map.ofList [npc.id, sayHiInteraction.id]
+            Map.ofList [harry.id, sayHiInteraction.id]
 
         let world =
             World.createWithInteractions
                 "sampleville"
                 bounds
                 spawnPoint
-                (npc::warp::walls)
+                (harry::barry::warp::walls)
                 interactionMap
             |> WithId.useId world1Id
 

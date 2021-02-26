@@ -188,6 +188,14 @@ namespace LuceRPG.Game.Overlords
                     var unitName = unitNameGo.GetComponent<UnitNameController>();
                     unitName.SetFollow(tName.Value, uc);
                 }
+
+                var caController = go.GetComponent<CharacterAppearanceController>();
+                var charData = WorldObjectModule.getCharacterData(obj.value);
+
+                if (caController != null && charData.HasValue())
+                {
+                    caController.CharacterData = charData.Value;
+                }
             }
         }
 
