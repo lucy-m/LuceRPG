@@ -6,6 +6,9 @@ public class CharacterAppearanceController : MonoBehaviour
 {
     public GameObject HairLong;
     public GameObject HairShort;
+    public SpriteColourController Skin;
+    public SpriteColourController Top;
+    public SpriteColourController Bottoms;
 
     private CharacterDataModule.Model _characterData;
     private GameObject _currentHair;
@@ -35,6 +38,21 @@ public class CharacterAppearanceController : MonoBehaviour
                     var colour = _characterData.hairColour.ToColor();
                     scc.Colour = colour;
                 }
+            }
+
+            if (Skin != null)
+            {
+                Skin.Colour = _characterData.skinColour.ToColor();
+            }
+
+            if (Top != null)
+            {
+                Top.Colour = _characterData.topColour.ToColor();
+            }
+
+            if (Bottoms != null)
+            {
+                Bottoms.Colour = _characterData.bottomColour.ToColor();
             }
         }
     }

@@ -22,6 +22,9 @@ module CharacterDataSrl =
         Array.concat [
             [|hairStyle|]
             (serialiseColour d.hairColour)
+            (serialiseColour d.skinColour)
+            (serialiseColour d.topColour)
+            (serialiseColour d.bottomColour)
             name
         ]
 
@@ -46,8 +49,11 @@ module CharacterDataSrl =
             bytes
 
     let deserialise (bytes: byte[]): CharacterData DesrlResult =
-        DesrlUtil.getThree
+        DesrlUtil.getSix
             deserialiseHairStyle
+            deserialiseColour
+            deserialiseColour
+            deserialiseColour
             deserialiseColour
             StringSrl.deserialise
             CharacterData.create

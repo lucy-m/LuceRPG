@@ -64,6 +64,8 @@ namespace LuceRPGServer
                 policy.AllowAnyMethod();
             });
 
+            app.UseStaticFiles();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

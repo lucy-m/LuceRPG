@@ -22,6 +22,9 @@ module SampleWorlds =
                 CharacterData.create
                     CharacterData.HairStyle.Long
                     CharacterData.HairColour.caramel
+                    CharacterData.SkinColour.cocoa70
+                    CharacterData.ClothingColour.grass
+                    CharacterData.ClothingColour.grey
                     "Harry"
             let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 16 4)
@@ -32,9 +35,27 @@ module SampleWorlds =
                 CharacterData.create
                     CharacterData.HairStyle.Short
                     CharacterData.HairColour.cocoa85
+                    CharacterData.SkinColour.butter
+                    CharacterData.ClothingColour.sky
+                    CharacterData.ClothingColour.maroon
                     "Barry"
+
             let t = WorldObject.Type.NPC charData
             WorldObject.create t (Point.create 18 4)
+            |> WithId.create
+
+        let garry =
+            let charData =
+                CharacterData.create
+                    CharacterData.HairStyle.Egg
+                    CharacterData.HairColour.tangerine
+                    CharacterData.SkinColour.ivory
+                    CharacterData.ClothingColour.grey
+                    CharacterData.ClothingColour.maroon
+                    "Garry"
+
+            let t = WorldObject.Type.NPC charData
+            WorldObject.create t (Point.create 20 4)
             |> WithId.create
 
         let warp =
@@ -67,7 +88,7 @@ module SampleWorlds =
                 "sampleville"
                 bounds
                 spawnPoint
-                (harry::barry::warp::walls)
+                (harry::barry::garry::warp::walls)
                 interactionMap
             |> WithId.useId world1Id
 
