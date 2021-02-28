@@ -196,10 +196,10 @@ module IntentionProcessing =
 
                 // Generates event to add a player object to the world at the spawn point
                 let spawnPoint = World.spawnPoint world.value
-                let playerData = PlayerData.create username
+                let charData = CharacterData.randomized username
                 let obj =
                     WorldObject.create
-                        (WorldObject.Type.Player playerData)
+                        (WorldObject.Type.Player charData)
                         spawnPoint
                     |> WithId.create
 

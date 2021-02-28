@@ -154,8 +154,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WallPrefab: {fileID: 1043136130290738900, guid: 716fdbb9a817f3744907912a8df15f2a, type: 3}
   PathPrefab: {fileID: 8145506027414206273, guid: f23905c806685a34ab6772670663faba, type: 3}
-  PlayerPrefab: {fileID: 1113982545424815417, guid: 467750d40a27da747b7cd92f3296bff7, type: 3}
-  NpcPrefab: {fileID: 1113982545424815417, guid: 64fba65ac443b0e4a8a810ae496613ce, type: 3}
+  PlayerPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
+  NpcPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
   WarpPrefab: {fileID: 5365399715254733196, guid: a825a54bebeed7c44b8a5474e5a95ec0, type: 3}
   BackgroundPrefab: {fileID: 8901204032175359068, guid: 207287b1931d5cd42ba1666f386c911f, type: 3}
   CameraPrefab: {fileID: 4397631990221490018, guid: 9a171321d98dd374a8aa309e3588b60b, type: 3}

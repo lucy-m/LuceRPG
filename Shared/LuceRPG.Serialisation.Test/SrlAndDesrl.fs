@@ -98,6 +98,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let characterData () =
+            let checkFn =
+                srlAndDesrl CharacterDataSrl.serialise CharacterDataSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let worldObjectTypeSrl () =
             let checkFn =
                 srlAndDesrl WorldObjectSrl.serialiseType WorldObjectSrl.deserialiseType

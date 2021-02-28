@@ -17,8 +17,8 @@ module WorldObjectSrl =
             | WorldObject.Type.Wall -> [||]
             | WorldObject.Type.Path (w,h) ->
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
-            | WorldObject.Type.Player d -> PlayerDataSrl.serialise d
-            | WorldObject.Type.NPC d -> PlayerDataSrl.serialise d
+            | WorldObject.Type.Player d -> CharacterDataSrl.serialise d
+            | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
             | WorldObject.Type.Warp (worldId, point) ->
                 Array.append (StringSrl.serialise worldId) (PointSrl.serialise point)
 
@@ -35,10 +35,10 @@ module WorldObjectSrl =
                     (fun w h -> WorldObject.Type.Path (w,h))
                     objectBytes
             | 3uy ->
-                PlayerDataSrl.deserialise objectBytes
+                CharacterDataSrl.deserialise objectBytes
                 |> DesrlResult.map (fun d -> WorldObject.Type.Player d)
             | 4uy ->
-                PlayerDataSrl.deserialise objectBytes
+                CharacterDataSrl.deserialise objectBytes
                 |> DesrlResult.map (fun d -> WorldObject.Type.NPC d)
             | 5uy ->
                 DesrlUtil.getTwo

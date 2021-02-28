@@ -22,6 +22,10 @@ module UnknownTag =
             unknownTag IntentionSrl.deserialise 100uy
 
         [<Test>]
+        let hairStyle () =
+            unknownTag CharacterDataSrl.deserialiseHairStyle 100uy
+
+        [<Test>]
         let worldObjectTypeSrl () =
             unknownTag WorldObjectSrl.deserialiseType 200uy
 
