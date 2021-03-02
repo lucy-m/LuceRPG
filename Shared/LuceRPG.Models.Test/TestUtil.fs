@@ -9,7 +9,7 @@ module TestUtil =
 
     let makePlayerWithName (btmLeft: Point) (name: string): WorldObject =
         let playerData = CharacterData.randomized name
-        let payload = WorldObject.create (WorldObject.Type.Player playerData) btmLeft
+        let payload = WorldObject.create (WorldObject.Type.Player playerData) btmLeft Direction.South
 
         WithId.create payload
 

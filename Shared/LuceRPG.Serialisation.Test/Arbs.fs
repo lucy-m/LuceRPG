@@ -31,11 +31,13 @@ type SerialisationArbs() =
             |> Gen.two
             |> Gen.map (fun (x,y) -> Point.create x y)
 
+        let facing = Arb.generate<Direction>
+
         let objType =
             Arb.generate<WorldObject.Type>
 
-        Gen.zip3 id objType btmLeft
-        |> Gen.map (fun (id, t, p) -> WorldObject.create t p |> WithId.useId id)
+        Gen.zip (Gen.zip id objType) (Gen.zip btmLeft facing)
+        |> Gen.map (fun ((id, t), (p, f)) -> WorldObject.create t p f |> WithId.useId id)
 
     static member genWorld: Gen<World.Payload> =
         let name = Arb.generate<string>

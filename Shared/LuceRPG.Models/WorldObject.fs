@@ -15,15 +15,17 @@ module WorldObject =
         {
             t: Type
             btmLeft: Point
+            facing: Direction
         }
 
     let t (wo: Payload): Type = wo.t
     let btmLeft (wo: Payload): Point = wo.btmLeft
 
-    let create (t: Type) (btmLeft: Point): Payload =
+    let create (t: Type) (btmLeft: Point) (facing: Direction): Payload =
         {
             t = t
             btmLeft = btmLeft
+            facing = facing
         }
 
     let isBlocking (obj: Payload): bool =
@@ -66,6 +68,7 @@ module WorldObject =
         {
             obj with
                 btmLeft = newBtmLeft
+                facing = direction
         }
 
     let moveObject (direction: Direction) (obj: Payload): Payload =

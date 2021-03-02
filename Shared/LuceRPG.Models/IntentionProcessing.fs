@@ -201,6 +201,7 @@ module IntentionProcessing =
                     WorldObject.create
                         (WorldObject.Type.Player charData)
                         spawnPoint
+                        Direction.South
                     |> WithId.create
 
                 let removeExisting =

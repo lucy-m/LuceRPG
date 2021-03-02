@@ -39,23 +39,23 @@ module WorldDiff =
     let ``objects`` () =
         let bounds = [ Rect.create 0 10 10 10 ]
         let extraObject =
-            WorldObject.create WorldObject.Type.Wall (Point.create 0 10)
+            WorldObject.create WorldObject.Type.Wall (Point.create 0 10) Direction.South
             |> WithId.create
 
         let missingObject =
-            WorldObject.create WorldObject.Type.Wall (Point.create 2 10)
+            WorldObject.create WorldObject.Type.Wall (Point.create 2 10) Direction.South
             |> WithId.create
 
         let matchingObject =
-            WorldObject.create WorldObject.Type.Wall (Point.create 4 10)
+            WorldObject.create WorldObject.Type.Wall (Point.create 4 10) Direction.South
             |> WithId.create
 
         let unmatchingObject1 =
-            WorldObject.create WorldObject.Type.Wall (Point.create 6 10)
+            WorldObject.create WorldObject.Type.Wall (Point.create 6 10) Direction.South
             |> WithId.create
 
         let unmatchingObject2 =
-            WorldObject.create (WorldObject.Type.Path (1, 1)) (Point.create 8 10)
+            WorldObject.create (WorldObject.Type.Path (1, 1)) (Point.create 8 10) Direction.South
             |> WithId.useId unmatchingObject1.id
 
         let world1 =
