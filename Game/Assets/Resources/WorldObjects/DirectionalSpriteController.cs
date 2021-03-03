@@ -1,5 +1,4 @@
 using LuceRPG.Models;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +11,6 @@ public class DirectionalSpriteController : MonoBehaviour
     public GameObject WestSprite;
 
     public bool NorthUseSouthFlipped = false;
-    public bool WestUseEastFlipped = false;
 
     private Dictionary<DirectionModule.Model, GameObject> _sprites;
     private DirectionModule.Model _lastDirection;
@@ -46,15 +44,20 @@ public class DirectionalSpriteController : MonoBehaviour
                 matchingSprite.SetActive(true);
             }
 
-            //if (NorthUseSouthFlipped && SouthSprite != null)
-            //{
-            //    if (direction == DirectionModule.Model.North)
-            //    {
-            //        SouthSprite.SetActive(true);
-            //        SouthSprite.transform.localPosition = new Vector3(0, 0, 1);
-            //        SouthSprite.transform.localScale = new Vector3(1, 1, -1);
-            //    }
-            //}
+            if (NorthUseSouthFlipped && SouthSprite != null)
+            {
+                if (direction == DirectionModule.Model.North)
+                {
+                    SouthSprite.SetActive(true);
+                    SouthSprite.transform.localPosition = new Vector3(2, 0, 1);
+                    SouthSprite.transform.localScale = new Vector3(-1, 1, -1);
+                }
+                else if (direction == DirectionModule.Model.South)
+                {
+                    SouthSprite.transform.localPosition = Vector3.zero;
+                    SouthSprite.transform.localScale = Vector3.one;
+                }
+            }
 
             _lastDirection = direction;
         }

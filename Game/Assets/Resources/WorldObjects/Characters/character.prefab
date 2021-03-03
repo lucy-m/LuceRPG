@@ -48,6 +48,7 @@ MonoBehaviour:
   Sprites:
   - {fileID: 2866528389997023523}
   - {fileID: 6764289503274477964}
+  Children: []
 --- !u!1 &1113982545424815417
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,6 +256,7 @@ MonoBehaviour:
   - {fileID: 8230333867063587703}
   - {fileID: 5444489709270114145}
   - {fileID: 658441600657819780}
+  Children: []
 --- !u!1 &1893248738835290660
 GameObject:
   m_ObjectHideFlags: 0
@@ -1007,6 +1009,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Sprites:
   - {fileID: 3461161448386283731}
+  Children: []
 --- !u!1 &7750754702658115275
 GameObject:
   m_ObjectHideFlags: 0

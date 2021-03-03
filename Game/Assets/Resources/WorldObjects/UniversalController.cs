@@ -18,7 +18,6 @@ namespace LuceRPG.Game.WorldObjects
         private string _id = "";
         private float _speed = 0;
         private WorldObjectModule.Payload _lastModel;
-        private IReadOnlyCollection<DirectionalSpriteController> _directionalSprites;
 
         public string Id
         {
@@ -60,11 +59,6 @@ namespace LuceRPG.Game.WorldObjects
             var travelTime = model == null ? 0 :
                 (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
-        }
-
-        private void Awake()
-        {
-            _directionalSprites = GetComponentsInChildren<DirectionalSpriteController>();
         }
 
         private void Start()
@@ -120,7 +114,8 @@ namespace LuceRPG.Game.WorldObjects
 
                 if (_lastModel == null || _lastModel.facing != model.facing)
                 {
-                    foreach (var s in _directionalSprites)
+                    var directionalSprites = GetComponentsInChildren<DirectionalSpriteController>();
+                    foreach (var s in directionalSprites)
                     {
                         s.SetDirection(model.facing);
                     }

@@ -3,6 +3,7 @@ using UnityEngine;
 public class SpriteColourController : MonoBehaviour
 {
     public SpriteRenderer[] Sprites;
+    public SpriteColourController[] Children;
 
     private Color _colour;
 
@@ -28,6 +29,11 @@ public class SpriteColourController : MonoBehaviour
             foreach (var s in Sprites)
             {
                 s.color = Colour;
+            }
+
+            foreach (var c in Children)
+            {
+                c.Colour = Colour;
             }
         }
     }

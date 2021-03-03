@@ -59,6 +59,8 @@ public class CharacterAppearanceController : MonoBehaviour
 
     private GameObject GetHair(CharacterDataModule.HairStyle hairStyle)
     {
+        return HairLong;
+
         if (hairStyle.IsLong)
         {
             return HairLong;
