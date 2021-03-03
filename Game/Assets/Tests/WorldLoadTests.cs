@@ -53,7 +53,7 @@ public class WorldLoadTests
 
         wallModel =
             WithId.create(WorldObjectModule.create(
-                WorldObjectModule.TypeModule.Model.Wall, PointModule.create(2, 4)
+                WorldObjectModule.TypeModule.Model.Wall, PointModule.create(2, 4), DirectionModule.Model.South
             ));
 
         var wallInteraction = WithId.create(InteractionModule.One.NewChat(interactionText).ToSingletonEnumerable());
@@ -350,7 +350,7 @@ public class WorldLoadTests
         // Player is at 4,8 and must be in bounds
         var bounds = RectModule.create(0, 0, 6, 12).ToSingletonEnumerable();
         var newWall = WithId.create(WorldObjectModule.create(
-                WorldObjectModule.TypeModule.Model.Wall, PointModule.create(0, 4)
+                WorldObjectModule.TypeModule.Model.Wall, PointModule.create(0, 4), DirectionModule.Model.South
             ));
 
         var newWallText = "New wall";

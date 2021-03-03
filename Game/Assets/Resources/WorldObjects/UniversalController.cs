@@ -18,6 +18,7 @@ namespace LuceRPG.Game.WorldObjects
         private string _id = "";
         private float _speed = 0;
         private WorldObjectModule.Payload _lastModel;
+        private IReadOnlyCollection<DirectionalSpriteController> _directionalSprites;
 
         public string Id
         {
@@ -29,13 +30,6 @@ namespace LuceRPG.Game.WorldObjects
 
                 _id = value;
             }
-        }
-
-        public void SetModelProps(WorldObjectModule.Payload model)
-        {
-            var travelTime = model == null ? 0 :
-                (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
-            _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
         }
 
         public Vector3 Target
@@ -59,6 +53,18 @@ namespace LuceRPG.Game.WorldObjects
             {
                 return null;
             }
+        }
+
+        public void SetModelProps(WorldObjectModule.Payload model)
+        {
+            var travelTime = model == null ? 0 :
+                (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
+            _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
+        }
+
+        private void Awake()
+        {
+            _directionalSprites = GetComponentsInChildren<DirectionalSpriteController>();
         }
 
         private void Start()
@@ -104,14 +110,20 @@ namespace LuceRPG.Game.WorldObjects
             if (model == null)
             {
                 Destroy(gameObject);
-                Debug.Log($"No matching object in model, deleting {Id}");
             }
             else
             {
                 if (_lastModel == null || _lastModel.btmLeft != model.btmLeft)
                 {
                     Target = model.btmLeft.ToVector3();
-                    Debug.Log($"Model {Id} has moved, changing target to {Target}");
+                }
+
+                if (_lastModel == null || _lastModel.facing != model.facing)
+                {
+                    foreach (var s in _directionalSprites)
+                    {
+                        s.SetDirection(model.facing);
+                    }
                 }
 
                 var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);

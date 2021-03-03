@@ -27,7 +27,7 @@ module SampleWorlds =
                     CharacterData.ClothingColour.grey
                     "Harry"
             let t = WorldObject.Type.NPC charData
-            WorldObject.create t (Point.create 16 4)
+            WorldObject.create t (Point.create 16 4) Direction.South
             |> WithId.create
 
         let barry =
@@ -41,7 +41,7 @@ module SampleWorlds =
                     "Barry"
 
             let t = WorldObject.Type.NPC charData
-            WorldObject.create t (Point.create 18 4)
+            WorldObject.create t (Point.create 18 4) Direction.South
             |> WithId.create
 
         let garry =
@@ -55,12 +55,12 @@ module SampleWorlds =
                     "Garry"
 
             let t = WorldObject.Type.NPC charData
-            WorldObject.create t (Point.create 20 4)
+            WorldObject.create t (Point.create 20 4) Direction.South
             |> WithId.create
 
         let warp =
             let t = WorldObject.Type.Warp (world2Id, Point.zero)
-            WorldObject.create t (Point.create -4 8)
+            WorldObject.create t (Point.create -4 8) Direction.South
             |> WithId.create
 
         let walls =
@@ -72,7 +72,7 @@ module SampleWorlds =
                 WorldObject.create WorldObject.Type.Wall (Point.create -4 1)
             ]
             |> List.map (fun wo ->
-                WithId.create wo
+                WithId.create (wo  Direction.South)
             )
 
         let sayHiInteraction: Interaction =
@@ -103,12 +103,12 @@ module SampleWorlds =
         let npc =
             let charData = CharacterData.randomized "Bobby"
             let t = WorldObject.Type.NPC charData
-            WorldObject.create t (Point.create 6 4)
+            WorldObject.create t (Point.create 6 4) Direction.South
             |> WithId.create
 
         let warp =
             let t = WorldObject.Type.Warp (world1Id, Point.create -4 6)
-            WorldObject.create t (Point.create 1 6)
+            WorldObject.create t (Point.create 1 6) Direction.South
             |> WithId.create
 
         let sayHiInteraction: Interaction =
