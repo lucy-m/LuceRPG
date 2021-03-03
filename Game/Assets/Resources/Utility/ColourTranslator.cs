@@ -13,5 +13,14 @@ namespace LuceRPG.Game.Utility
 
             return new Color(r, b, g);
         }
+
+        public static Tuple<byte, byte, byte> ToByteTuple(this Color c)
+        {
+            var r = (byte)(c.r * 255);
+            var g = (byte)(c.g * 255);
+            var b = (byte)(c.b * 255);
+
+            return Tuple.Create(r, g, b);
+        }
     }
 }

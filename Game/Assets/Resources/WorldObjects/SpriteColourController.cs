@@ -1,11 +1,13 @@
 using UnityEngine;
 
+[ExecuteAlways]
 public class SpriteColourController : MonoBehaviour
 {
     public SpriteRenderer[] Sprites;
     public SpriteColourController[] Children;
 
-    private Color _colour;
+    [SerializeField]
+    private Color _colour = Color.white;
 
     public Color Colour
     {
@@ -17,7 +19,7 @@ public class SpriteColourController : MonoBehaviour
         }
     }
 
-    private void Awake()
+    private void Start()
     {
         SetSpriteColour();
     }
@@ -35,6 +37,15 @@ public class SpriteColourController : MonoBehaviour
             {
                 c.Colour = Colour;
             }
+        }
+    }
+
+    private void Update()
+    {
+        // Allows changes to be made in edit mode
+        if (Application.isEditor)
+        {
+            SetSpriteColour();
         }
     }
 }

@@ -1,7 +1,10 @@
+using LuceRPG.Game.Editor;
 using LuceRPG.Game.Utility;
 using LuceRPG.Models;
+using System;
 using UnityEngine;
 
+[ExecuteAlways]
 public class CharacterAppearanceController : MonoBehaviour
 {
     public GameObject HairLong;
@@ -13,6 +16,14 @@ public class CharacterAppearanceController : MonoBehaviour
     private CharacterDataModule.Model _characterData;
     private GameObject _currentHair;
 
+    // Used for inspector
+
+    [SerializeField] private HairStyleInput _hairStyle = HairStyleInput.Egg;
+    [SerializeField] private Color _hairColour = Color.white;
+    [SerializeField] private Color _skinColour = Color.white;
+    [SerializeField] private Color _topColour = Color.white;
+    [SerializeField] private Color _btmColour = Color.white;
+
     public CharacterDataModule.Model CharacterData
     {
         get => _characterData;
@@ -22,7 +33,14 @@ public class CharacterAppearanceController : MonoBehaviour
 
             if (_currentHair != null)
             {
-                Destroy(_currentHair);
+                if (Application.isEditor)
+                {
+                    DestroyImmediate(_currentHair);
+                }
+                else
+                {
+                    Destroy(_currentHair);
+                }
             }
 
             var newHair = GetHair(_characterData.hairStyle);
@@ -59,8 +77,6 @@ public class CharacterAppearanceController : MonoBehaviour
 
     private GameObject GetHair(CharacterDataModule.HairStyle hairStyle)
     {
-        return HairLong;
-
         if (hairStyle.IsLong)
         {
             return HairLong;
@@ -71,5 +87,35 @@ public class CharacterAppearanceController : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void Update()
+    {
+        // Allows changes to be previewed in Edit Mode
+        if (!Application.isPlaying)
+        {
+            var hairStyle = _hairStyle switch
+            {
+                HairStyleInput.Long => CharacterDataModule.HairStyle.Long,
+                HairStyleInput.Short => CharacterDataModule.HairStyle.Short,
+                _ => CharacterDataModule.HairStyle.Egg
+            };
+
+            var hairColour = _hairColour.ToByteTuple();
+            var skinColour = _skinColour.ToByteTuple();
+            var topColour = _topColour.ToByteTuple();
+            var bottomColour = _btmColour.ToByteTuple();
+
+            var charData = new CharacterDataModule.Model(
+                "",
+                hairStyle,
+                hairColour,
+                skinColour,
+                topColour,
+                bottomColour
+            );
+
+            CharacterData = charData;
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace LuceRPG.Game.WorldObjects
         private string _id = "";
         private float _speed = 0;
         private WorldObjectModule.Payload _lastModel;
+        private DirectionalSpriteRoot _directionalSpriteRoot;
 
         public string Id
         {
@@ -61,6 +62,11 @@ namespace LuceRPG.Game.WorldObjects
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
         }
 
+        private void Awake()
+        {
+            _directionalSpriteRoot = GetComponent<DirectionalSpriteRoot>();
+        }
+
         private void Start()
         {
             Target = transform.position;
@@ -97,8 +103,6 @@ namespace LuceRPG.Game.WorldObjects
 
         private void Update()
         {
-            // Change this to poll the model's state and apply any adjustments to the GO
-            // Remove updating from WorldEvents
             var model = GetModel();
 
             if (model == null)
@@ -112,13 +116,9 @@ namespace LuceRPG.Game.WorldObjects
                     Target = model.btmLeft.ToVector3();
                 }
 
-                if (_lastModel == null || _lastModel.facing != model.facing)
+                if (_directionalSpriteRoot != null)
                 {
-                    var directionalSprites = GetComponentsInChildren<DirectionalSpriteController>();
-                    foreach (var s in directionalSprites)
-                    {
-                        s.SetDirection(model.facing);
-                    }
+                    _directionalSpriteRoot.Direction = model.facing;
                 }
 
                 var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
