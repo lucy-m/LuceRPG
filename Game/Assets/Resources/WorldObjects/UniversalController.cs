@@ -1,5 +1,7 @@
 ﻿using LuceRPG.Game.Utility;
 using LuceRPG.Models;
+using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +17,7 @@ namespace LuceRPG.Game.WorldObjects
 
         private string _id = "";
         private float _speed = 0;
+        private WorldObjectModule.Payload _lastModel;
 
         public string Id
         {
@@ -68,21 +71,6 @@ namespace LuceRPG.Game.WorldObjects
             Controllers.Remove(_id);
         }
 
-        public void Apply(WorldEventModule.Model worldEvent)
-        {
-            if (worldEvent.t.IsMoved)
-            {
-                var moved = (WorldEventModule.Type.Moved)worldEvent.t;
-                var offset = moved.Item2.AsVector3();
-
-                Target += offset;
-            }
-            else if (worldEvent.t.IsObjectRemoved)
-            {
-                Destroy(gameObject);
-            }
-        }
-
         /// <summary>
         /// Sets an object's target to the location or immediately
         ///   moves the object to the location if too far away
@@ -109,8 +97,28 @@ namespace LuceRPG.Game.WorldObjects
 
         private void Update()
         {
-            var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
-            transform.position = newPosition;
+            // Change this to poll the model's state and apply any adjustments to the GO
+            // Remove updating from WorldEvents
+            var model = GetModel();
+
+            if (model == null)
+            {
+                Destroy(gameObject);
+                Debug.Log($"No matching object in model, deleting {Id}");
+            }
+            else
+            {
+                if (_lastModel == null || _lastModel.btmLeft != model.btmLeft)
+                {
+                    Target = model.btmLeft.ToVector3();
+                    Debug.Log($"Model {Id} has moved, changing target to {Target}");
+                }
+
+                var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
+                transform.position = newPosition;
+
+                _lastModel = model;
+            }
         }
 
         private void OnDrawGizmosSelected()
@@ -121,6 +129,21 @@ namespace LuceRPG.Game.WorldObjects
         public void OnMouseDown()
         {
             Registry.Streams.Interactions.Next(Id, transform.position);
+        }
+
+        public WorldObjectModule.Payload GetModel()
+        {
+            var worldStore = Registry.Stores.World.World;
+            var tModel = MapModule.TryFind(Id, worldStore.objects);
+
+            if (tModel.HasValue())
+            {
+                return tModel.Value.value;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

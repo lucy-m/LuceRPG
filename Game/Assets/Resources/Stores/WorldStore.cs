@@ -23,6 +23,9 @@ namespace LuceRPG.Game.Stores
 
         public void Apply(WorldEventModule.Model worldEvent)
         {
+            var current = IdWorld;
+            var updated = EventApply.apply(worldEvent, current);
+
             IdWorld = EventApply.apply(worldEvent, IdWorld);
         }
 

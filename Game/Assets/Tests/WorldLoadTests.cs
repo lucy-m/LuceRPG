@@ -196,7 +196,7 @@ public class WorldLoadTests
                     "intention1",
                     idWorld.id,
                     0,
-                    WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.North)
+                    WorldEventModule.Type.NewMoved(playerModel.id, DirectionModule.Model.South)
                 )
             )
         };
@@ -205,11 +205,13 @@ public class WorldLoadTests
         var tsGetSinceResult = WithTimestamp.create(testTimestampProvider.Now, getSinceResult);
 
         testCommsService.OnUpdate(tsGetSinceResult);
+        yield return null;
 
-        // player object should target to be 1 square north
+        // player object should target to be 1 square south
         var playerObject = UniversalController.GetById(playerModel.id);
-        var expectedTarget = playerObject.transform.position + new Vector3(0, 1);
-        Assert.That(playerObject.Target, Is.EqualTo(expectedTarget));
+        var expectedTarget = playerObject.GetModel().btmLeft.ToVector3();
+
+        TestUtil.AssertXYMatch(playerObject.Target, expectedTarget);
 
         // wall object target should be unchanged
         var wallObject = UniversalController.GetById(wallModel.id);
@@ -223,9 +225,8 @@ public class WorldLoadTests
         var afterPosition = playerObject.transform.position;
         var positionChange = afterPosition - priorPosition;
 
-        var movesNorth = Vector3.Dot(positionChange.normalized, new Vector3(0, 1)) == 1;
-
-        Assert.That(movesNorth, Is.True);
+        var movesSouth = Vector3.Dot(positionChange.normalized, new Vector3(0, -1)) == 1;
+        Assert.That(movesSouth, Is.True);
 
         // the player eventually reaches the target
         for (var i = 0; i < 10; i++)
