@@ -30,13 +30,11 @@ public class DirectionalSpriteController : MonoBehaviour
         get => _direction;
         set
         {
-            Debug.Log($"Directional sprite setting to {value}");
-
             if (_direction != value && value != null)
             {
                 _direction = value;
                 _testDirection = value.ToInput();
-                SetSprites();
+                SetSprites(); 
             }
         }
     }
