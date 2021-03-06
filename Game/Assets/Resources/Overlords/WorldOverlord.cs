@@ -135,16 +135,10 @@ namespace LuceRPG.Game.Overlords
                 var tObjectId = WorldEventModule.getObjectId(worldEvent.t);
                 if (tObjectId.HasValue())
                 {
-                    var objectId = tObjectId.Value;
-
                     if (worldEvent.t.IsObjectAdded)
                     {
                         var objectAdded = ((WorldEventModule.Type.ObjectAdded)worldEvent.t).Item;
                         AddObject(objectAdded);
-                    }
-                    else
-                    {
-                        OnUcEvent(objectId, worldEvent);
                     }
                 }
             }
@@ -196,19 +190,6 @@ namespace LuceRPG.Game.Overlords
                 {
                     caController.CharacterData = charData.Value;
                 }
-            }
-        }
-
-        private void OnUcEvent(string ucId, WorldEventModule.Model worldEvent)
-        {
-            var uc = UniversalController.GetById(ucId);
-            if (uc != null)
-            {
-                uc.Apply(worldEvent);
-            }
-            else
-            {
-                Debug.LogError($"Could not process update for unknown object {ucId}");
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using LuceRPG.Game.Utility;
 using LuceRPG.Models;
+using LuceRPG.Utility;
+using Microsoft.FSharp.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +17,8 @@ namespace LuceRPG.Game.WorldObjects
 
         private string _id = "";
         private float _speed = 0;
+        private WorldObjectModule.Payload _lastModel;
+        private DirectionalSpriteRoot _directionalSpriteRoot;
 
         public string Id
         {
@@ -26,13 +30,6 @@ namespace LuceRPG.Game.WorldObjects
 
                 _id = value;
             }
-        }
-
-        public void SetModelProps(WorldObjectModule.Payload model)
-        {
-            var travelTime = model == null ? 0 :
-                (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
-            _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
         }
 
         public Vector3 Target
@@ -58,6 +55,18 @@ namespace LuceRPG.Game.WorldObjects
             }
         }
 
+        public void SetModelProps(WorldObjectModule.Payload model)
+        {
+            var travelTime = model == null ? 0 :
+                (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
+            _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
+        }
+
+        private void Awake()
+        {
+            _directionalSpriteRoot = GetComponent<DirectionalSpriteRoot>();
+        }
+
         private void Start()
         {
             Target = transform.position;
@@ -66,21 +75,6 @@ namespace LuceRPG.Game.WorldObjects
         private void OnDestroy()
         {
             Controllers.Remove(_id);
-        }
-
-        public void Apply(WorldEventModule.Model worldEvent)
-        {
-            if (worldEvent.t.IsMoved)
-            {
-                var moved = (WorldEventModule.Type.Moved)worldEvent.t;
-                var offset = moved.Item2.AsVector3();
-
-                Target += offset;
-            }
-            else if (worldEvent.t.IsObjectRemoved)
-            {
-                Destroy(gameObject);
-            }
         }
 
         /// <summary>
@@ -109,8 +103,29 @@ namespace LuceRPG.Game.WorldObjects
 
         private void Update()
         {
-            var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
-            transform.position = newPosition;
+            var model = GetModel();
+
+            if (model == null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                if (_lastModel == null || _lastModel.btmLeft != model.btmLeft)
+                {
+                    Target = model.btmLeft.ToVector3();
+                }
+
+                if (_directionalSpriteRoot != null)
+                {
+                    _directionalSpriteRoot.Direction = model.facing;
+                }
+
+                var newPosition = Vector3.MoveTowards(transform.position, Target, _speed * Time.deltaTime);
+                transform.position = newPosition;
+
+                _lastModel = model;
+            }
         }
 
         private void OnDrawGizmosSelected()
@@ -121,6 +136,21 @@ namespace LuceRPG.Game.WorldObjects
         public void OnMouseDown()
         {
             Registry.Streams.Interactions.Next(Id, transform.position);
+        }
+
+        public WorldObjectModule.Payload GetModel()
+        {
+            var worldStore = Registry.Stores.World.World;
+            var tModel = MapModule.TryFind(Id, worldStore.objects);
+
+            if (tModel.HasValue())
+            {
+                return tModel.Value.value;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

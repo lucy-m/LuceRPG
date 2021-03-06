@@ -18,7 +18,7 @@ module IntentionProcessing =
         [<TestFixture>]
         module ``for a world with a single wall and player`` =
             let player = TestUtil.makePlayerWithName (Point.create 1 1) username
-            let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) |> TestUtil.withId
+            let wall = WorldObject.create WorldObject.Type.Wall (Point.create 3 1) Direction.South |> TestUtil.withId
             let objectClientMap = [player.id, clientId] |> Map.ofList
             let tObjectClientMap = objectClientMap |> Option.Some
             let now = 120L
@@ -71,6 +71,7 @@ module IntentionProcessing =
                         newPlayer.IsSome |> should equal true
 
                         newPlayer.Value.value.btmLeft |> should equal (Point.create 1 2)
+                        newPlayer.Value.value.facing |> should equal Direction.North
 
                     [<Test>]
                     let ``nothing is delayed`` () =
@@ -102,6 +103,7 @@ module IntentionProcessing =
                         newPlayer.IsSome |> should equal true
 
                         newPlayer.Value.value.btmLeft |> should equal (Point.create 1 1)
+                        newPlayer.Value.value.facing |> should equal Direction.South
 
                 [<TestFixture>]
                 module ``when the player tries to move one square east`` =
@@ -122,10 +124,8 @@ module IntentionProcessing =
                         let newPlayer = result.world.value.objects |> Map.tryFind player.id
                         newPlayer.IsSome |> should equal true
 
-                        newPlayer.Value
-                        |> WithId.value
-                        |> WorldObject.btmLeft
-                        |> should equal (Point.create 1 1)
+                        newPlayer.Value.value.btmLeft |> should equal (Point.create 1 1)
+                        newPlayer.Value.value.facing |> should equal Direction.South
 
                 [<TestFixture>]
                 module ``when the player tries to move four squares east`` =
@@ -386,6 +386,7 @@ module IntentionProcessing =
                 WorldObject.create
                     (WorldObject.Type.Warp(toWorld, toPoint))
                     (Point.create 3 1)
+                    Direction.South
                 |> TestUtil.withId
 
             let now = 120L

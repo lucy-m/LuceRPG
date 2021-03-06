@@ -14,7 +14,7 @@ public static class TestUtil
         var topLeft = PointModule.create(x, y);
 
         var payload = WorldObjectModule.create(
-            WorldObjectModule.TypeModule.Model.NewPlayer(playerData), topLeft);
+            WorldObjectModule.TypeModule.Model.NewPlayer(playerData), topLeft, DirectionModule.Model.South);
 
         return WithId.create(payload);
     }

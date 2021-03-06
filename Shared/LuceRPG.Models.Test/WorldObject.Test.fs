@@ -12,7 +12,7 @@ module WorldObject =
         [<TestFixture>]
         module ``1x1 object`` =
             let btmLeft = Point.create 8 2
-            let obj = WorldObject.create (WorldObject.Type.Path (1,1)) btmLeft |> TestUtil.withId
+            let obj = WorldObject.create (WorldObject.Type.Path (1,1)) btmLeft Direction.South |> TestUtil.withId
 
             let points = WorldObject.getPoints obj.value
 
@@ -27,7 +27,7 @@ module WorldObject =
         [<TestFixture>]
         module ``2x2 object`` =
             let btmLeft = Point.create 10 1
-            let obj = WorldObject.create WorldObject.Type.Wall btmLeft |> TestUtil.withId
+            let obj = WorldObject.create WorldObject.Type.Wall btmLeft Direction.South |> TestUtil.withId
 
             let points = WorldObject.getPoints obj.value
 

@@ -7,7 +7,7 @@ open FsUnit
 module EventApply =
     let worldId = "world-id"
     let bounds = [ Rect.create 0 0 10 10]
-    let obj = WithId.create (WorldObject.create WorldObject.Type.Wall (Point.create 4 4))
+    let obj = WithId.create (WorldObject.create WorldObject.Type.Wall (Point.create 4 4) Direction.South)
     let world = WithId.useId worldId (World.empty "test" bounds Point.zero)
     let withObj = WithId.map (World.addObject obj) world
 

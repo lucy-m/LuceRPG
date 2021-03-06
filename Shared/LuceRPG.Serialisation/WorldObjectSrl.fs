@@ -55,13 +55,15 @@ module WorldObjectSrl =
     let serialisePayload (obj: WorldObject.Payload): byte[] =
         let t = serialiseType obj.t
         let btmLeft = PointSrl.serialise obj.btmLeft
+        let facing = DirectionSrl.serialise obj.facing
 
-        Array.concat  [t; btmLeft]
+        Array.concat  [t; btmLeft; facing]
 
     let deserialisePayload (bytes: byte[]): WorldObject.Payload DesrlResult =
-        DesrlUtil.getTwo
+        DesrlUtil.getThree
             deserialiseType
             PointSrl.deserialise
+            DirectionSrl.deserialise
             WorldObject.create
             bytes
 
