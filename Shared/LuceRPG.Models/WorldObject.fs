@@ -8,6 +8,7 @@ module WorldObject =
             | Player of CharacterData
             | NPC of CharacterData
             | Warp of Id.World * Point
+            | Tree
 
     type Type = Type.Model
 
@@ -35,8 +36,10 @@ module WorldObject =
         | Type.Player _ -> false
         | Type.NPC _ -> true
         | Type.Warp _ -> false
+        | Type.Tree -> true
 
     let size (obj: Payload): Point =
+        let p1x1 = Point.create 1 1
         let p2x2 = Point.create 2 2
 
         match obj.t with
@@ -45,6 +48,7 @@ module WorldObject =
         | Type.Player _ -> p2x2
         | Type.NPC _ -> p2x2
         | Type.Warp _ -> p2x2
+        | Type.Tree _ -> p1x1
 
     let getPoints (obj: Payload): Point List =
         let objSize = size obj

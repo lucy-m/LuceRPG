@@ -11,7 +11,7 @@ module SampleWorlds =
         let bounds =
             [
                 Rect.create 0 0 44 8
-                Rect.create 4 8 3 8
+                Rect.create 4 8 8 8
                 Rect.create -6 0 6 11
             ]
 
@@ -75,6 +75,18 @@ module SampleWorlds =
                 WithId.create (wo  Direction.South)
             )
 
+        let trees =
+            [
+                WorldObject.create WorldObject.Type.Tree (Point.create 6 9)
+                WorldObject.create WorldObject.Type.Tree (Point.create 8 10)
+                WorldObject.create WorldObject.Type.Tree (Point.create 9 11)
+                WorldObject.create WorldObject.Type.Tree (Point.create 5 12)
+                WorldObject.create WorldObject.Type.Tree (Point.create 10 15)
+            ]
+            |> List.map (fun wo ->
+                WithId.create (wo  Direction.South)
+            )
+
         let sayHiInteraction: Interaction =
             let sayHi = Interaction.One.Chat "Hey you, you're finally awake. Welcome to LuceRPG pre-alpha dev preview. Enjoy your stay, {player}!"
             let payload = [sayHi]
@@ -83,12 +95,20 @@ module SampleWorlds =
         let interactionMap: World.InteractionMap =
             Map.ofList [harry.id, sayHiInteraction.id]
 
+        let allObjects =
+            List.concat
+                [
+                    [ harry; barry; garry; warp ]
+                    walls
+                    trees
+                ]
+
         let world =
             World.createWithInteractions
                 "sampleville"
                 bounds
                 spawnPoint
-                (harry::barry::garry::warp::walls)
+                allObjects
                 interactionMap
             |> WithId.useId world1Id
 

@@ -11,6 +11,7 @@ module WorldObjectSrl =
             | WorldObject.Type.Player _ -> 3uy
             | WorldObject.Type.NPC _ -> 4uy
             | WorldObject.Type.Warp _ -> 5uy
+            | WorldObject.Type.Tree -> 6uy
 
         let addtInfo =
             match t with
@@ -21,6 +22,7 @@ module WorldObjectSrl =
             | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
             | WorldObject.Type.Warp (worldId, point) ->
                 Array.append (StringSrl.serialise worldId) (PointSrl.serialise point)
+            | WorldObject.Type.Tree -> [||]
 
         Array.append [|label|] addtInfo
 
@@ -46,6 +48,7 @@ module WorldObjectSrl =
                     PointSrl.deserialise
                     (fun worldId point -> WorldObject.Type.Warp(worldId, point))
                     objectBytes
+            | 6uy -> DesrlResult.create WorldObject.Type.Tree 0
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None
