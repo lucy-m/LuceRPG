@@ -3,6 +3,22 @@
 open LuceRPG.Models
 
 module WorldObjectSrl =
+
+    let serialiseWarpData (wd: WorldObject.WarpData): byte[] =
+        Array.append (StringSrl.serialise wd.toWorld) (PointSrl.serialise wd.toPoint)
+
+    let deserialiseWarpData (bytes: byte[]): WorldObject.WarpData DesrlResult =
+        DesrlUtil.getTwo
+            StringSrl.deserialise
+            PointSrl.deserialise
+            (fun worldId point ->
+                {
+                    toWorld = worldId
+                    toPoint = point
+                }
+            )
+            bytes
+
     let serialiseType (t: WorldObject.Type): byte[] =
         let label =
             match t with
@@ -12,6 +28,7 @@ module WorldObjectSrl =
             | WorldObject.Type.NPC _ -> 4uy
             | WorldObject.Type.Warp _ -> 5uy
             | WorldObject.Type.Tree -> 6uy
+            | WorldObject.Type.Inn _ -> 7uy
 
         let addtInfo =
             match t with
@@ -20,9 +37,12 @@ module WorldObjectSrl =
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
             | WorldObject.Type.Player d -> CharacterDataSrl.serialise d
             | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
-            | WorldObject.Type.Warp (worldId, point) ->
-                Array.append (StringSrl.serialise worldId) (PointSrl.serialise point)
+            | WorldObject.Type.Warp wd -> serialiseWarpData wd
             | WorldObject.Type.Tree -> [||]
+            | WorldObject.Type.Inn doorWarp ->
+                OptionSrl.serialise
+                    serialiseWarpData
+                    doorWarp
 
         Array.append [|label|] addtInfo
 
@@ -38,17 +58,19 @@ module WorldObjectSrl =
                     objectBytes
             | 3uy ->
                 CharacterDataSrl.deserialise objectBytes
-                |> DesrlResult.map (fun d -> WorldObject.Type.Player d)
+                |> DesrlResult.map WorldObject.Type.Player
             | 4uy ->
                 CharacterDataSrl.deserialise objectBytes
-                |> DesrlResult.map (fun d -> WorldObject.Type.NPC d)
+                |> DesrlResult.map WorldObject.Type.NPC
             | 5uy ->
-                DesrlUtil.getTwo
-                    StringSrl.deserialise
-                    PointSrl.deserialise
-                    (fun worldId point -> WorldObject.Type.Warp(worldId, point))
-                    objectBytes
+                deserialiseWarpData objectBytes
+                |> DesrlResult.map WorldObject.Type.Warp
             | 6uy -> DesrlResult.create WorldObject.Type.Tree 0
+            | 7uy ->
+                OptionSrl.deserialise
+                    deserialiseWarpData
+                    objectBytes
+                |> DesrlResult.map WorldObject.Type.Inn
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None

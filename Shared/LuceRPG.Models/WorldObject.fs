@@ -1,14 +1,31 @@
 ﻿namespace LuceRPG.Models
 
 module WorldObject =
+
+    module WarpData =
+        type Model =
+            {
+                toWorld: Id.World
+                toPoint: Point
+            }
+
+        let create (toWorld: Id.World) (toPoint: Point): Model =
+            {
+                toWorld = toWorld
+                toPoint = toPoint
+            }
+
+    type WarpData = WarpData.Model
+
     module Type =
         type Model =
             | Wall
             | Path of int * int
             | Player of CharacterData
             | NPC of CharacterData
-            | Warp of Id.World * Point
+            | Warp of WarpData
             | Tree
+            | Inn of WarpData Option
 
     type Type = Type.Model
 
@@ -37,6 +54,7 @@ module WorldObject =
         | Type.NPC _ -> true
         | Type.Warp _ -> false
         | Type.Tree -> true
+        | Type.Inn _ -> true
 
     let size (obj: Payload): Point =
         let p1x1 = Point.create 1 1
@@ -48,23 +66,33 @@ module WorldObject =
         | Type.Player _ -> p2x2
         | Type.NPC _ -> p2x2
         | Type.Warp _ -> p2x2
-        | Type.Tree _ -> p1x1
+        | Type.Tree -> p1x1
+        | Type.Inn _ -> Point.create 6 8
 
-    let getPoints (obj: Payload): Point List =
-        let objSize = size obj
+    let getPoints (obj: Payload): Point seq =
+        match obj.t with
+        | Type.Inn door ->
+            let relPoints =
+                let top = Rect.create 0 3 6 4
+                let leftCol = Rect.create 0 0 1 3
+                let rightCol = Rect.create 5 0 1 3
+                let bottom =
+                    if door |> Option.isSome
+                    then Rect.create 1 1 2 2
+                    else Rect.create 1 1 4 2
 
-        let relPoints =
-            ([0 .. (objSize.x - 1)], [0 .. (objSize.y - 1)])
-            |> (fun (xs, ys) ->
-                xs
-                |> List.collect (fun x -> ys |> List.map (fun y -> Point.create x y))
-            )
+                [ top; leftCol; rightCol; bottom ]
+                |> Seq.collect Rect.getPoints
 
-        let blocked =
-            relPoints
-            |> List.map (fun p1 -> Point.add p1 obj.btmLeft)
+            let absPoints =
+                relPoints |> Seq.map (Point.add obj.btmLeft)
 
-        blocked
+            absPoints
+        | _ ->
+            let objSize = size obj
+            let rect = Rect.pointCreate obj.btmLeft objSize
+
+            Rect.getPoints rect
 
     let moveObjectN (direction: Direction) (amount: int) (obj: Payload): Payload =
         let newBtmLeft = Direction.movePoint direction amount obj.btmLeft

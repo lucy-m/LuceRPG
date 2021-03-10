@@ -9,9 +9,11 @@
     <Compile Include="DesrlResult.fs" />
     <Compile Include="ByteSrl.fs" />
     <Compile Include="DesrlUtil.fs" />
+    <Compile Include="BoolSrl.fs" />
     <Compile Include="IntSrl.fs" />
     <Compile Include="LongSrl.fs" />
     <Compile Include="StringSrl.fs" />
+    <Compile Include="OptionSrl.fs" />
     <Compile Include="ListSrl.fs" />
     <Compile Include="MapSrl.fs" />
     <Compile Include="WithTimestampSrl.fs" />

@@ -14,7 +14,7 @@ module World =
             objects: Map<Id.WorldObject, WorldObject>
             interactions: InteractionMap
             blocked: Map<Point, BlockedType>
-            warps: Map<Point, Id.WorldObject * Id.World * Point>
+            warps: Map<Point, Id.WorldObject * WorldObject.WarpData>
             playerSpawner: Point
         }
 
@@ -65,8 +65,8 @@ module World =
         let points = WorldObject.getPoints obj.value
 
         points
-        |> List.map (fun p -> pointInBounds p world)
-        |> List.fold (&&) true
+        |> Seq.map (fun p -> pointInBounds p world)
+        |> Seq.fold (&&) true
 
     let containsObject (id: Id.WorldObject) (world: Payload): bool =
         world.objects
@@ -78,8 +78,8 @@ module World =
         let isNotBlocked =
             let blockedPoints =
                 points
-                |> List.choose (fun p -> getBlocker p world)
-                |> List.filter (fun b ->
+                |> Seq.choose (fun p -> getBlocker p world)
+                |> Seq.filter (fun b ->
                     match b with
                     // objects are blocked by other objects with a differing id
                     | BlockedType.Object o -> o.id <> obj.id
@@ -87,23 +87,23 @@ module World =
                     | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj.value)
                 )
 
-            blockedPoints |> List.isEmpty
+            blockedPoints |> Seq.isEmpty
 
         let inBounds = objInBounds obj world
 
         isNotBlocked && inBounds
 
-    let getWarp (id: Id.WorldObject) (world: Payload): (Id.World * Point) Option =
+    let getWarp (id: Id.WorldObject) (world: Payload): WorldObject.WarpData Option =
         let tObject = world.objects |> Map.tryFind id
         let tPoints = tObject |> Option.map (WithId.value >> WorldObject.getPoints)
         let tWarp =
             tPoints
             |> Option.bind (fun points ->
                 points
-                |> List.tryPick (fun p -> world.warps |> Map.tryFind p)
+                |> Seq.tryPick (fun p -> world.warps |> Map.tryFind p)
             )
 
-        tWarp |> Option.map (fun (objId, worldId, point) -> (worldId, point))
+        tWarp |> Option.map (fun (objId, wd) -> wd)
 
     let removeObject (id: Id.WorldObject) (world: Payload): Payload =
         let newObjects =
@@ -124,7 +124,7 @@ module World =
 
         let newWarps =
             world.warps
-            |> Map.filter (fun p (oId, wId, toPoint) ->
+            |> Map.filter (fun p (oId, wd) ->
                 oId <> id
             )
 
@@ -174,7 +174,7 @@ module World =
                 then
                     // add all points to blocking map
                     points
-                    |> List.fold
+                    |> Seq.fold
                         (fun acc p -> Map.add p (BlockedType.Object obj) acc)
                         existingIdRemoved.blocked
                 else
@@ -185,11 +185,11 @@ module World =
 
             let warps =
                 match obj.value.t with
-                | WorldObject.Type.Warp (worldId, toPoint) ->
+                | WorldObject.Type.Warp wd ->
                     // Add the warp to the warps map
                     points
-                    |> List.fold (fun acc p ->
-                        acc |> Map.add p (obj.id, worldId, toPoint)
+                    |> Seq.fold (fun acc p ->
+                        acc |> Map.add p (obj.id, wd)
                     ) world.warps
                 | _ -> world.warps
 

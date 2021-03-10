@@ -27,6 +27,13 @@ module SrlAndDesrl =
             Arb.register<SerialisationArbs>() |> ignore
 
         [<Test>]
+        let boolSrl () =
+            let checkFn =
+                srlAndDesrl BoolSrl.serialise BoolSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let intSrl () =
             let checkFn =
                 srlAndDesrl IntSrl.serialise IntSrl.deserialise
@@ -37,6 +44,15 @@ module SrlAndDesrl =
         let stringSrl () =
             let checkFn =
                 srlAndDesrl StringSrl.serialise StringSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let optionSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (OptionSrl.serialise IntSrl.serialise)
+                    (OptionSrl.deserialise IntSrl.deserialise)
 
             doCheck checkFn
 

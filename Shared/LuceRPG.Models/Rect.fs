@@ -45,4 +45,17 @@ module Rect =
 
         inX && inY
 
+    let getPoints (rect: Model): Point seq =
+        let xs = [leftBound rect .. rightBound rect - 1]
+        let ys = [bottomBound rect .. topBound rect - 1]
+
+        let points =
+            xs
+            |> Seq.collect (fun x ->
+                ys
+                |> Seq.map (fun y -> Point.create x y)
+            )
+
+        points
+
 type Rect = Rect.Model

@@ -47,10 +47,10 @@ module World =
                     let ``points for new wall are blocked`` () =
                         let blockedPoints =
                             WorldObject.getPoints newWall.value
-                            |> List.map (fun p -> World.pointBlocked p added)
-                            |> List.filter id
+                            |> Seq.map (fun p -> World.pointBlocked p added)
+                            |> Seq.filter id
 
-                        blockedPoints.Length |> should equal 4
+                        blockedPoints |> Seq.length |> should equal 4
 
                 [<TestFixture>]
                 module ``adding a new wall to a different point with the same id`` =
@@ -179,9 +179,10 @@ module World =
             module ``adding a warp`` =
                 let toWorldId = "other-world"
                 let toPoint = Point.zero
+                let warpData = WorldObject.WarpData.create toWorldId toPoint
                 let btmLeft = Point.create 5 4
                 let warp =
-                    WorldObject.create (WorldObject.Type.Warp (toWorldId, toPoint)) btmLeft Direction.South
+                    WorldObject.create (WorldObject.Type.Warp warpData) btmLeft Direction.South
                     |> TestUtil.withId
 
                 let added = World.addObject warp emptyWorld
@@ -196,20 +197,20 @@ module World =
                     let expectedPoints = WorldObject.getPoints warp.value
 
                     expectedPoints
-                    |> List.forall (fun p ->
+                    |> Seq.forall (fun p ->
                         added.warps |> Map.containsKey p
                         &&
                             added.warps
                             |> Map.find p
-                            |> fun (woId, wId, p) -> woId = warp.id
+                            |> fun (woId, wd) -> woId = warp.id
                     )
                     |> should equal true
 
                     added.warps
                     |> Map.find btmLeft
-                    |> fun (woId, wId, p) ->
-                        wId |> should equal toWorldId
-                        p |> should equal toPoint
+                    |> fun (woId, wd) ->
+                        wd.toWorld |> should equal toWorldId
+                        wd.toPoint |> should equal toPoint
 
                 [<TestFixture>]
                 module ``when the warp overlaps a player`` =
@@ -223,12 +224,11 @@ module World =
 
                     [<Test>]
                     let ``getWarps returns correct warp`` () =
-                        let gotWarp = World.getWarp player.id withPlayer
-                        gotWarp.IsSome |> should equal true
+                        let tWarpData = World.getWarp player.id withPlayer
+                        tWarpData.IsSome |> should equal true
 
-                        let (gotWorldId, gotToPoint) = gotWarp.Value
-                        gotWorldId |> should equal toWorldId
-                        gotToPoint |> should equal toPoint
+                        tWarpData.Value.toWorld |> should equal toWorldId
+                        tWarpData.Value.toPoint |> should equal toPoint
 
                 [<TestFixture>]
                 module ``removing the warp`` =
@@ -237,6 +237,21 @@ module World =
                     [<Test>]
                     let ``updates the warps map correctly`` () =
                         removed.warps |> Map.isEmpty |> should equal true
+
+            [<TestFixture>]
+            module ``adding an inn`` =
+                let btmLeft = Point.create 2 0
+                let warpData = WorldObject.WarpData.create "toWorld" Point.zero |> Option.Some
+                let inn =
+                    WorldObject.create (WorldObject.Type.Inn warpData) btmLeft Direction.South
+                    |> TestUtil.withId
+
+                let added = World.addObject inn emptyWorld
+
+                [<Test>]
+                let ``inn is added`` () =
+                    added.objects |> Map.containsKey inn.id |> should equal true
+                    added.objects |> Map.find inn.id |> should equal inn
 
         [<TestFixture>]
         module ``for a world made of two rects`` =

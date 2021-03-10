@@ -111,9 +111,9 @@ module IntentionProcessing =
                                     // Check if the object is now on a warp
                                     let tWarp = World.getWarp id newWorld.value
                                     match tWarp with
-                                    | Option.Some (worldId, toPoint) ->
+                                    | Option.Some warpData ->
                                         let intention =
-                                            Intention.Warp (worldId, toPoint, id)
+                                            Intention.Warp (warpData.toWorld, warpData.toPoint, id)
                                             |> Intention.makePayload clientId
                                             |> WithId.useId intention.id
                                             |> WithTimestamp.create timestamp
