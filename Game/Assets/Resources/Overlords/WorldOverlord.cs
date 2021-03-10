@@ -189,7 +189,7 @@ namespace LuceRPG.Game.Overlords
                 var tName = WorldObjectModule.getName(obj.value);
                 if (tName.HasValue())
                 {
-                    var unitNameLocation = obj.GetCenterLocation() + Vector3.up;
+                    var unitNameLocation = obj.GetCenterLocation() + 1.8f * Vector3.up;
                     var unitNameGo = Instantiate(UnitNamePrefab, unitNameLocation, Quaternion.identity, WorldTextCanvas.transform);
                     var unitName = unitNameGo.GetComponent<UnitNameController>();
                     unitName.SetFollow(tName.Value, uc);

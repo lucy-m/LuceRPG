@@ -3,6 +3,8 @@
 module WorldObject =
 
     module WarpData =
+        type Appearance = Default | Door
+
         type Model =
             {
                 toWorld: Id.World
@@ -57,16 +59,13 @@ module WorldObject =
         | Type.Inn _ -> true
 
     let size (obj: Payload): Point =
-        let p1x1 = Point.create 1 1
-        let p2x2 = Point.create 2 2
-
         match obj.t with
-        | Type.Wall -> p2x2
+        | Type.Wall -> Point.p2x2
         | Type.Path (w,h) -> Point.create w h
-        | Type.Player _ -> p2x2
-        | Type.NPC _ -> p2x2
-        | Type.Warp _ -> p2x2
-        | Type.Tree -> p1x1
+        | Type.Player _ -> Point.p2x1
+        | Type.NPC _ -> Point.p2x1
+        | Type.Warp _ -> Point.p2x2
+        | Type.Tree -> Point.p1x1
         | Type.Inn _ -> Point.create 6 8
 
     let getPoints (obj: Payload): Point seq =
