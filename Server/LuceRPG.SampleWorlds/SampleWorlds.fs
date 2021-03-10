@@ -11,7 +11,7 @@ module SampleWorlds =
         let bounds =
             [
                 Rect.create 0 0 44 8
-                Rect.create 4 8 8 8
+                Rect.create 4 8 16 10
                 Rect.create -6 0 6 11
             ]
 
@@ -55,12 +55,22 @@ module SampleWorlds =
                     "Garry"
 
             let t = WorldObject.Type.NPC charData
+
             WorldObject.create t (Point.create 20 4) Direction.South
             |> WithId.create
 
         let warp =
-            let t = WorldObject.Type.Warp (world2Id, Point.zero)
-            WorldObject.create t (Point.create -4 8) Direction.South
+            let warpData = WorldObject.WarpData.create world2Id Point.zero
+            
+            WorldObject.Type.Warp warpData
+            |> fun t -> WorldObject.create t (Point.create -4 8) Direction.South
+            |> WithId.create
+
+        let inn =
+            let warpData = WorldObject.WarpData.create world2Id Point.zero |> Option.Some
+            
+            WorldObject.Type.Inn warpData
+            |> fun t -> WorldObject.create t (Point.create 12 8) Direction.South
             |> WithId.create
 
         let walls =
@@ -98,7 +108,7 @@ module SampleWorlds =
         let allObjects =
             List.concat
                 [
-                    [ harry; barry; garry; warp ]
+                    [ harry; barry; garry; warp; inn ]
                     walls
                     trees
                 ]
@@ -127,7 +137,8 @@ module SampleWorlds =
             |> WithId.create
 
         let warp =
-            let t = WorldObject.Type.Warp (world1Id, Point.create -4 6)
+            let warpData = WorldObject.WarpData.create world1Id (Point.create -4 6)
+            let t = WorldObject.Type.Warp warpData
             WorldObject.create t (Point.create 1 6) Direction.South
             |> WithId.create
 

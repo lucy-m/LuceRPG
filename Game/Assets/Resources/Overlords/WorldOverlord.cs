@@ -18,6 +18,8 @@ namespace LuceRPG.Game.Overlords
         public GameObject NpcPrefab = null;
         public GameObject WarpPrefab = null;
         public GameObject TreePrefab = null;
+        public GameObject InnPrefab = null;
+
         public BackgroundController BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
         public GameObject UnitNamePrefab = null;
@@ -68,6 +70,10 @@ namespace LuceRPG.Game.Overlords
             else if (t.IsTree)
             {
                 return TreePrefab;
+            }
+            else if (t.IsInn)
+            {
+                return InnPrefab;
             }
 
             Debug.Log($"Unknown object type {t.Tag}");
