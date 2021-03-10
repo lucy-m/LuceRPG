@@ -253,6 +253,14 @@ module World =
                     added.objects |> Map.containsKey inn.id |> should equal true
                     added.objects |> Map.find inn.id |> should equal inn
 
+                [<Test>]
+                let ``warp is added`` () =
+                    let warpPos = Point.create 5 1
+                    let warpAtPos = added.warps |> Map.tryFind warpPos
+
+                    warpAtPos.IsSome |> should equal true
+                    warpAtPos.Value |> snd |> should equal warpData.Value
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =

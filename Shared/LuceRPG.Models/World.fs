@@ -158,47 +158,74 @@ module World =
     /// An object with the same id that already exists will be removed
     /// Blocking objects can be placed on top of non-blocking objects
     let addObject (obj: WorldObject) (world: Payload): Payload =
-        let existingIdRemoved = removeObject obj.id world
+        let rec addObjectInner
+                (objs: WorldObject List)
+                (world: Payload)
+                : Payload =
 
-        let canPlaceObject = canPlace obj existingIdRemoved
+            match objs with
+            | [] -> world
+            | obj::rem ->
+                let existingIdRemoved = removeObject obj.id world
 
-        let points = WorldObject.getPoints obj.value
+                let canPlaceObject = canPlace obj existingIdRemoved
 
-        if not canPlaceObject
-        then existingIdRemoved
-        else
-            let isBlocking = WorldObject.isBlocking obj.value
+                let points = WorldObject.getPoints obj.value
 
-            let blocked =
-                if isBlocking
-                then
-                    // add all points to blocking map
-                    points
-                    |> Seq.fold
-                        (fun acc p -> Map.add p (BlockedType.Object obj) acc)
-                        existingIdRemoved.blocked
+                if not canPlaceObject
+                then existingIdRemoved
                 else
-                    existingIdRemoved.blocked
+                    let isBlocking = WorldObject.isBlocking obj.value
 
-            let objects =
-                Map.add obj.id obj existingIdRemoved.objects
+                    let blocked =
+                        if isBlocking
+                        then
+                            // add all points to blocking map
+                            points
+                            |> Seq.fold
+                                (fun acc p -> Map.add p (BlockedType.Object obj) acc)
+                                existingIdRemoved.blocked
+                        else
+                            existingIdRemoved.blocked
 
-            let warps =
-                match obj.value.t with
-                | WorldObject.Type.Warp wd ->
-                    // Add the warp to the warps map
-                    points
-                    |> Seq.fold (fun acc p ->
-                        acc |> Map.add p (obj.id, wd)
-                    ) world.warps
-                | _ -> world.warps
+                    let objects =
+                        Map.add obj.id obj existingIdRemoved.objects
 
-            {
-                world with
-                    blocked = blocked
-                    objects = objects
-                    warps = warps
-            }
+                    let warps =
+                        match obj.value.t with
+                        | WorldObject.Type.Warp wd ->
+                            // Add the warp to the warps map
+                            points
+                            |> Seq.fold (fun acc p ->
+                                acc |> Map.add p (obj.id, wd)
+                            ) world.warps
+                        | _ -> world.warps
+
+                    let remaining =
+                        match obj.value.t with
+                        | WorldObject.Type.Inn tWd ->
+                            match tWd with
+                            | Option.None -> rem
+                            | Option.Some wd ->
+                                let warpLocation = Point.add obj.value.btmLeft (Point.create 3 1)
+                                let warpId = obj.id + "-warp"
+                                let warp =
+                                    WorldObject.create (WorldObject.Type.Warp wd) warpLocation Direction.South
+                                    |> WithId.useId warpId
+                                warp :: rem
+                        | _ -> rem
+
+                    let newWorld =
+                        {
+                            world with
+                                blocked = blocked
+                                objects = objects
+                                warps = warps
+                        }
+
+                    addObjectInner remaining newWorld
+
+        addObjectInner [obj] world
 
     /// Adds many objects
     /// Blocking objects will be added first
