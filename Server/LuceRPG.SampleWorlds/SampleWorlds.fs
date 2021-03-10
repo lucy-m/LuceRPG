@@ -11,7 +11,7 @@ module SampleWorlds =
         let bounds =
             [
                 Rect.create 0 0 44 8
-                Rect.create 4 8 16 10
+                Rect.create 4 8 24 10
                 Rect.create -6 0 6 11
             ]
 
@@ -73,6 +73,11 @@ module SampleWorlds =
             |> fun t -> WorldObject.create t (Point.create 12 8) Direction.South
             |> WithId.create
 
+        let nonInteractiveInn =
+            WorldObject.Type.Inn Option.None
+            |> fun t -> WorldObject.create t (Point.create 19 8) Direction.South
+            |> WithId.create
+
         let walls =
             [
                 WorldObject.create WorldObject.Type.Wall (Point.create 2 2)
@@ -108,7 +113,7 @@ module SampleWorlds =
         let allObjects =
             List.concat
                 [
-                    [ harry; barry; garry; warp; inn ]
+                    [ harry; barry; garry; warp; inn; nonInteractiveInn ]
                     walls
                     trees
                 ]
