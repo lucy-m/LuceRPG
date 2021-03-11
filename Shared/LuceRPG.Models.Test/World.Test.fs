@@ -13,7 +13,7 @@ module World =
         module ``for a rect world`` =
             let bounds = Rect.create 0 0 10 8
             let spawnPoint = Point.create 0 4
-            let emptyWorld = World.empty "test-world" [bounds] spawnPoint
+            let emptyWorld = World.empty "test-world" [bounds] spawnPoint WorldBackground.GreenGrass
 
             [<TestFixture>]
             module ``with a wall`` =
@@ -268,7 +268,7 @@ module World =
                     Rect.create 0 0 5 2
                     Rect.create 3 -4 4 4
                 ]
-            let emptyWorld = World.empty "two-rects" bounds (Point.create 0 2)
+            let emptyWorld = World.empty "two-rects" bounds (Point.create 0 2) WorldBackground.GreenGrass
 
             [<Test>]
             let ``wall can be placed in first rect`` () =

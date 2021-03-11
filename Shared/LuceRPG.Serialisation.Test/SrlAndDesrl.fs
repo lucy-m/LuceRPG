@@ -114,6 +114,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let colourSrl () =
+            let checkFn =
+                srlAndDesrl ColourSrl.serialise ColourSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let characterData () =
             let checkFn =
                 srlAndDesrl CharacterDataSrl.serialise CharacterDataSrl.deserialise
@@ -159,6 +166,13 @@ module SrlAndDesrl =
         let worldEventSrl () =
             let checkFn =
                 srlAndDesrl WorldEventSrl.serialise WorldEventSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let worldBackgroundSrl () =
+            let checkFn =
+                srlAndDesrl WorldBackgroundSrl.serialise WorldBackgroundSrl.deserialise
 
             doCheck checkFn
 

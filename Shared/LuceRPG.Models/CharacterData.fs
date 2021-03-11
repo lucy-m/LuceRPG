@@ -6,8 +6,6 @@ module CharacterData =
         | Long
         | Egg
 
-    type Colour = byte * byte * byte
-
     module HairColour =
         let banana: Colour = (255uy, 232uy, 117uy)
         let cocoa85: Colour = (59uy, 37uy, 19uy)

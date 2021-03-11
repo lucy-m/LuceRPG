@@ -11,11 +11,13 @@
     <Compile Include="Point.fs" />
     <Compile Include="Rect.fs" />
     <Compile Include="Direction.fs" />
+    <Compile Include="Colour.fs" />
     <Compile Include="CharacterData.fs" />
     <Compile Include="WorldObject.fs" />
     <Compile Include="Intention.fs" />
     <Compile Include="Interaction.fs" />
     <Compile Include="WorldEvent.fs" />
+    <Compile Include="WorldBackground.fs" />
     <Compile Include="World.fs" />
     <Compile Include="WorldDiff.fs" />
     <Compile Include="EventApply.fs" />

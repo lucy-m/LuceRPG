@@ -3,13 +3,6 @@
 open LuceRPG.Models
 
 module CharacterDataSrl =
-    let serialiseColour ((r, g, b): CharacterData.Colour): byte[] =
-        Array.concat [
-            ByteSrl.serialise r
-            ByteSrl.serialise g
-            ByteSrl.serialise b
-        ]
-
     let serialise (d: CharacterData): byte[] =
         let name = StringSrl.serialise d.name
 
@@ -21,10 +14,10 @@ module CharacterDataSrl =
 
         Array.concat [
             [|hairStyle|]
-            (serialiseColour d.hairColour)
-            (serialiseColour d.skinColour)
-            (serialiseColour d.topColour)
-            (serialiseColour d.bottomColour)
+            (ColourSrl.serialise d.hairColour)
+            (ColourSrl.serialise d.skinColour)
+            (ColourSrl.serialise d.topColour)
+            (ColourSrl.serialise d.bottomColour)
             name
         ]
 
@@ -40,21 +33,13 @@ module CharacterDataSrl =
 
         DesrlUtil.getTagged loadObj bytes
 
-    let deserialiseColour (bytes: byte[]): CharacterData.Colour DesrlResult =
-        DesrlUtil.getThree
-            ByteSrl.deserialise
-            ByteSrl.deserialise
-            ByteSrl.deserialise
-            (fun r g b -> (r, g, b))
-            bytes
-
     let deserialise (bytes: byte[]): CharacterData DesrlResult =
         DesrlUtil.getSix
             deserialiseHairStyle
-            deserialiseColour
-            deserialiseColour
-            deserialiseColour
-            deserialiseColour
+            ColourSrl.deserialise
+            ColourSrl.deserialise
+            ColourSrl.deserialise
+            ColourSrl.deserialise
             StringSrl.deserialise
             CharacterData.create
             bytes

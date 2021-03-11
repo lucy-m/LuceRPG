@@ -16,12 +16,17 @@ module World =
             blocked: Map<Point, BlockedType>
             warps: Map<Point, Id.WorldObject * WorldObject.WarpData>
             playerSpawner: Point
+            background: WorldBackground
         }
 
     let objectList (world: Payload): WorldObject List =
         WithId.toList world.objects
 
-    let empty (name: string) (bounds: Rect seq) (playerSpawner: Point): Payload =
+    let empty
+            (name: string)
+            (bounds: Rect seq)
+            (playerSpawner: Point)
+            (background: WorldBackground): Payload =
         let blocked =
             let spawnerPoints =
                 [
@@ -44,6 +49,7 @@ module World =
             blocked = blocked
             warps = Map.empty
             playerSpawner = playerSpawner
+            background = background
         }
 
     let pointBlocked (p: Point) (world: Payload): bool =
@@ -258,20 +264,22 @@ module World =
             (name: string)
             (bounds: Rect seq)
             (spawn: Point)
+            (background: WorldBackground)
             (objs: WorldObject seq)
             : Payload =
 
-        let emptyWorld = empty name bounds spawn
+        let emptyWorld = empty name bounds spawn background
         addObjects objs emptyWorld
 
     let createWithInteractions
             (name: string)
             (bounds: Rect seq)
             (spawn: Point)
+            (background: WorldBackground)
             (objs: WorldObject seq)
             (interactions: Map<Id.WorldObject, Id.Interaction>)
             : Payload =
-        let emptyWorld = empty name bounds spawn
+        let emptyWorld = empty name bounds spawn background
         let withObjects = addObjects objs emptyWorld
         setInteractions interactions withObjects
 

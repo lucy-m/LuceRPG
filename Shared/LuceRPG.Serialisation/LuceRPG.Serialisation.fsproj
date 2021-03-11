@@ -21,11 +21,13 @@
     <Compile Include="PointSrl.fs" />
     <Compile Include="RectSrl.fs" />
     <Compile Include="DirectionSrl.fs" />
+    <Compile Include="ColourSrl.fs" />
     <Compile Include="CharacterDataSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
     <Compile Include="InteractionSrl.fs" />
     <Compile Include="WorldEventSrl.fs" />
+    <Compile Include="WorldBackgroundSrl.fs" />
     <Compile Include="WorldSrl.fs" />
     <Compile Include="WorldDiffSrl.fs" />
     <Compile Include="GetSinceResultSrl.fs" />
