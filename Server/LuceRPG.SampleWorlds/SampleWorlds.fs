@@ -59,16 +59,9 @@ module SampleWorlds =
             WorldObject.create t (Point.create 20 4) Direction.South
             |> WithId.create
 
-        let warp =
-            let warpData = WorldObject.WarpData.create world2Id Point.zero
-            
-            WorldObject.Type.Warp warpData
-            |> fun t -> WorldObject.create t (Point.create -4 8) Direction.South
-            |> WithId.create
-
         let inn =
-            let warpData = WorldObject.WarpData.create world2Id Point.zero |> Option.Some
-            
+            let warpData = WorldObject.WarpData.create world2Id (Point.create 5 0) |> Option.Some
+
             WorldObject.Type.Inn warpData
             |> fun t -> WorldObject.create t (Point.create 12 8) Direction.South
             |> WithId.create
@@ -113,7 +106,7 @@ module SampleWorlds =
         let allObjects =
             List.concat
                 [
-                    [ harry; barry; garry; warp; inn; nonInteractiveInn ]
+                    [ harry; barry; garry; inn; nonInteractiveInn ]
                     walls
                     trees
                 ]
@@ -123,6 +116,7 @@ module SampleWorlds =
                 "sampleville"
                 bounds
                 spawnPoint
+                WorldBackground.GreenGrass
                 allObjects
                 interactionMap
             |> WithId.useId world1Id
@@ -132,7 +126,7 @@ module SampleWorlds =
         (world, interactions)
 
     let world2: (World * Interactions) =
-        let bounds = [ Rect.create 0 0 8 8 ]
+        let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -2 2 2 ]
         let spawnPoint = Point.create 4 0
 
         let npc =
@@ -142,9 +136,9 @@ module SampleWorlds =
             |> WithId.create
 
         let warp =
-            let warpData = WorldObject.WarpData.create world1Id (Point.create -4 6)
+            let warpData = WorldObject.WarpData.create world1Id (Point.create 15 8)
             let t = WorldObject.Type.Warp warpData
-            WorldObject.create t (Point.create 1 6) Direction.South
+            WorldObject.create t (Point.create 5 -2) Direction.South
             |> WithId.create
 
         let sayHiInteraction: Interaction =
@@ -160,6 +154,7 @@ module SampleWorlds =
                 "world2"
                 bounds
                 spawnPoint
+                WorldBackground.BrownPlanks
                 [warp; npc]
                 interactionMap
                 |> WithId.useId world2Id

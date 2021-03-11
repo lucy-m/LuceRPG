@@ -127,3 +127,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpriteRenderer: {fileID: 8901204032159255350}
+  GrassSprite: {fileID: 21300000, guid: 8cfd4fb0955bebd498d2a0a3a7311ff7, type: 3}
+  PlanksSprite: {fileID: 21300000, guid: 338db6f9aeef14f4289c09e6d7ee8c14, type: 3}

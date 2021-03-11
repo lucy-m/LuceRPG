@@ -94,6 +94,7 @@ namespace LuceRPG.Game.Overlords
                 {
                     var bc = Instantiate(BackgroundPrefab, bound.btmLeft.ToVector3(), Quaternion.identity);
                     bc.Rect = bound;
+                    bc.Bg = world.background;
                 }
 
                 var objectCount = world.objects.Count;
