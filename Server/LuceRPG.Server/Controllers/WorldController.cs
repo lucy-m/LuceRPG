@@ -50,7 +50,7 @@ namespace LuceRPGServer.Controllers
         }
 
         [HttpGet("join")]
-        public ActionResult JoinGame(string username, string password)
+        public ActionResult JoinGame(string username, string? password)
         {
             if (!_credentialService.IsValid(username, password))
             {
