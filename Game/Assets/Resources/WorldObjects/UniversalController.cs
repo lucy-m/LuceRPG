@@ -60,6 +60,17 @@ namespace LuceRPG.Game.WorldObjects
             var travelTime = model == null ? 0 :
                 (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
+
+            if (model.t.IsWarp)
+            {
+                var warp = model.t as WorldObjectModule.TypeModule.Model.Warp;
+                var wac = GetComponent<WarpAppearanceController>();
+                if (wac != null)
+                {
+                    Debug.Log("Setting item direction");
+                    wac.Appearance = warp.Item.appearance;
+                }
+            }
         }
 
         private void Awake()

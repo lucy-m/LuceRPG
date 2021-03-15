@@ -1167,8 +1167,11 @@ MonoBehaviour:
   EastSprite: {fileID: 2301807051625995165}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &3750225472097473205
 GameObject:
@@ -1220,8 +1223,11 @@ MonoBehaviour:
   EastSprite: {fileID: 1345926894647965902}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 0
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &4281915105713666845
 GameObject:
@@ -1291,8 +1297,11 @@ MonoBehaviour:
   EastSprite: {fileID: 6632940614852024847}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &4376630431512191311
 GameObject:
@@ -1690,8 +1699,11 @@ MonoBehaviour:
   EastSprite: {fileID: 3065369301831661388}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &6197562227287635422
 GameObject:
@@ -2054,8 +2066,11 @@ MonoBehaviour:
   EastSprite: {fileID: 184049269687278443}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!114 &4900491611418002535
 MonoBehaviour:
@@ -2420,8 +2435,11 @@ MonoBehaviour:
   EastSprite: {fileID: 570855293764776210}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &8119852566438528062
 GameObject:
@@ -2573,8 +2591,11 @@ MonoBehaviour:
   EastSprite: {fileID: 1937322401511949198}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1
 --- !u!1 &8997130534602503203
 GameObject:
@@ -2644,6 +2665,9 @@ MonoBehaviour:
   EastSprite: {fileID: 7362886433497053290}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 1
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
+  SpriteHeight: 0
+  SpriteWidth: 2
   _testDirection: 1

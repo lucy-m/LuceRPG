@@ -17,6 +17,20 @@ module SampleWorlds =
 
         let spawnPoint = Point.create 2 5
 
+        let testWarps =
+            let makeWarp (pos: Point) (direction: Direction)=
+                Warp.create (Warp.createTarget "" Point.zero) Warp.Appearance.Mat
+                |> WorldObject.Type.Warp
+                |> fun t -> WorldObject.create t pos direction
+                |> WithId.create
+
+            [
+                makeWarp (Point.create -4 3) Direction.South
+                makeWarp (Point.create -5 4) Direction.West
+                makeWarp (Point.create -2 4) Direction.East
+                makeWarp (Point.create -4 6) Direction.North
+            ]
+
         let harry =
             let charData =
                 CharacterData.create
@@ -109,6 +123,7 @@ module SampleWorlds =
                     [ harry; barry; garry; inn; nonInteractiveInn ]
                     walls
                     trees
+                    testWarps
                 ]
 
         let world =
@@ -126,7 +141,7 @@ module SampleWorlds =
         (world, interactions)
 
     let world2: (World * Interactions) =
-        let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -2 2 2 ]
+        let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
         let spawnPoint = Point.create 4 0
 
         let npc =
@@ -140,7 +155,7 @@ module SampleWorlds =
 
             Warp.create target Warp.Appearance.Mat
             |> WorldObject.Type.Warp
-            |> fun t -> WorldObject.create t (Point.create 5 -2) Direction.South
+            |> fun t -> WorldObject.create t (Point.create 5 -1) Direction.South
             |> WithId.create
 
         let sayHiInteraction: Interaction =

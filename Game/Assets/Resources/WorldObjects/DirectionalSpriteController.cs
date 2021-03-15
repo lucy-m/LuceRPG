@@ -13,9 +13,13 @@ public class DirectionalSpriteController : MonoBehaviour
     public GameObject WestSprite;
 
     public bool NorthUseSouthXFlipped = false;
+    public bool NorthUseSouthYFlipped = false;
     public bool NorthUseSouthZFlipped = false;
 
     public bool WestUseEastFlipped = false;
+
+    public float SpriteHeight = 0.0f;
+    public float SpriteWidth = 0.0f;
 
     private Dictionary<DirectionModule.Model, GameObject> _sprites;
 
@@ -34,7 +38,7 @@ public class DirectionalSpriteController : MonoBehaviour
             {
                 _direction = value;
                 _testDirection = value.ToInput();
-                SetSprites(); 
+                SetSprites();
             }
         }
     }
@@ -78,19 +82,22 @@ public class DirectionalSpriteController : MonoBehaviour
             matchingSprite.SetActive(true);
         }
 
-        if (NorthUseSouthXFlipped)
+        if (NorthUseSouthXFlipped || NorthUseSouthZFlipped || NorthUseSouthYFlipped)
         {
             if (_direction.IsNorth && SouthSprite != null)
             {
-                var xPos = NorthUseSouthXFlipped ? 2 : 0;
+                var xPos = NorthUseSouthXFlipped ? SpriteWidth : 0;
                 var xScale = NorthUseSouthXFlipped ? -1 : 1;
+
+                var yPos = NorthUseSouthYFlipped ? SpriteHeight : 0;
+                var yScale = NorthUseSouthYFlipped ? -1 : 1;
 
                 var zPos = NorthUseSouthZFlipped ? 1 : 0;
                 var zScale = NorthUseSouthZFlipped ? -1 : 1;
 
                 SouthSprite.SetActive(true);
-                transform.localPosition = new Vector3(xPos, 0, zPos);
-                transform.localScale = new Vector3(xScale, 1, zScale);
+                transform.localPosition = new Vector3(xPos, yPos, zPos);
+                transform.localScale = new Vector3(xScale, yScale, zScale);
             }
         }
 
@@ -99,7 +106,7 @@ public class DirectionalSpriteController : MonoBehaviour
             if (_direction.IsWest && EastSprite != null)
             {
                 EastSprite.SetActive(true);
-                transform.localPosition = new Vector3(2, 0, 0);
+                transform.localPosition = new Vector3(SpriteWidth, 0, 0);
                 transform.localScale = new Vector3(-1, 1, 1);
             }
         }
