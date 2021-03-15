@@ -67,8 +67,17 @@ namespace LuceRPG.Game.WorldObjects
                 var wac = GetComponent<WarpAppearanceController>();
                 if (wac != null)
                 {
-                    Debug.Log("Setting item direction");
                     wac.Appearance = warp.Item.appearance;
+                }
+            }
+            else if (model.t.IsFlower)
+            {
+                var flower = (model.t as WorldObjectModule.TypeModule.Model.Flower).Item;
+                var fac = GetComponent<FlowerAppearanceController>();
+                if (fac != null)
+                {
+                    Debug.Log("Setting flower appearance");
+                    fac.Model = flower;
                 }
             }
         }

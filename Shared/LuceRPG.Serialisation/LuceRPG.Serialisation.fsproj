@@ -24,6 +24,7 @@
     <Compile Include="ColourSrl.fs" />
     <Compile Include="CharacterDataSrl.fs" />
     <Compile Include="WarpSrl.fs" />
+    <Compile Include="FlowerSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
     <Compile Include="InteractionSrl.fs" />

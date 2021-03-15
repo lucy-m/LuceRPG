@@ -11,6 +11,7 @@ module WorldObject =
             | Warp of Warp
             | Tree
             | Inn of Warp.Target Option
+            | Flower of Flower
 
     type Type = Type.Model
 
@@ -40,6 +41,7 @@ module WorldObject =
         | Type.Warp _ -> false
         | Type.Tree -> true
         | Type.Inn _ -> true
+        | Type.Flower _ -> false
 
     let size (obj: Payload): Point =
         match obj.t with
@@ -50,6 +52,7 @@ module WorldObject =
         | Type.Warp w -> Warp.size w obj.facing
         | Type.Tree -> Point.p1x1
         | Type.Inn _ -> Point.create 6 8
+        | Type.Flower _ -> Point.p1x1
 
     let getPoints (obj: Payload): Point seq =
         match obj.t with

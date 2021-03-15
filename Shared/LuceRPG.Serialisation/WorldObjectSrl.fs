@@ -13,6 +13,7 @@ module WorldObjectSrl =
             | WorldObject.Type.Warp _ -> 5uy
             | WorldObject.Type.Tree -> 6uy
             | WorldObject.Type.Inn _ -> 7uy
+            | WorldObject.Type.Flower _ -> 8uy
 
         let addtInfo =
             match t with
@@ -27,6 +28,7 @@ module WorldObjectSrl =
                 OptionSrl.serialise
                     WarpSrl.serialiseTarget
                     doorWarp
+            | WorldObject.Type.Flower f -> FlowerSrl.serialise f
 
         Array.append [|label|] addtInfo
 
@@ -55,6 +57,9 @@ module WorldObjectSrl =
                     WarpSrl.deserialiseTarget
                     objectBytes
                 |> DesrlResult.map WorldObject.Type.Inn
+            | 8uy ->
+                FlowerSrl.deserialise objectBytes
+                |> DesrlResult.map WorldObject.Type.Flower
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None

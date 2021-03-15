@@ -13,6 +13,7 @@ module SampleWorlds =
                 Rect.create 0 0 44 8
                 Rect.create 4 8 24 10
                 Rect.create -6 0 6 11
+                Rect.create 2 -9 13 9
             ]
 
         let spawnPoint = Point.create 2 5
@@ -109,6 +110,19 @@ module SampleWorlds =
                 WithId.create (wo  Direction.South)
             )
 
+        let flowers =
+            let rect = Rect.create 2 -9 13 8
+            let points = Rect.getPoints rect
+
+            points
+            |> Seq.map (fun p ->
+                Flower.randomized()
+                |> WorldObject.Type.Flower
+                |> fun t -> WorldObject.create t p Direction.South
+                |> WithId.create
+            )
+            |> List.ofSeq
+
         let sayHiInteraction: Interaction =
             let sayHi = Interaction.One.Chat "Hey you, you're finally awake. Welcome to LuceRPG pre-alpha dev preview. Enjoy your stay, {player}!"
             let payload = [sayHi]
@@ -124,6 +138,7 @@ module SampleWorlds =
                     walls
                     trees
                     testWarps
+                    flowers
                 ]
 
         let world =

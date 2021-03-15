@@ -135,6 +135,13 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
+        let flowerSrl () =
+            let checkFn =
+                srlAndDesrl FlowerSrl.serialise FlowerSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let worldObjectTypeSrl () =
             let checkFn =
                 srlAndDesrl WorldObjectSrl.serialiseType WorldObjectSrl.deserialiseType
