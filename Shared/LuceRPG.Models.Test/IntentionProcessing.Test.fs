@@ -382,7 +382,7 @@ module IntentionProcessing =
             let player = TestUtil.makePlayer (Point.create 1 1)
             let toWorld = "to-world-id"
             let toPoint = Point.zero
-            let warpData = WorldObject.WarpData.create toWorld toPoint
+            let warpData = Warp.create (Warp.createTarget toWorld toPoint) Warp.Appearance.Door
             let warp =
                 WorldObject.create
                     (WorldObject.Type.Warp warpData)

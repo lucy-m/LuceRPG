@@ -2,32 +2,15 @@
 
 module WorldObject =
 
-    module WarpData =
-        type Appearance = Default | Door
-
-        type Model =
-            {
-                toWorld: Id.World
-                toPoint: Point
-            }
-
-        let create (toWorld: Id.World) (toPoint: Point): Model =
-            {
-                toWorld = toWorld
-                toPoint = toPoint
-            }
-
-    type WarpData = WarpData.Model
-
     module Type =
         type Model =
             | Wall
             | Path of int * int
             | Player of CharacterData
             | NPC of CharacterData
-            | Warp of WarpData
+            | Warp of Warp
             | Tree
-            | Inn of WarpData Option
+            | Inn of Warp.Target Option
 
     type Type = Type.Model
 
@@ -64,7 +47,7 @@ module WorldObject =
         | Type.Path (w,h) -> Point.create w h
         | Type.Player _ -> Point.p2x1
         | Type.NPC _ -> Point.p2x1
-        | Type.Warp _ -> Point.p2x2
+        | Type.Warp w -> Warp.size w obj.facing
         | Type.Tree -> Point.p1x1
         | Type.Inn _ -> Point.create 6 8
 

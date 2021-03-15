@@ -47,12 +47,37 @@ module WorldObject =
                 points |> should be (equivalent expected)
 
         [<TestFixture>]
+        module ``warp`` =
+            [<Test>]
+            let ``door warp has correct size`` () =
+                let warp =
+                    Warp.create (Warp.createTarget "" Point.zero) Warp.Appearance.Door
+                    |> WorldObject.Type.Warp
+                    |> fun t -> WorldObject.create t Point.zero Direction.South
+
+                let size = WorldObject.size warp
+
+                size |> should equal Point.p2x2
+
+            [<Test>]
+            let ``mat has correct size`` () =
+                let mkWarp =
+                    Warp.create (Warp.createTarget "" Point.zero) Warp.Appearance.Mat
+                    |> WorldObject.Type.Warp
+                    |> fun t -> WorldObject.create t Point.zero
+
+                mkWarp Direction.South |> WorldObject.size |> should equal Point.p2x1
+                mkWarp Direction.North |> WorldObject.size |> should equal Point.p2x1
+                mkWarp Direction.West |> WorldObject.size |> should equal Point.p1x2
+                mkWarp Direction.East |> WorldObject.size |> should equal Point.p1x2
+
+        [<TestFixture>]
         module ``inn`` =
 
             [<Test>]
             let ``with door has correct points`` () =
                 let btmLeft = Point.create 4 3
-                let warpData = Option.Some (WorldObject.WarpData.create "" Point.zero)
+                let warpData = Option.Some (Warp.createTarget "" Point.zero)
                 let obj = WorldObject.create (WorldObject.Type.Inn warpData) btmLeft Direction.South
                 let points = WorldObject.getPoints obj |> Set.ofSeq
 

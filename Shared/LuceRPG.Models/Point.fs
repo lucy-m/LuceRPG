@@ -23,5 +23,6 @@ module Point =
     let p1x1 = create 1 1
     let p2x2 = create 2 2
     let p2x1 = create 2 1
+    let p1x2 = create 1 2
 
 type Point = Point.Model

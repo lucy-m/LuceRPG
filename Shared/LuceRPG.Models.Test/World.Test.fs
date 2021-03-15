@@ -179,7 +179,7 @@ module World =
             module ``adding a warp`` =
                 let toWorldId = "other-world"
                 let toPoint = Point.zero
-                let warpData = WorldObject.WarpData.create toWorldId toPoint
+                let warpData = Warp.create (Warp.createTarget toWorldId toPoint) Warp.Appearance.Door
                 let btmLeft = Point.create 5 4
                 let warp =
                     WorldObject.create (WorldObject.Type.Warp warpData) btmLeft Direction.South
@@ -241,7 +241,7 @@ module World =
             [<TestFixture>]
             module ``adding an inn`` =
                 let btmLeft = Point.create 2 0
-                let warpData = WorldObject.WarpData.create "toWorld" Point.zero |> Option.Some
+                let warpData = Warp.createTarget "toWorld" Point.zero |> Option.Some
                 let inn =
                     WorldObject.create (WorldObject.Type.Inn warpData) btmLeft Direction.South
                     |> TestUtil.withId

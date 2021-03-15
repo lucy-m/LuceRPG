@@ -60,7 +60,7 @@ module SampleWorlds =
             |> WithId.create
 
         let inn =
-            let warpData = WorldObject.WarpData.create world2Id (Point.create 5 0) |> Option.Some
+            let warpData = Warp.createTarget world2Id (Point.create 5 0) |> Option.Some
 
             WorldObject.Type.Inn warpData
             |> fun t -> WorldObject.create t (Point.create 12 8) Direction.South
@@ -136,9 +136,11 @@ module SampleWorlds =
             |> WithId.create
 
         let warp =
-            let warpData = WorldObject.WarpData.create world1Id (Point.create 15 8)
-            let t = WorldObject.Type.Warp warpData
-            WorldObject.create t (Point.create 5 -2) Direction.South
+            let target = Warp.createTarget world1Id (Point.create 15 8)
+
+            Warp.create target Warp.Appearance.Mat
+            |> WorldObject.Type.Warp
+            |> fun t -> WorldObject.create t (Point.create 5 -2) Direction.South
             |> WithId.create
 
         let sayHiInteraction: Interaction =

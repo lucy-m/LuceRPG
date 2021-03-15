@@ -14,7 +14,7 @@ module World =
             objects: Map<Id.WorldObject, WorldObject>
             interactions: InteractionMap
             blocked: Map<Point, BlockedType>
-            warps: Map<Point, Id.WorldObject * WorldObject.WarpData>
+            warps: Map<Point, Id.WorldObject * Warp.Target>
             playerSpawner: Point
             background: WorldBackground
         }
@@ -99,7 +99,7 @@ module World =
 
         isNotBlocked && inBounds
 
-    let getWarp (id: Id.WorldObject) (world: Payload): WorldObject.WarpData Option =
+    let getWarp (id: Id.WorldObject) (world: Payload): Warp.Target Option =
         let tObject = world.objects |> Map.tryFind id
         let tPoints = tObject |> Option.map (WithId.value >> WorldObject.getPoints)
         let tWarp =
@@ -203,7 +203,7 @@ module World =
                             // Add the warp to the warps map
                             points
                             |> Seq.fold (fun acc p ->
-                                acc |> Map.add p (obj.id, wd)
+                                acc |> Map.add p (obj.id, wd.target)
                             ) world.warps
                         | _ -> world.warps
 
@@ -216,7 +216,9 @@ module World =
                                 let warpLocation = Point.add obj.value.btmLeft (Point.create 3 1)
                                 let warpId = obj.id + "-warp"
                                 let warp =
-                                    WorldObject.create (WorldObject.Type.Warp wd) warpLocation Direction.South
+                                    Warp.create wd Warp.Appearance.Door
+                                    |> WorldObject.Type.Warp
+                                    |> fun t -> WorldObject.create t warpLocation Direction.South
                                     |> WithId.useId warpId
                                 warp :: rem
                         | _ -> rem

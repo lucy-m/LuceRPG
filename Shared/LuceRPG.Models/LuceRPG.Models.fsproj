@@ -13,6 +13,7 @@
     <Compile Include="Direction.fs" />
     <Compile Include="Colour.fs" />
     <Compile Include="CharacterData.fs" />
+    <Compile Include="Warp.fs" />
     <Compile Include="WorldObject.fs" />
     <Compile Include="Intention.fs" />
     <Compile Include="Interaction.fs" />

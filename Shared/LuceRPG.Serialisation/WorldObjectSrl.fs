@@ -3,22 +3,6 @@
 open LuceRPG.Models
 
 module WorldObjectSrl =
-
-    let serialiseWarpData (wd: WorldObject.WarpData): byte[] =
-        Array.append (StringSrl.serialise wd.toWorld) (PointSrl.serialise wd.toPoint)
-
-    let deserialiseWarpData (bytes: byte[]): WorldObject.WarpData DesrlResult =
-        DesrlUtil.getTwo
-            StringSrl.deserialise
-            PointSrl.deserialise
-            (fun worldId point ->
-                {
-                    toWorld = worldId
-                    toPoint = point
-                }
-            )
-            bytes
-
     let serialiseType (t: WorldObject.Type): byte[] =
         let label =
             match t with
@@ -37,11 +21,11 @@ module WorldObjectSrl =
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
             | WorldObject.Type.Player d -> CharacterDataSrl.serialise d
             | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
-            | WorldObject.Type.Warp wd -> serialiseWarpData wd
+            | WorldObject.Type.Warp wd -> WarpSrl.serialise wd
             | WorldObject.Type.Tree -> [||]
             | WorldObject.Type.Inn doorWarp ->
                 OptionSrl.serialise
-                    serialiseWarpData
+                    WarpSrl.serialiseTarget
                     doorWarp
 
         Array.append [|label|] addtInfo
@@ -63,12 +47,12 @@ module WorldObjectSrl =
                 CharacterDataSrl.deserialise objectBytes
                 |> DesrlResult.map WorldObject.Type.NPC
             | 5uy ->
-                deserialiseWarpData objectBytes
+                WarpSrl.deserialise objectBytes
                 |> DesrlResult.map WorldObject.Type.Warp
             | 6uy -> DesrlResult.create WorldObject.Type.Tree 0
             | 7uy ->
                 OptionSrl.deserialise
-                    deserialiseWarpData
+                    WarpSrl.deserialiseTarget
                     objectBytes
                 |> DesrlResult.map WorldObject.Type.Inn
             | _ ->
