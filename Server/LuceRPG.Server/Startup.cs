@@ -27,7 +27,7 @@ namespace LuceRPGServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IntentionQueue>();
-            services.AddSingleton(SampleWorlds.collection);
+            services.AddSingleton(PrimordiaVille.collection);
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
             services.AddSingleton<ICredentialService, CredentialService>();

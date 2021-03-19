@@ -76,7 +76,6 @@ namespace LuceRPG.Game.WorldObjects
                 var fac = GetComponent<FlowerAppearanceController>();
                 if (fac != null)
                 {
-                    Debug.Log("Setting flower appearance");
                     fac.Model = flower;
                 }
             }
