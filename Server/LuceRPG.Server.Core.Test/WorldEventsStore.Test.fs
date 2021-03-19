@@ -37,7 +37,7 @@ module WorldEventsStore =
             }
 
         let events = [worldId, seq{firstEvent; secondEvent; joinedEvent}] |> Map.ofList
-        let world = World.empty "test" [] Point.zero
+        let world = World.empty "test" [] Point.zero WorldBackground.GreenGrass
         let idWorld = world |> WithId.useId worldId
         let objectBusyMap = ["obj1", 1000L; "obj2", 1200L] |> Map.ofList
         let worldMap = [worldId, idWorld] |> Map.ofList
@@ -105,7 +105,7 @@ module WorldEventsStore =
 
         [<TestFixture>]
         module ``adding a process result`` =
-            let newWorld = World.empty "test" [Rect.create 0 0 4 4] Point.zero |> WithId.useId worldId
+            let newWorld = World.empty "test" [Rect.create 0 0 4 4] Point.zero WorldBackground.GreenGrass |> WithId.useId worldId
             let newWorldMap = WithId.toMap [newWorld]
             let event = WorldEvent.Moved (objId, Direction.South) |> makeEvent
             let objectClientMap = Map.ofList ["obj1", "client1"]
@@ -176,7 +176,7 @@ module WorldEventsStore =
 
     [<TestFixture>]
     module ``culled store`` =
-        let world = World.empty "test" [] Point.zero |> WithId.useId worldId
+        let world = World.empty "test" [] Point.zero WorldBackground.GreenGrass |> WithId.useId worldId
         let worldMap = [worldId, world] |> Map.ofList
         let event: WorldEvent WithTimestamp =
             {

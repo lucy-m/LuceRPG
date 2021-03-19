@@ -157,6 +157,9 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
   NpcPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
   WarpPrefab: {fileID: 5365399715254733196, guid: a825a54bebeed7c44b8a5474e5a95ec0, type: 3}
+  TreePrefab: {fileID: 6954832426385836639, guid: 5d2b0f4c8d0649d42b982945e1d86158, type: 3}
+  InnPrefab: {fileID: 6639082945074291125, guid: 80db9a0a587461645895b58ee8273060, type: 3}
+  FlowerPrefab: {fileID: 553352091567951100, guid: faf83f751185d524cba5ab09bd0f7a7a, type: 3}
   BackgroundPrefab: {fileID: 8901204032175359068, guid: 207287b1931d5cd42ba1666f386c911f, type: 3}
   CameraPrefab: {fileID: 4397631990221490018, guid: 9a171321d98dd374a8aa309e3588b60b, type: 3}
   UnitNamePrefab: {fileID: 7693043972235348111, guid: e247afec652705246812a363826525e1, type: 3}
@@ -173,7 +176,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &149300985
 GameObject:
@@ -530,7 +533,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1726080141
 GameObject:
@@ -625,7 +628,7 @@ RectTransform:
   m_Children:
   - {fileID: 448441559}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -731,7 +734,7 @@ RectTransform:
   - {fileID: 6182008920477956223}
   - {fileID: 928318457}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

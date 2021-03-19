@@ -14,14 +14,19 @@ module World =
             objects: Map<Id.WorldObject, WorldObject>
             interactions: InteractionMap
             blocked: Map<Point, BlockedType>
-            warps: Map<Point, Id.WorldObject * Id.World * Point>
+            warps: Map<Point, Id.WorldObject * Warp.Target>
             playerSpawner: Point
+            background: WorldBackground
         }
 
     let objectList (world: Payload): WorldObject List =
         WithId.toList world.objects
 
-    let empty (name: string) (bounds: Rect seq) (playerSpawner: Point): Payload =
+    let empty
+            (name: string)
+            (bounds: Rect seq)
+            (playerSpawner: Point)
+            (background: WorldBackground): Payload =
         let blocked =
             let spawnerPoints =
                 [
@@ -44,6 +49,7 @@ module World =
             blocked = blocked
             warps = Map.empty
             playerSpawner = playerSpawner
+            background = background
         }
 
     let pointBlocked (p: Point) (world: Payload): bool =
@@ -65,8 +71,8 @@ module World =
         let points = WorldObject.getPoints obj.value
 
         points
-        |> List.map (fun p -> pointInBounds p world)
-        |> List.fold (&&) true
+        |> Seq.map (fun p -> pointInBounds p world)
+        |> Seq.fold (&&) true
 
     let containsObject (id: Id.WorldObject) (world: Payload): bool =
         world.objects
@@ -78,8 +84,8 @@ module World =
         let isNotBlocked =
             let blockedPoints =
                 points
-                |> List.choose (fun p -> getBlocker p world)
-                |> List.filter (fun b ->
+                |> Seq.choose (fun p -> getBlocker p world)
+                |> Seq.filter (fun b ->
                     match b with
                     // objects are blocked by other objects with a differing id
                     | BlockedType.Object o -> o.id <> obj.id
@@ -87,23 +93,23 @@ module World =
                     | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj.value)
                 )
 
-            blockedPoints |> List.isEmpty
+            blockedPoints |> Seq.isEmpty
 
         let inBounds = objInBounds obj world
 
         isNotBlocked && inBounds
 
-    let getWarp (id: Id.WorldObject) (world: Payload): (Id.World * Point) Option =
+    let getWarp (id: Id.WorldObject) (world: Payload): Warp.Target Option =
         let tObject = world.objects |> Map.tryFind id
         let tPoints = tObject |> Option.map (WithId.value >> WorldObject.getPoints)
         let tWarp =
             tPoints
             |> Option.bind (fun points ->
                 points
-                |> List.tryPick (fun p -> world.warps |> Map.tryFind p)
+                |> Seq.tryPick (fun p -> world.warps |> Map.tryFind p)
             )
 
-        tWarp |> Option.map (fun (objId, worldId, point) -> (worldId, point))
+        tWarp |> Option.map (fun (objId, wd) -> wd)
 
     let removeObject (id: Id.WorldObject) (world: Payload): Payload =
         let newObjects =
@@ -124,7 +130,7 @@ module World =
 
         let newWarps =
             world.warps
-            |> Map.filter (fun p (oId, wId, toPoint) ->
+            |> Map.filter (fun p (oId, wd) ->
                 oId <> id
             )
 
@@ -158,47 +164,76 @@ module World =
     /// An object with the same id that already exists will be removed
     /// Blocking objects can be placed on top of non-blocking objects
     let addObject (obj: WorldObject) (world: Payload): Payload =
-        let existingIdRemoved = removeObject obj.id world
+        let rec addObjectInner
+                (objs: WorldObject List)
+                (world: Payload)
+                : Payload =
 
-        let canPlaceObject = canPlace obj existingIdRemoved
+            match objs with
+            | [] -> world
+            | obj::rem ->
+                let existingIdRemoved = removeObject obj.id world
 
-        let points = WorldObject.getPoints obj.value
+                let canPlaceObject = canPlace obj existingIdRemoved
 
-        if not canPlaceObject
-        then existingIdRemoved
-        else
-            let isBlocking = WorldObject.isBlocking obj.value
+                let points = WorldObject.getPoints obj.value
 
-            let blocked =
-                if isBlocking
-                then
-                    // add all points to blocking map
-                    points
-                    |> List.fold
-                        (fun acc p -> Map.add p (BlockedType.Object obj) acc)
-                        existingIdRemoved.blocked
+                if not canPlaceObject
+                then existingIdRemoved
                 else
-                    existingIdRemoved.blocked
+                    let isBlocking = WorldObject.isBlocking obj.value
 
-            let objects =
-                Map.add obj.id obj existingIdRemoved.objects
+                    let blocked =
+                        if isBlocking
+                        then
+                            // add all points to blocking map
+                            points
+                            |> Seq.fold
+                                (fun acc p -> Map.add p (BlockedType.Object obj) acc)
+                                existingIdRemoved.blocked
+                        else
+                            existingIdRemoved.blocked
 
-            let warps =
-                match obj.value.t with
-                | WorldObject.Type.Warp (worldId, toPoint) ->
-                    // Add the warp to the warps map
-                    points
-                    |> List.fold (fun acc p ->
-                        acc |> Map.add p (obj.id, worldId, toPoint)
-                    ) world.warps
-                | _ -> world.warps
+                    let objects =
+                        Map.add obj.id obj existingIdRemoved.objects
 
-            {
-                world with
-                    blocked = blocked
-                    objects = objects
-                    warps = warps
-            }
+                    let warps =
+                        match obj.value.t with
+                        | WorldObject.Type.Warp wd ->
+                            // Add the warp to the warps map
+                            points
+                            |> Seq.fold (fun acc p ->
+                                acc |> Map.add p (obj.id, wd.target)
+                            ) world.warps
+                        | _ -> world.warps
+
+                    let remaining =
+                        match obj.value.t with
+                        | WorldObject.Type.Inn tWd ->
+                            match tWd with
+                            | Option.None -> rem
+                            | Option.Some wd ->
+                                let warpLocation = Point.add obj.value.btmLeft (Point.create 3 1)
+                                let warpId = obj.id + "-warp"
+                                let warp =
+                                    Warp.create wd Warp.Appearance.Door
+                                    |> WorldObject.Type.Warp
+                                    |> fun t -> WorldObject.create t warpLocation Direction.South
+                                    |> WithId.useId warpId
+                                warp :: rem
+                        | _ -> rem
+
+                    let newWorld =
+                        {
+                            world with
+                                blocked = blocked
+                                objects = objects
+                                warps = warps
+                        }
+
+                    addObjectInner remaining newWorld
+
+        addObjectInner [obj] world
 
     /// Adds many objects
     /// Blocking objects will be added first
@@ -231,20 +266,22 @@ module World =
             (name: string)
             (bounds: Rect seq)
             (spawn: Point)
+            (background: WorldBackground)
             (objs: WorldObject seq)
             : Payload =
 
-        let emptyWorld = empty name bounds spawn
+        let emptyWorld = empty name bounds spawn background
         addObjects objs emptyWorld
 
     let createWithInteractions
             (name: string)
             (bounds: Rect seq)
             (spawn: Point)
+            (background: WorldBackground)
             (objs: WorldObject seq)
             (interactions: Map<Id.WorldObject, Id.Interaction>)
             : Payload =
-        let emptyWorld = empty name bounds spawn
+        let emptyWorld = empty name bounds spawn background
         let withObjects = addObjects objs emptyWorld
         setInteractions interactions withObjects
 

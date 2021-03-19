@@ -62,10 +62,10 @@ namespace LuceRPG.Server.Test
 
             initialWorld = WithId.useId(
                 "default-world",
-                WorldModule.empty("Testville", worldBounds, spawnPoint));
+                WorldModule.empty("Testville", worldBounds, spawnPoint, WorldBackgroundModule.GreenGrass));
             secondWorld = WithId.useId(
                 "second-world",
-                WorldModule.empty("Secondville", worldBounds, spawnPoint));
+                WorldModule.empty("Secondville", worldBounds, spawnPoint, WorldBackgroundModule.GreenGrass));
 
             var worldCollection = WorldCollectionModule.createWithoutInteractions(
                 initialWorld.id,

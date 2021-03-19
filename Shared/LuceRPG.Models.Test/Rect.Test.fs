@@ -53,3 +53,19 @@ module Rect =
                     Rect.contains p rect |> should equal e
                 )
                 |> ignore
+
+            [<Test>]
+            let ``getPoints gives correct points`` () =
+                let points =
+                    Rect.getPoints rect
+                    |> Set.ofSeq
+
+                let expected =
+                    [
+                        5,6; 6,6; 7,6; 8,6; 9,6; 10,6; 11,6; 12,6; 13,6; 14,6;
+                        5,7; 6,7; 7,7; 8,7; 9,7; 10,7; 11,7; 12,7; 13,7; 14,7;
+                    ]
+                    |> List.map (fun (x,y) -> Point.create x y)
+                    |> Set.ofList
+
+                points |> should equal expected

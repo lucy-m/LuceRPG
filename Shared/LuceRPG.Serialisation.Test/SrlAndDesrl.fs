@@ -27,6 +27,13 @@ module SrlAndDesrl =
             Arb.register<SerialisationArbs>() |> ignore
 
         [<Test>]
+        let boolSrl () =
+            let checkFn =
+                srlAndDesrl BoolSrl.serialise BoolSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
         let intSrl () =
             let checkFn =
                 srlAndDesrl IntSrl.serialise IntSrl.deserialise
@@ -37,6 +44,15 @@ module SrlAndDesrl =
         let stringSrl () =
             let checkFn =
                 srlAndDesrl StringSrl.serialise StringSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let optionSrl () =
+            let checkFn =
+                srlAndDesrl
+                    (OptionSrl.serialise IntSrl.serialise)
+                    (OptionSrl.deserialise IntSrl.deserialise)
 
             doCheck checkFn
 
@@ -98,9 +114,30 @@ module SrlAndDesrl =
             doCheck checkFn
 
         [<Test>]
-        let characterData () =
+        let colourSrl () =
+            let checkFn =
+                srlAndDesrl ColourSrl.serialise ColourSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let characterDataSrl () =
             let checkFn =
                 srlAndDesrl CharacterDataSrl.serialise CharacterDataSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let warpSrl () =
+            let checkFn =
+                srlAndDesrl WarpSrl.serialise WarpSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let flowerSrl () =
+            let checkFn =
+                srlAndDesrl FlowerSrl.serialise FlowerSrl.deserialise
 
             doCheck checkFn
 
@@ -143,6 +180,13 @@ module SrlAndDesrl =
         let worldEventSrl () =
             let checkFn =
                 srlAndDesrl WorldEventSrl.serialise WorldEventSrl.deserialise
+
+            doCheck checkFn
+
+        [<Test>]
+        let worldBackgroundSrl () =
+            let checkFn =
+                srlAndDesrl WorldBackgroundSrl.serialise WorldBackgroundSrl.deserialise
 
             doCheck checkFn
 

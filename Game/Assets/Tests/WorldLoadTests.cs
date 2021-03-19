@@ -73,7 +73,9 @@ public class WorldLoadTests
         var wallInteractionMap = Tuple.Create(wallModel.id, wallInteraction.id);
         var interactionMap = new FSharpMap<string, string>(wallInteractionMap.ToSingletonEnumerable());
 
-        var world = WorldModule.createWithInteractions("test", worldBounds, spawnPoint, objects, interactionMap);
+        var world = WorldModule.createWithInteractions(
+            "test", worldBounds, spawnPoint, WorldBackgroundModule.GreenGrass, objects, interactionMap
+        );
         idWorld = WithId.create(world);
         var tsWorld = WithTimestamp.create(0, idWorld);
 
@@ -367,7 +369,9 @@ public class WorldLoadTests
             Tuple.Create(newWall.id, wallInteraction.id).ToSingletonEnumerable()
         );
         var newWorld = WithId.create(
-            WorldModule.createWithInteractions("world-2", bounds, PointModule.zero, objects, newInteractionMap)
+            WorldModule.createWithInteractions(
+                "world-2", bounds, PointModule.zero, WorldBackgroundModule.GreenGrass, objects, newInteractionMap
+            )
         );
 
         var getSinceResult = WithTimestamp.create(

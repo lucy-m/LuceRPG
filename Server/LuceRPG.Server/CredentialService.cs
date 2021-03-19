@@ -9,7 +9,7 @@ namespace LuceRPG.Server
 {
     public interface ICredentialService
     {
-        bool IsValid(string username, string password);
+        bool IsValid(string username, string? password);
 
         string AddOrResetUser(string username);
     }
@@ -46,7 +46,7 @@ namespace LuceRPG.Server
             _logger.LogInformation($"Loaded {Credentials.Count} credentials");
         }
 
-        public bool IsValid(string username, string password)
+        public bool IsValid(string username, string? password)
         {
             if (Credentials.TryGetValue(username, out var storedPw))
             {
@@ -54,7 +54,7 @@ namespace LuceRPG.Server
             }
             else
             {
-                return false;
+                return true;
             }
         }
 
@@ -92,7 +92,7 @@ namespace LuceRPG.Server
             return "";
         }
 
-        public bool IsValid(string username, string password)
+        public bool IsValid(string username, string? password)
         {
             return IsValidReturn;
         }

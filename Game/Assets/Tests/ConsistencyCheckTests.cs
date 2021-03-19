@@ -57,7 +57,9 @@ public class ConsistencyCheckTests
         };
         var spawnPoint = PointModule.create(10, 10);
 
-        var world = WorldModule.createWithObjs("test", worldBounds, spawnPoint, objects);
+        var world = WorldModule.createWithObjs(
+            "test", worldBounds, spawnPoint, WorldBackgroundModule.GreenGrass, objects
+        );
         var idWorld = WithId.create(world);
         var tsWorld = WithTimestamp.create(0, idWorld);
         var interactions = InteractionStore.Empty();
@@ -82,7 +84,9 @@ public class ConsistencyCheckTests
             modelToAdd
         };
 
-        updatedWorld = WorldModule.createWithObjs("test", worldBounds, spawnPoint, updatedObjects);
+        updatedWorld = WorldModule.createWithObjs(
+            "test", worldBounds, spawnPoint, WorldBackgroundModule.GreenGrass, updatedObjects
+        );
     }
 
     private static void ObjMatchesModelPosition(

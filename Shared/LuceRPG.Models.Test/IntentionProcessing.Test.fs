@@ -24,7 +24,7 @@ module IntentionProcessing =
             let now = 120L
 
             let world =
-                World.createWithObjs "test-world" [bound] spawnPoint [player; wall]
+                World.createWithObjs "test-world" [bound] spawnPoint WorldBackground.GreenGrass [player; wall]
 
             let idWorld = world |> WithId.useId worldId
 
@@ -382,9 +382,10 @@ module IntentionProcessing =
             let player = TestUtil.makePlayer (Point.create 1 1)
             let toWorld = "to-world-id"
             let toPoint = Point.zero
+            let warpData = Warp.create (Warp.createTarget toWorld toPoint) Warp.Appearance.Door
             let warp =
                 WorldObject.create
-                    (WorldObject.Type.Warp(toWorld, toPoint))
+                    (WorldObject.Type.Warp warpData)
                     (Point.create 3 1)
                     Direction.South
                 |> TestUtil.withId
@@ -392,7 +393,7 @@ module IntentionProcessing =
             let now = 120L
 
             let world =
-                World.createWithObjs "test-world" [bound] spawnPoint [player; warp]
+                World.createWithObjs "test-world" [bound] spawnPoint WorldBackground.GreenGrass [player; warp]
 
             let idWorld = world |> WithId.useId worldId
 
@@ -443,7 +444,7 @@ module IntentionProcessing =
             let existingPlayer = TestUtil.makePlayerWithName (Point.create 0 0) existingUsername
 
             let spawnPoint = Point.create 4 4
-            let emptyWorld = World.empty "empty" [Rect.create 0 0 10 10] spawnPoint
+            let emptyWorld = World.empty "empty" [Rect.create 0 0 10 10] spawnPoint WorldBackground.GreenGrass
             let world1 = WithId.create (emptyWorld |> World.addObject existingPlayer)
             let world2 = WithId.create emptyWorld
 
@@ -713,8 +714,15 @@ module IntentionProcessing =
             let bounds = [Rect.create 0 0 10 10]
             let spawnPoint = Point.create 0 0
 
-            let world1 = World.createWithObjs "world-1" bounds spawnPoint [player1] |> WithId.create
-            let world2 = World.createWithObjs "world-2" bounds spawnPoint [player2] |> WithId.create
+            let world1 =
+                World.createWithObjs
+                    "world-1" bounds spawnPoint WorldBackground.GreenGrass [player1]
+                |> WithId.create
+
+            let world2 =
+                World.createWithObjs
+                    "world-2" bounds spawnPoint WorldBackground.GreenGrass [player2]
+                |> WithId.create
 
             let worldMap = WithId.toMap [world1; world2]
 
@@ -1032,7 +1040,7 @@ module IntentionProcessing =
             let existingPlayer = TestUtil.makePlayerWithName (Point.create 0 0) existingUsername
 
             let spawnPoint = Point.create 4 4
-            let emptyWorld = World.empty "empty" [Rect.create 0 0 10 10] spawnPoint
+            let emptyWorld = World.empty "empty" [Rect.create 0 0 10 10] spawnPoint WorldBackground.GreenGrass
             let world1 = WithId.create (emptyWorld |> World.addObject existingPlayer)
             let world2 = WithId.create emptyWorld
 
@@ -1249,7 +1257,9 @@ module IntentionProcessing =
             let client1 = "client1"
             let client2 = "client2"
 
-            let defaultWorld = World.empty "empty" [Rect.create 0 0 10 10] Point.zero |> WithId.create
+            let defaultWorld =
+                World.empty "empty" [Rect.create 0 0 10 10] Point.zero WorldBackground.GreenGrass
+                |> WithId.create
 
             let worldMap = WithId.toMap [defaultWorld]
 

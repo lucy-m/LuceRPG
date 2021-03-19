@@ -9,9 +9,11 @@
     <Compile Include="DesrlResult.fs" />
     <Compile Include="ByteSrl.fs" />
     <Compile Include="DesrlUtil.fs" />
+    <Compile Include="BoolSrl.fs" />
     <Compile Include="IntSrl.fs" />
     <Compile Include="LongSrl.fs" />
     <Compile Include="StringSrl.fs" />
+    <Compile Include="OptionSrl.fs" />
     <Compile Include="ListSrl.fs" />
     <Compile Include="MapSrl.fs" />
     <Compile Include="WithTimestampSrl.fs" />
@@ -19,11 +21,15 @@
     <Compile Include="PointSrl.fs" />
     <Compile Include="RectSrl.fs" />
     <Compile Include="DirectionSrl.fs" />
+    <Compile Include="ColourSrl.fs" />
     <Compile Include="CharacterDataSrl.fs" />
+    <Compile Include="WarpSrl.fs" />
+    <Compile Include="FlowerSrl.fs" />
     <Compile Include="WorldObjectSrl.fs" />
     <Compile Include="IntentionSrl.fs" />
     <Compile Include="InteractionSrl.fs" />
     <Compile Include="WorldEventSrl.fs" />
+    <Compile Include="WorldBackgroundSrl.fs" />
     <Compile Include="WorldSrl.fs" />
     <Compile Include="WorldDiffSrl.fs" />
     <Compile Include="GetSinceResultSrl.fs" />

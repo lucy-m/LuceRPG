@@ -69,13 +69,15 @@ type SerialisationArbs() =
                 |> Map.ofList
             )
 
+        let worldBackground = Arb.generate<WorldBackground>
+
         let world =
             Gen.zip3
                     name
-                    (Gen.zip bounds point)
+                    (Gen.zip3 bounds point worldBackground)
                     (Gen.zip objects interactions)
-            |> Gen.map (fun (n, (bs, p), (os, is)) ->
-                World.createWithInteractions n bs p os is
+            |> Gen.map (fun (n, (bs, p, bg), (os, is)) ->
+                World.createWithInteractions n bs p bg os is
             )
 
         world

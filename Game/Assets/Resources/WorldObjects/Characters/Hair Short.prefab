@@ -71,9 +71,12 @@ MonoBehaviour:
   EastSprite: {fileID: 4670123512029775434}
   WestSprite: {fileID: 0}
   NorthUseSouthXFlipped: 0
+  NorthUseSouthYFlipped: 0
   NorthUseSouthZFlipped: 0
   WestUseEastFlipped: 1
-  _testDirection: 0
+  SpriteHeight: 0
+  SpriteWidth: 2
+  _testDirection: 1
 --- !u!1 &3692196682338703706
 GameObject:
   m_ObjectHideFlags: 0
@@ -89,7 +92,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6580410930235357043
 Transform:
   m_ObjectHideFlags: 0
@@ -286,7 +289,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6158318849112510253
 Transform:
   m_ObjectHideFlags: 0

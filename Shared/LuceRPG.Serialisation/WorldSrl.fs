@@ -15,6 +15,9 @@ module WorldSrl =
         let spawner =
             PointSrl.serialise w.playerSpawner
 
+        let background =
+            WorldBackgroundSrl.serialise w.background
+
         let objects =
             ListSrl.serialise
                 WorldObjectSrl.serialise
@@ -26,7 +29,7 @@ module WorldSrl =
                 StringSrl.serialise
                 w.interactions
 
-        Array.concat [name; bounds; spawner; objects; interactions]
+        Array.concat [name; bounds; spawner; background; objects; interactions]
 
     let serialise (w: World): byte[] =
         WithIdSrl.serialise serialisePayload w
@@ -35,13 +38,15 @@ module WorldSrl =
         let getName = StringSrl.deserialise
         let getBounds = ListSrl.deserialise RectSrl.deserialise
         let getSpawner = PointSrl.deserialise
+        let getBackground = WorldBackgroundSrl.deserialise
         let getObjects = ListSrl.deserialise WorldObjectSrl.deserialise
         let getInteractions = MapSrl.deserialise StringSrl.deserialise StringSrl.deserialise
 
-        DesrlUtil.getFive
+        DesrlUtil.getSix
             getName
             getBounds
             getSpawner
+            getBackground
             getObjects
             getInteractions
             World.createWithInteractions

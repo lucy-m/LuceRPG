@@ -11,6 +11,9 @@ module WorldObjectSrl =
             | WorldObject.Type.Player _ -> 3uy
             | WorldObject.Type.NPC _ -> 4uy
             | WorldObject.Type.Warp _ -> 5uy
+            | WorldObject.Type.Tree -> 6uy
+            | WorldObject.Type.Inn _ -> 7uy
+            | WorldObject.Type.Flower _ -> 8uy
 
         let addtInfo =
             match t with
@@ -19,8 +22,13 @@ module WorldObjectSrl =
                 Array.append (IntSrl.serialise w) (IntSrl.serialise h)
             | WorldObject.Type.Player d -> CharacterDataSrl.serialise d
             | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
-            | WorldObject.Type.Warp (worldId, point) ->
-                Array.append (StringSrl.serialise worldId) (PointSrl.serialise point)
+            | WorldObject.Type.Warp wd -> WarpSrl.serialise wd
+            | WorldObject.Type.Tree -> [||]
+            | WorldObject.Type.Inn doorWarp ->
+                OptionSrl.serialise
+                    WarpSrl.serialiseTarget
+                    doorWarp
+            | WorldObject.Type.Flower f -> FlowerSrl.serialise f
 
         Array.append [|label|] addtInfo
 
@@ -36,16 +44,22 @@ module WorldObjectSrl =
                     objectBytes
             | 3uy ->
                 CharacterDataSrl.deserialise objectBytes
-                |> DesrlResult.map (fun d -> WorldObject.Type.Player d)
+                |> DesrlResult.map WorldObject.Type.Player
             | 4uy ->
                 CharacterDataSrl.deserialise objectBytes
-                |> DesrlResult.map (fun d -> WorldObject.Type.NPC d)
+                |> DesrlResult.map WorldObject.Type.NPC
             | 5uy ->
-                DesrlUtil.getTwo
-                    StringSrl.deserialise
-                    PointSrl.deserialise
-                    (fun worldId point -> WorldObject.Type.Warp(worldId, point))
+                WarpSrl.deserialise objectBytes
+                |> DesrlResult.map WorldObject.Type.Warp
+            | 6uy -> DesrlResult.create WorldObject.Type.Tree 0
+            | 7uy ->
+                OptionSrl.deserialise
+                    WarpSrl.deserialiseTarget
                     objectBytes
+                |> DesrlResult.map WorldObject.Type.Inn
+            | 8uy ->
+                FlowerSrl.deserialise objectBytes
+                |> DesrlResult.map WorldObject.Type.Flower
             | _ ->
                 printfn "Unknown WorldObject Type tag %u" tag
                 Option.None

@@ -60,6 +60,26 @@ namespace LuceRPG.Game.WorldObjects
             var travelTime = model == null ? 0 :
                 (WorldObjectModule.travelTime(model) / TimeSpan.TicksPerMillisecond);
             _speed = travelTime == 0 ? 0 : 1050.0f / travelTime;
+
+            if (model.t.IsWarp)
+            {
+                var warp = model.t as WorldObjectModule.TypeModule.Model.Warp;
+                var wac = GetComponent<WarpAppearanceController>();
+                if (wac != null)
+                {
+                    wac.Appearance = warp.Item.appearance;
+                }
+            }
+            else if (model.t.IsFlower)
+            {
+                var flower = (model.t as WorldObjectModule.TypeModule.Model.Flower).Item;
+                var fac = GetComponent<FlowerAppearanceController>();
+                if (fac != null)
+                {
+                    Debug.Log("Setting flower appearance");
+                    fac.Model = flower;
+                }
+            }
         }
 
         private void Awake()

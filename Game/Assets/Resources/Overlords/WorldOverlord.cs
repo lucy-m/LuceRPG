@@ -17,6 +17,10 @@ namespace LuceRPG.Game.Overlords
         public GameObject PlayerPrefab = null;
         public GameObject NpcPrefab = null;
         public GameObject WarpPrefab = null;
+        public GameObject TreePrefab = null;
+        public GameObject InnPrefab = null;
+        public GameObject FlowerPrefab;
+
         public BackgroundController BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
         public GameObject UnitNamePrefab = null;
@@ -64,7 +68,20 @@ namespace LuceRPG.Game.Overlords
             {
                 return WarpPrefab;
             }
+            else if (t.IsTree)
+            {
+                return TreePrefab;
+            }
+            else if (t.IsInn)
+            {
+                return InnPrefab;
+            }
+            else if (t.IsFlower)
+            {
+                return FlowerPrefab;
+            }
 
+            Debug.Log($"Unknown object type {t.Tag}");
             return null;
         }
 
@@ -82,6 +99,7 @@ namespace LuceRPG.Game.Overlords
                 {
                     var bc = Instantiate(BackgroundPrefab, bound.btmLeft.ToVector3(), Quaternion.identity);
                     bc.Rect = bound;
+                    bc.Bg = world.background;
                 }
 
                 var objectCount = world.objects.Count;
@@ -177,7 +195,7 @@ namespace LuceRPG.Game.Overlords
                 var tName = WorldObjectModule.getName(obj.value);
                 if (tName.HasValue())
                 {
-                    var unitNameLocation = obj.GetCenterLocation() + Vector3.up;
+                    var unitNameLocation = obj.GetCenterLocation() + 1.8f * Vector3.up;
                     var unitNameGo = Instantiate(UnitNamePrefab, unitNameLocation, Quaternion.identity, WorldTextCanvas.transform);
                     var unitName = unitNameGo.GetComponent<UnitNameController>();
                     unitName.SetFollow(tName.Value, uc);
