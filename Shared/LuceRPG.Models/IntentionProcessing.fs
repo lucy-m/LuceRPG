@@ -236,12 +236,14 @@ module IntentionProcessing =
                         |> Map.add clientId world.id
 
                     let defaultWorld = serverSideData.defaultWorld
+                    let serverId = serverSideData.serverId
 
                     ServerSideData.create
                         worldObjectClientMap
                         usernameClientMap
                         clientWorldMap
                         defaultWorld
+                        serverId
 
                 let event =
                     WorldEvent.Type.ObjectAdded obj
@@ -322,12 +324,14 @@ module IntentionProcessing =
                         |> Map.remove clientId
 
                     let defaultWorld = serverSideData.defaultWorld
+                    let serverId = serverSideData.serverId
 
                     ServerSideData.create
                         wocm
                         usernameClientMap
                         clientWorldMap
                         defaultWorld
+                        serverId
 
                 updatedServerSideData, updatedBusyMap, removeEvents
 

@@ -436,6 +436,7 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``processGlobal`` =
+        let serverId = "server"
 
         [<TestFixture>]
         module ``for an existing client with a player`` =
@@ -460,6 +461,7 @@ module IntentionProcessing =
                     usernameClientMap
                     clientWorldMap
                     world1.id
+                    serverId
 
             [<TestFixture>]
             module ``join game for new username`` =
@@ -573,6 +575,10 @@ module IntentionProcessing =
 
                     cwm |> Map.containsKey newClientId |> should equal true
                     cwm |> Map.find newClientId |> should equal world1.id
+
+                [<Test>]
+                let ``server id is unchanged`` () =
+                    processResult.serverSideData.serverId |> should equal serverId
 
             [<TestFixture>]
             module ``join game for existing username`` =
@@ -741,6 +747,7 @@ module IntentionProcessing =
                     usernameClientMap
                     clientWorldMap
                     world1.id
+                    serverId
 
             [<Test>]
             let ``worlds create correctly`` () =
@@ -808,6 +815,10 @@ module IntentionProcessing =
                     |> Map.containsKey clientId
                     |> should equal false
 
+                [<Test>]
+                let ``server id is unchanged`` () =
+                    processResult.serverSideData.serverId |> should equal serverId
+
             [<TestFixture>]
             module ``leave world`` =
                 [<TestFixture>]
@@ -861,6 +872,10 @@ module IntentionProcessing =
                         processResult.serverSideData.clientWorldMap
                         |> Map.containsKey clientId
                         |> should equal false
+
+                    [<Test>]
+                    let ``server id is unchanged`` () =
+                        processResult.serverSideData.serverId |> should equal serverId
 
                 [<TestFixture>]
                 module ``from second world`` =
@@ -916,6 +931,10 @@ module IntentionProcessing =
 
                         processResult.serverSideData.clientWorldMap
                         |> should equal serverSideData.clientWorldMap
+
+                    [<Test>]
+                    let ``server id is unchanged`` () =
+                        processResult.serverSideData.serverId |> should equal serverId
 
             [<TestFixture>]
             module ``warp`` =
@@ -1030,6 +1049,7 @@ module IntentionProcessing =
 
     [<TestFixture>]
     module ``processMany`` =
+        let serverId = "server"
 
         [<TestFixture>]
         module ``for client with single object`` =
@@ -1056,6 +1076,7 @@ module IntentionProcessing =
                     usernameClientMap
                     clientWorldMap
                     world1.id
+                    serverId
 
             [<TestFixture>]
             module ``for multiple intentions`` =
