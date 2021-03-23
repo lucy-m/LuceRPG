@@ -61,3 +61,5 @@ module Behaviour =
         {
             update = update
         }
+
+type Behaviour = Behaviour.Model

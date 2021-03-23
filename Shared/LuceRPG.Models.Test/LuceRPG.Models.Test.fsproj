@@ -23,6 +23,7 @@
     <Compile Include="WorldDiff.Test.fs" />
     <Compile Include="EventApply.Test.fs" />
     <Compile Include="IntentionProcessing.Test.fs" />
+    <Compile Include="BehaviourMap.Test.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
