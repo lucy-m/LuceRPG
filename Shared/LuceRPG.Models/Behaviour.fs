@@ -62,4 +62,25 @@ module Behaviour =
             update = update
         }
 
+    let patrolUniform
+            (moves: (Direction * byte) seq)
+            (pauseBetween: int64)
+            (repeat: bool)
+            : Model =
+        let steps =
+            moves
+            |> Seq.collect (fun (d, n) ->
+                let move = MovementStep.Move (d,n)
+
+                if pauseBetween >= 0L
+                then
+                    let wait = MovementStep.Wait pauseBetween
+                    [move; wait]
+                else
+                    [move]
+            )
+            |> List.ofSeq
+
+        patrol steps repeat Option.None
+
 type Behaviour = Behaviour.Model
