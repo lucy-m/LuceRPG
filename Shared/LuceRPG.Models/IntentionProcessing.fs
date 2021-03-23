@@ -1,7 +1,6 @@
 ﻿namespace LuceRPG.Models
 
 module IntentionProcessing =
-    type ObjectBusyMap = Map<Id.WorldObject, int64>
 
     type ProcessWorldResult =
         {

@@ -25,6 +25,7 @@
     <Compile Include="WorldDiff.fs" />
     <Compile Include="EventApply.fs" />
     <Compile Include="ServerSideData.fs" />
+    <Compile Include="ObjectBusyMap.fs" />
     <Compile Include="IntentionProcessing.fs" />
     <Compile Include="GetSinceResult.fs" />
     <Compile Include="GetJoinGameResult.fs" />
