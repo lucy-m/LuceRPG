@@ -17,6 +17,7 @@
     <Compile Include="Flower.fs" />
     <Compile Include="WorldObject.fs" />
     <Compile Include="Intention.fs" />
+    <Compile Include="Behaviour.fs" />
     <Compile Include="Interaction.fs" />
     <Compile Include="WorldEvent.fs" />
     <Compile Include="WorldBackground.fs" />
