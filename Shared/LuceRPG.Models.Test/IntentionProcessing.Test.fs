@@ -12,6 +12,7 @@ module IntentionProcessing =
         let clientId = "client"
         let worldId = "world-id"
         let username = "some-user"
+        let serverId = "server" |> Option.Some
         let bound = Rect.create 0 0 10 10
         let spawnPoint = Point.create 1 1
 
@@ -32,6 +33,7 @@ module IntentionProcessing =
                 IntentionProcessing.processWorld
                     now
                     tObjectClientMap
+                    serverId
                     Map.empty
                     idWorld
 
@@ -203,6 +205,7 @@ module IntentionProcessing =
                             IntentionProcessing.processWorld
                                 100L
                                 tObjectClientMap
+                                serverId
                                 Map.empty
                                 idWorld
                                 intention
@@ -218,6 +221,50 @@ module IntentionProcessing =
                         let processResult =
                             IntentionProcessing.processWorld
                                 100L
+                                Option.None
+                                Option.None
+                                Map.empty
+                                idWorld
+                                intention
+
+                        [<Test>]
+                        let ``player can be moved`` () =
+                            processResult.events
+                            |> Seq.length
+                            |> should equal 1
+
+                [<TestFixture>]
+                module ``server client id`` =
+                    let intention =
+                        Intention.Move (player.id, Direction.North, 1uy)
+                        |> Intention.makePayload serverId.Value
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create worldId
+
+                    [<TestFixture>]
+                    module ``with objectClientMap`` =
+                        let processResult =
+                            IntentionProcessing.processWorld
+                                100L
+                                tObjectClientMap
+                                serverId
+                                Map.empty
+                                idWorld
+                                intention
+
+                        [<Test>]
+                        let ``player can be moved`` () =
+                            processResult.events
+                            |> Seq.length
+                            |> should equal 1
+
+                    [<TestFixture>]
+                    module ``when objectClientMap is not provided`` =
+                        let processResult =
+                            IntentionProcessing.processWorld
+                                100L
+                                Option.None
                                 Option.None
                                 Map.empty
                                 idWorld
@@ -270,6 +317,7 @@ module IntentionProcessing =
                             IntentionProcessing.processWorld
                                 now
                                 tObjectClientMap
+                                serverId
                                 objectBusyMap
                                 idWorld
                                 intention
@@ -288,6 +336,7 @@ module IntentionProcessing =
                         IntentionProcessing.processWorld
                             now
                             tObjectClientMap
+                            serverId
                             objectBusyMap
                             idWorld
 
@@ -409,6 +458,7 @@ module IntentionProcessing =
                 let processResult =
                     IntentionProcessing.processWorld
                         now
+                        Option.None
                         Option.None
                         Map.empty
                         idWorld

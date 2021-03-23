@@ -27,6 +27,7 @@ module IntentionProcessing =
     let processWorld
             (now: int64)
             (tObjectClientMap: ServerSideData.ObjectClientMap Option)
+            (tServerId: Id.Client Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             (iIntention: IndexedIntention)
@@ -42,14 +43,22 @@ module IntentionProcessing =
         | Intention.Move (id, dir, amount) ->
             // May generate an event to move the object to its target location
             let clientOwnsObject =
-                tObjectClientMap
-                |> Option.map (fun objectClientMap ->
-                    objectClientMap
-                    |> Map.tryFind id
-                    |> Option.map (fun cId -> cId = clientId)
+                let isServer =
+                    tServerId
+                    |> Option.map (fun serverId -> clientId = serverId)
                     |> Option.defaultValue false
-                )
-                |> Option.defaultValue true
+
+                if isServer
+                then true
+                else
+                    tObjectClientMap
+                    |> Option.map (fun objectClientMap ->
+                        objectClientMap
+                        |> Map.tryFind id
+                        |> Option.map (fun cId -> cId = clientId)
+                        |> Option.defaultValue false
+                    )
+                    |> Option.defaultValue true
 
             if not clientOwnsObject
             then thisUnchanged (sprintf "Client %s does not own object %s" clientId id)
@@ -599,6 +608,7 @@ module IntentionProcessing =
                     processWorld
                         now
                         tObjectClientMap
+                        (Option.Some resGlobal.serverSideData.serverId)
                         resGlobal.objectBusyMap
                         world
                         i
