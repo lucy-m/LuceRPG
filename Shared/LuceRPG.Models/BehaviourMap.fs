@@ -72,3 +72,5 @@ module BehaviourMap =
             }
 
         result
+
+type BehaviourMap = BehaviourMap.Model

@@ -4,6 +4,7 @@ using LuceRPG.Samples;
 using LuceRPG.Server;
 using LuceRPG.Server.Core;
 using LuceRPG.Server.Processors;
+using LuceRPG.Server.Storer;
 using LuceRPG.Utility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,14 +31,17 @@ namespace LuceRPGServer
             services.AddSingleton(PrimordiaVille.collection);
             services.AddSingleton<WorldEventsStorer>();
             services.AddSingleton<LastPingStorer>();
+            services.AddSingleton<BehaviourMapStorer>();
             services.AddSingleton<ICredentialService, CredentialService>();
             services.AddSingleton<IntentionProcessor>();
             services.AddSingleton<StaleClientProcessor>();
+            services.AddSingleton<BehaviourProcessor>();
             services.AddSingleton<ITimestampProvider, TimestampProvider>();
             services.AddSingleton<ICsvLogService, CsvLogService>();
 
             services.AddHostedService<IntentionProcessorService>();
             services.AddHostedService<StaleClientProcessorService>();
+            services.AddHostedService<BehaviourProcessorService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

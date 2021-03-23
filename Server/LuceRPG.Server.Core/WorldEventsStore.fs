@@ -13,7 +13,7 @@ module WorldEventsStore =
             recentEvents: Map<Id.World, WorldEvent WithTimestamp seq>
             worldMap: Map<Id.World, World>
             interactionMap: Map<Id.World, Interactions>
-            objectBusyMap: IntentionProcessing.ObjectBusyMap
+            objectBusyMap: ObjectBusyMap
             serverSideData: ServerSideData
         }
 
@@ -31,8 +31,8 @@ module WorldEventsStore =
     //   through intentions process results
     // A freshly loaded world will never have any ownership
     let create (worlds: WorldCollection): Model =
-        let worldMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, w)) |> Map.ofSeq
-        let interactionMap = worlds.allWorlds |> Seq.map (fun (w, i) -> (w.id, i)) |> Map.ofSeq
+        let worldMap = worlds.allWorlds |> Seq.map (fun (w, i, b) -> (w.id, w)) |> Map.ofSeq
+        let interactionMap = worlds.allWorlds |> Seq.map (fun (w, i, b) -> (w.id, i)) |> Map.ofSeq
 
         {
             lastCull = 0L

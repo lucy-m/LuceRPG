@@ -54,6 +54,19 @@ namespace LuceRPG.Server
             }
         }
 
+        public void EnqueueAll(
+            IEnumerable<IndexedIntentionModule.Model> intentions
+        )
+        {
+            lock (_queue)
+            {
+                foreach (var i in intentions)
+                {
+                    _queue.Enqueue((Intention: i, OnProcessed: null));
+                }
+            }
+        }
+
         public IEnumerable<(
             IndexedIntentionModule.Model Intention,
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
