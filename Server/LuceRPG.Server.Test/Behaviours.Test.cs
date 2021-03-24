@@ -9,6 +9,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -93,6 +94,11 @@ namespace LuceRPG.Server.Test
         [Test]
         public void NoBehaviour_DoesNothing()
         {
+            if (MethodBase.GetCurrentMethod().DeclaringType != GetType())
+            {
+                Assert.Ignore();
+            }
+
             behaviourProcessor.Process();
 
             Assert.That(intentionQueue.Queue.Count, Is.EqualTo(0));
@@ -135,6 +141,25 @@ namespace LuceRPG.Server.Test
                 Assert.That(intention.Item1, Is.EqualTo(npcId));
                 Assert.That(intention.Item2, Is.EqualTo(DirectionModule.Model.South));
                 Assert.That(intention.Item3, Is.EqualTo(1));
+
+                // processing moves the item south
+                intentionProcessor.Process();
+                Assert.That(GetNpc().value.btmLeft, Is.EqualTo(PointModule.create(4, 3)));
+
+                // Set timestamp to the end of the busy time
+                var busyUntil = MapModule.Find(npcId, worldStorer.ObjectBusyMap);
+                timestampProvider.Now = busyUntil;
+
+                // Processing again does nothing as object is waiting
+                behaviourProcessor.Process();
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(0));
+
+                // Set timestamp to the end of the wait time
+                timestampProvider.Now += waitTime;
+
+                // Processing again produces an intention
+                behaviourProcessor.Process();
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(1));
             }
         }
     }

@@ -12,6 +12,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -93,6 +94,11 @@ namespace LuceRPG.Server.Test
         [Test]
         public void JoinGameDisallowedCredentials()
         {
+            if (MethodBase.GetCurrentMethod().DeclaringType != GetType())
+            {
+                Assert.Ignore();
+            }
+
             credentialService.IsValidReturn = false;
             var result = worldController.JoinGame(username, "not password");
 
