@@ -27,6 +27,11 @@ namespace LuceRPG.Server.Processors
             _intentionQueue = intentionQueue;
         }
 
+        // Worth noting that this processor should not run multiple times between
+        //   intention processing ticks. This will result in duplicate intentions
+        //   being dispatched and may be a source of bugs.
+        // In this case, can track which behaviours have an intention that is awaiting
+        //   processing, and ignoring those behaviours.
         public void Process()
         {
             var now = _timestampProvider.Now;
