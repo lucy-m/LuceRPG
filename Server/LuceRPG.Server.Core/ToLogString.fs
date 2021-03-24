@@ -21,7 +21,11 @@ module ToLogString =
             |> Seq.map IndexedIntentionFields.create
             |> Seq.map (fun p -> p, "Delayed")
 
-        Seq.append events delayed
+        let logs =
+            result.logs
+            |> Seq.map (fun l -> Seq.singleton l, "Log")
+
+        Seq.concat [ events; delayed; logs ]
         |> Seq.map (fun (fields, subType) ->
             FormatFields.format fields subType eventType timestamp
         )

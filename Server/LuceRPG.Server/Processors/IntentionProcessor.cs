@@ -41,8 +41,6 @@ namespace LuceRPG.Server.Processors
                 _logger.LogDebug($"Processing {entries.Length} intentions");
                 var intentions = entries.Select(e => e.Intention).ToArray();
 
-                // Currently applying intentions to the first world only, will need
-                //   to update this
                 var processed = IntentionProcessing.processMany(
                     timestamp,
                     _store.ServerSideData,

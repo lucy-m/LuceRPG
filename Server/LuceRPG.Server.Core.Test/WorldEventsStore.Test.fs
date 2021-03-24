@@ -9,6 +9,7 @@ open System
 module WorldEventsStore =
     let worldId = "world-id"
     let clientId = "client-id"
+    let serverId = "server-id"
     let joinedClientId = "joined-client-id"
     let objId = System.Guid.NewGuid().ToString()
 
@@ -111,7 +112,7 @@ module WorldEventsStore =
             let objectClientMap = Map.ofList ["obj1", "client1"]
             let wocm = [newWorld.id, objectClientMap] |> Map.ofList
             let objectBusyMap = Map.ofList ["obj1", 100L]
-            let serverSideData = ServerSideData.create wocm Map.empty Map.empty worldId
+            let serverSideData = ServerSideData.create wocm Map.empty Map.empty worldId serverId
 
             let processResult: IntentionProcessing.ProcessManyResult =
                 {

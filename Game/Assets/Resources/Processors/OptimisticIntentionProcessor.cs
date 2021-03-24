@@ -68,6 +68,7 @@ namespace LuceRPG.Game.Processors
                 var processResult = IntentionProcessing.processWorld(
                         now,
                         FSharpOption<FSharpMap<string, string>>.None,
+                        FSharpOption<string>.None,
                         _objectBusyMap,
                         Registry.Stores.World.IdWorld,
                         i

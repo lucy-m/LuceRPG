@@ -119,12 +119,12 @@ module PrimordiaVille =
             let simpleSquare =
                 Behaviour.patrolUniform
                     [
-                        Direction.South, 1uy
-                        Direction.East, 1uy
-                        Direction.North, 1uy
+                        Direction.South, 2uy
                         Direction.West, 1uy
+                        Direction.North, 2uy
+                        Direction.East, 1uy
                     ]
-                    (System.TimeSpan.FromSeconds(3.0).Ticks)
+                    (System.TimeSpan.FromSeconds(2.0))
                     true
 
             [ NpcIds.annie, simpleSquare ] |> Map.ofList

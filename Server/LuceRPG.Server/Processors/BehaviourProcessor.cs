@@ -54,7 +54,7 @@ namespace LuceRPG.Server.Processors
                 return (Behaviour: updatedBehaviour, Intentions: indexedIntentions);
             }).ToArray();
 
-            var intentions = results.SelectMany(t => t.Intentions);
+            var intentions = results.SelectMany(t => t.Intentions).ToArray();
             var behaviours = results.Select(t => t.Behaviour).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             _intentionQueue.EnqueueAll(intentions);
@@ -69,7 +69,7 @@ namespace LuceRPG.Server.Processors
     public sealed class BehaviourProcessorService : ProcessorHostService
     {
         private readonly BehaviourProcessor _behaviourProcessor;
-        protected override TimeSpan Interval => TimeSpan.FromMilliseconds(100);
+        protected override TimeSpan Interval => TimeSpan.FromMilliseconds(200);
 
         public BehaviourProcessorService(
             ILogger<ProcessorHostService> logger, BehaviourProcessor behaviourProcessor)

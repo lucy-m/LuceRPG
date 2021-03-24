@@ -64,17 +64,18 @@ module Behaviour =
 
     let patrolUniform
             (moves: (Direction * byte) seq)
-            (pauseBetween: int64)
+            (pauseBetween: System.TimeSpan)
             (repeat: bool)
             : Model =
+        let pauseBetweenTicks = pauseBetween.Ticks
         let steps =
             moves
             |> Seq.collect (fun (d, n) ->
                 let move = MovementStep.Move (d,n)
 
-                if pauseBetween >= 0L
+                if pauseBetweenTicks >= 0L
                 then
-                    let wait = MovementStep.Wait pauseBetween
+                    let wait = MovementStep.Wait pauseBetweenTicks
                     [move; wait]
                 else
                     [move]
