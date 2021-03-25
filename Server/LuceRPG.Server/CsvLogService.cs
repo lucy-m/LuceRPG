@@ -90,7 +90,7 @@ namespace LuceRPG.Server
             }
             catch
             {
-                Console.Error.WriteLine("Could not write logs to file");
+                _logger.LogError("Could not write logs to file");
             }
         }
 

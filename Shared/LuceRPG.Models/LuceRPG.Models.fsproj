@@ -17,7 +17,6 @@
     <Compile Include="Flower.fs" />
     <Compile Include="WorldObject.fs" />
     <Compile Include="Intention.fs" />
-    <Compile Include="Behaviour.fs" />
     <Compile Include="Interaction.fs" />
     <Compile Include="WorldEvent.fs" />
     <Compile Include="WorldBackground.fs" />
@@ -27,7 +26,6 @@
     <Compile Include="ServerSideData.fs" />
     <Compile Include="ObjectBusyMap.fs" />
     <Compile Include="IntentionProcessing.fs" />
-    <Compile Include="BehaviourMap.fs" />
     <Compile Include="GetSinceResult.fs" />
     <Compile Include="GetJoinGameResult.fs" />
     <Compile Include="ClientLogEntry.fs" />

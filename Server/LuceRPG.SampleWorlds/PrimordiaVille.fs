@@ -124,8 +124,9 @@ module PrimordiaVille =
                         Direction.North, 2uy
                         Direction.East, 1uy
                     ]
-                    (System.TimeSpan.FromSeconds(2.0))
+                    (System.TimeSpan.FromSeconds(3.0))
                     true
+                |> WithId.create
 
             let randomPatrol =
                 Behaviour.randomWalk
@@ -133,7 +134,21 @@ module PrimordiaVille =
                     (System.TimeSpan.FromMilliseconds(1000.0))
                 |> WithId.create
 
-            [ NpcIds.annie, randomPatrol ] |> Map.ofList
+            let backAndForth =
+                Behaviour.patrolUniform
+                    [
+                        Direction.South, 4uy
+                        Direction.North, 4uy
+                    ]
+                    System.TimeSpan.Zero
+                    true
+                |> WithId.create
+
+            [
+                NpcIds.annie, randomPatrol
+                NpcIds.harry, simpleSquare
+                NpcIds.bob, backAndForth
+            ] |> Map.ofList
 
         let allObjects =
             List.concat

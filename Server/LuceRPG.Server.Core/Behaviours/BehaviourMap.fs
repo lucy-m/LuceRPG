@@ -1,4 +1,6 @@
-﻿namespace LuceRPG.Models
+﻿namespace LuceRPG.Server.Core
+
+open LuceRPG.Models
 
 module BehaviourMap =
 

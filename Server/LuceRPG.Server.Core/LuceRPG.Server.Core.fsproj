@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Behaviours\Behaviour.fs" />
+    <Compile Include="Behaviours\BehaviourMap.fs" />
     <Compile Include="WorldCollection.fs" />
     <Compile Include="LogPayloads\FormatFields.fs" />
     <Compile Include="LogPayloads\WorldEventFields.fs" />

@@ -1,7 +1,8 @@
-﻿namespace LuceRPG.Models
+﻿namespace LuceRPG.Server.Core
 
 open NUnit.Framework
 open FsUnit
+open LuceRPG.Models
 
 [<TestFixture>]
 module Behaviour =
