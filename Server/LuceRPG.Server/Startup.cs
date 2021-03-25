@@ -42,6 +42,7 @@ namespace LuceRPGServer
             services.AddHostedService<IntentionProcessorService>();
             services.AddHostedService<StaleClientProcessorService>();
             services.AddHostedService<BehaviourProcessorService>();
+            services.AddHostedService<LogFlusher>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

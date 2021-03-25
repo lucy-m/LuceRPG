@@ -20,6 +20,8 @@ namespace LuceRPG.Server
         );
 
         void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result);
+
+        void Flush();
     }
 
     public class CsvLogService : ICsvLogService
@@ -33,6 +35,7 @@ namespace LuceRPG.Server
 
         private readonly ITimestampProvider _timestampProvider;
         private readonly ILogger<CsvLogService> _logger;
+        private readonly Queue<string> _toWrite = new Queue<string>();
 
         public CsvLogService(
             ITimestampProvider timestampProvider,
@@ -84,13 +87,26 @@ namespace LuceRPG.Server
 
         private void AddServerLogs(params string[] logs)
         {
-            try
+            foreach (var log in logs)
             {
-                System.IO.File.AppendAllLines(ServerLogPath, logs);
+                _toWrite.Enqueue(log);
             }
-            catch
+        }
+
+        public void Flush()
+        {
+            lock (this)
             {
-                _logger.LogError("Could not write logs to file");
+                try
+                {
+                    var logs = _toWrite.ToArray();
+                    System.IO.File.AppendAllLines(ServerLogPath, logs);
+                    _toWrite.Clear();
+                }
+                catch
+                {
+                    _logger.LogError("Could not write logs to file");
+                }
             }
         }
 
@@ -132,6 +148,10 @@ namespace LuceRPG.Server
         }
 
         public void EstablishLog(string clientId, string username)
+        {
+        }
+
+        public void Flush()
         {
         }
     }

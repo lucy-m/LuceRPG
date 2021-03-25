@@ -130,17 +130,17 @@ module PrimordiaVille =
 
             let randomPatrol =
                 Behaviour.randomWalk
-                    (System.TimeSpan.FromMilliseconds(100.0))
-                    (System.TimeSpan.FromMilliseconds(1000.0))
+                    System.TimeSpan.Zero
+                    (System.TimeSpan.FromSeconds(5.0))
                 |> WithId.create
 
             let backAndForth =
                 Behaviour.patrolUniform
                     [
-                        Direction.South, 4uy
-                        Direction.North, 4uy
+                        Direction.South, 8uy
+                        Direction.North, 8uy
                     ]
-                    System.TimeSpan.Zero
+                    (System.TimeSpan.FromSeconds(2.0))
                     true
                 |> WithId.create
 
