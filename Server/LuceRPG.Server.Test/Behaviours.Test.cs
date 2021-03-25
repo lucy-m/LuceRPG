@@ -87,7 +87,8 @@ namespace LuceRPG.Server.Test
                 timestampProvider,
                 worldStorer,
                 behaviourMapStorer,
-                intentionQueue
+                intentionQueue,
+                logService
             );
         }
 
@@ -119,7 +120,7 @@ namespace LuceRPG.Server.Test
                 );
 
                 var behaviourMap = MapModule.OfSeq(
-                    Tuple.Create(npcId, patrolBehaviour).ToSingletonEnumerable()
+                    Tuple.Create(npcId, WithId.create(patrolBehaviour)).ToSingletonEnumerable()
                 );
 
                 behaviourMapStorer.Maps[initialWorld.id] = behaviourMap;

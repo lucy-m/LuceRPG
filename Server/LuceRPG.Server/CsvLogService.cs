@@ -18,6 +18,8 @@ namespace LuceRPG.Server
             string clientId,
             IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs
         );
+
+        void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result);
     }
 
     public class CsvLogService : ICsvLogService
@@ -70,9 +72,26 @@ namespace LuceRPG.Server
             AddServerLogs(logLines);
         }
 
+        public void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result)
+        {
+            var logLines =
+                ToLogString
+                .behaviourUpdateResult(_timestampProvider.Now, result)
+                .ToArray();
+
+            AddServerLogs(logLines);
+        }
+
         private void AddServerLogs(params string[] logs)
         {
-            System.IO.File.AppendAllLines(ServerLogPath, logs);
+            try
+            {
+                System.IO.File.AppendAllLines(ServerLogPath, logs);
+            }
+            catch
+            {
+                Console.Error.WriteLine("Could not write logs to file");
+            }
         }
 
         public void AddClientLogs(
@@ -100,6 +119,10 @@ namespace LuceRPG.Server
 
     public class TestCsvLogService : ICsvLogService
     {
+        public void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result)
+        {
+        }
+
         public void AddClientLogs(string clientId, IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
         {
         }

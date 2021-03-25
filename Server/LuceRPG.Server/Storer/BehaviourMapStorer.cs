@@ -9,11 +9,11 @@ namespace LuceRPG.Server.Storer
 {
     public sealed class BehaviourMapStorer
     {
-        public Dictionary<string, FSharpMap<string, BehaviourModule.Model>> Maps { get; }
+        public Dictionary<string, FSharpMap<string, WithId.Model<BehaviourModule.Model>>> Maps { get; }
 
         public BehaviourMapStorer(WorldCollectionModule.Model worldCollection)
         {
-            Maps = new Dictionary<string, FSharpMap<string, BehaviourModule.Model>>();
+            Maps = new Dictionary<string, FSharpMap<string, WithId.Model<BehaviourModule.Model>>>();
 
             foreach (var w in worldCollection.allWorlds)
             {
@@ -24,7 +24,7 @@ namespace LuceRPG.Server.Storer
             }
         }
 
-        public void Update(string worldId, FSharpMap<string, BehaviourModule.Model> map)
+        public void Update(string worldId, FSharpMap<string, WithId.Model<BehaviourModule.Model>> map)
         {
             Maps[worldId] = map;
         }

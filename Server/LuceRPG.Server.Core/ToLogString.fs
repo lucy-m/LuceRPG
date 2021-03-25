@@ -44,3 +44,18 @@ module ToLogString =
 
     let clientLog (entry: ClientLogEntry): string seq =
         ClientLogEntryFormatter.create entry
+
+    let behaviourUpdateResult
+            (timestamp: int64)
+            (result: BehaviourMap.UpdateResult)
+            : string seq =
+
+        result.logs
+        |> Seq.map (fun log ->
+            let payload = Seq.singleton log
+            let subType = "Behaviour"
+            let eventType = "Behaviour"
+            let timestamp = timestamp
+
+            FormatFields.format payload subType eventType timestamp
+        )

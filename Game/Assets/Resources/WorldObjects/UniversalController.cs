@@ -15,7 +15,9 @@ namespace LuceRPG.Game.WorldObjects
 
         private Vector3 _target;
 
+        [SerializeField]
         private string _id = "";
+
         private float _speed = 0;
         private WorldObjectModule.Payload _lastModel;
         private DirectionalSpriteRoot _directionalSpriteRoot;

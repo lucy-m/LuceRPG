@@ -7,7 +7,8 @@ open FsUnit
 module BehaviourMap =
     let moveNorthInfinite =
         Behaviour.patrol [Behaviour.MovementStep.Move (Direction.North, 1uy)] true Option.None
-    let emptyBehaviour = Behaviour.patrol [] false Option.None
+        |> WithId.create
+    let emptyBehaviour = Behaviour.patrol [] false Option.None |> WithId.create
     let objectId = "object"
 
     [<TestFixture>]

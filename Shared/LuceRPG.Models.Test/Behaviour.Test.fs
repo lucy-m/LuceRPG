@@ -10,7 +10,7 @@ module Behaviour =
     module patrol =
 
         [<TestFixture>]
-        module ``repeating alteranting between movement and wait`` =
+        module ``repeating alternating between movement and wait`` =
             let steps =
                 [
                     Behaviour.MovementStep.Move (Direction.North, 3uy)
@@ -115,12 +115,53 @@ module Behaviour =
                     | _ ->
                         failwith "Incorrect case"
 
-                [<TestFixture>]
-                module ``third update`` =
-                    snd update2 |> Option.isSome |> should equal true
-                    let update3 = (snd update2).Value.update 2L
+                [<Test>]
+                let ``behaviour is complete`` () =
+                    snd update2 |> Option.isNone |> should equal true
 
-                    [<Test>]
-                    let ``behaviour is complete`` () =
-                        snd update3 |> Option.isNone |> should equal true
+    [<TestFixture>]
+    module randomWalk =
+        [<Test>]
+        let ``does not end`` () =
+            let noWait = Behaviour.randomWalk System.TimeSpan.Zero System.TimeSpan.Zero
+            [1L .. 10L]
+            |> List.fold (fun (acc: Behaviour) i ->
+                let update = acc.update i
 
+                fst update |> Seq.length |> should equal 1
+                snd update |> Option.isSome |> should equal true
+
+                (snd update).Value
+            ) noWait
+            |> ignore
+
+        [<Test>]
+        let ``handles waits correctly`` () =
+            let wait =
+                Behaviour.randomWalk
+                    (System.TimeSpan.FromTicks(100L))
+                    (System.TimeSpan.FromTicks(200L))
+
+            // This should be a move step
+            let update0 = wait.update 0L
+            let intentions1 = fst update0 |> List.ofSeq
+            intentions1 |> List.length |> should equal 1
+            intentions1
+            |> List.head
+            |> fun i ->
+                match (i "") with
+                | Intention.Type.Move _ -> ignore
+                | _ -> failwith "Incorrect case"
+            |> ignore
+
+            // Updating at 5L to initiate wait
+            let update5 = (snd update0).Value.update 5L
+            fst update5 |> Seq.length |> should equal 0
+
+            // Updating after 99L should do nothing
+            let update104 = (snd update5).Value.update 104L
+            fst update104 |> Seq.length |> should equal 0
+
+            // Updating after 200L should move
+            let update205 = (snd update104).Value.update 205L
+            fst update205 |> Seq.length |> should equal 1

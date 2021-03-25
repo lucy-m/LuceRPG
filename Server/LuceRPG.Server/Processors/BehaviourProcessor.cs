@@ -14,17 +14,20 @@ namespace LuceRPG.Server.Processors
         private readonly WorldEventsStorer _worldEventsStorer;
         private readonly IntentionQueue _intentionQueue;
         private readonly BehaviourMapStorer _mapStorer;
+        private readonly ICsvLogService _logService;
 
         public BehaviourProcessor(
             ITimestampProvider timestampProvider,
             WorldEventsStorer worldEventsStorer,
             BehaviourMapStorer mapStorer,
-            IntentionQueue intentionQueue)
+            IntentionQueue intentionQueue,
+            ICsvLogService logService)
         {
             _timestampProvider = timestampProvider;
             _worldEventsStorer = worldEventsStorer;
             _mapStorer = mapStorer;
             _intentionQueue = intentionQueue;
+            _logService = logService;
         }
 
         // Worth noting that this processor should not run multiple times between
@@ -53,6 +56,8 @@ namespace LuceRPG.Server.Processors
 
                     return indexed;
                 });
+
+                _logService.AddBehaviourUpdateResult(updateResult);
 
                 var updatedBehaviour = KeyValuePair.Create(worldId, updateResult.model);
 

@@ -29,7 +29,7 @@ module PrimordiaVille =
                 Rect.create 19 0 22 16
             ]
 
-        let spawnPoint = Point.create 2 9
+        let spawnPoint = Point.create 16 7
 
         let trees =
             [
@@ -127,7 +127,13 @@ module PrimordiaVille =
                     (System.TimeSpan.FromSeconds(2.0))
                     true
 
-            [ NpcIds.annie, simpleSquare ] |> Map.ofList
+            let randomPatrol =
+                Behaviour.randomWalk
+                    (System.TimeSpan.FromMilliseconds(100.0))
+                    (System.TimeSpan.FromMilliseconds(1000.0))
+                |> WithId.create
+
+            [ NpcIds.annie, randomPatrol ] |> Map.ofList
 
         let allObjects =
             List.concat

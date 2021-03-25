@@ -13,10 +13,10 @@ module Behaviour =
         | Wait of int64
 
     let rec patrol
-        (steps: MovementStep List)
-        (repeat: bool)
-        (tWaitUntil: int64 Option)
-        : Model =
+            (steps: MovementStep List)
+            (repeat: bool)
+            (tWaitUntil: int64 Option)
+            : Model =
 
         let update (timestamp: int64): ObjectlessIntention seq * Model Option =
             match steps with
@@ -30,7 +30,13 @@ module Behaviour =
                         then List.append tl [nextStep]
                         else tl
 
-                    Seq.singleton intention, Option.Some (patrol newSteps repeat Option.None)
+                    // if this is the last step then terminate
+                    let next =
+                        if newSteps |> List.isEmpty
+                        then Option.None
+                        else Option.Some (patrol newSteps repeat Option.None)
+
+                    Seq.singleton intention, next
 
                 | Wait waitDuration ->
                     match tWaitUntil with
@@ -83,5 +89,61 @@ module Behaviour =
             |> List.ofSeq
 
         patrol steps repeat Option.None
+
+    /// minWait and maxWait should be <= 3 minutes due to number truncation
+    let randomWalk
+            (minWait: System.TimeSpan)
+            (maxWait: System.TimeSpan)
+            : Model =
+        let r = System.Random()
+
+        let makePatrol (): Model =
+            let wait =
+                let min = int32(minWait.Ticks)
+                let max = int32(maxWait.Ticks)
+
+                if max <= min
+                then []
+                else
+                    int64(r.Next(min, max))
+                    |> MovementStep.Wait
+                    |> List.singleton
+
+            let dir =
+                match r.Next(0, 4) with
+                | 0 -> Direction.North
+                | 1 -> Direction.East
+                | 2 -> Direction.South
+                | _ -> Direction.West
+
+            let steps =
+                MovementStep.Move (dir, 1uy)::wait
+
+            patrol steps false Option.None
+
+        let rec randomWalkInner (currentPatrol: Model): Model =
+            let update (timestamp: int64): ObjectlessIntention seq * Model Option =
+                let patrolResult = currentPatrol.update timestamp
+
+                let intentions = fst patrolResult |> List.ofSeq
+
+                if intentions |> List.isEmpty && snd patrolResult |> Option.isNone
+                then
+                    // Finished waiting, need to move on to next step immediately
+                    (randomWalkInner (makePatrol())).update(timestamp)
+                else
+                    let behaviour =
+                        snd patrolResult
+                        |> Option.map (fun p -> randomWalkInner p)
+                        |> Option.defaultValue (randomWalkInner (makePatrol()))
+                        |> Option.Some
+
+                    (intentions |> Seq.ofList), behaviour
+
+            {
+                update = update
+            }
+
+        randomWalkInner (makePatrol())
 
 type Behaviour = Behaviour.Model
