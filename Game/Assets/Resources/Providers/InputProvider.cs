@@ -12,6 +12,8 @@ namespace LuceRPG.Game.Providers
         public float GetVertIn();
 
         public float GetHorzIn();
+
+        public Vector3 GetMousePosition();
     }
 
     public class InputProvider : IInputProvider
@@ -25,12 +27,18 @@ namespace LuceRPG.Game.Providers
         {
             return Input.GetAxis("Vertical");
         }
+
+        public Vector3 GetMousePosition()
+        {
+            return Input.mousePosition;
+        }
     }
 
     public class TestInputProvider : IInputProvider
     {
         public float HorzIn = 0;
         public float VertIn = 0;
+        public Vector3 MousePosition = Vector3.zero;
 
         public float GetHorzIn()
         {
@@ -40,6 +48,11 @@ namespace LuceRPG.Game.Providers
         public float GetVertIn()
         {
             return VertIn;
+        }
+
+        public Vector3 GetMousePosition()
+        {
+            return MousePosition;
         }
     }
 }
