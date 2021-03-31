@@ -32,7 +32,10 @@ public class SpriteColourController : MonoBehaviour
             {
                 s.color = Colour;
             }
+        }
 
+        if (Children != null && Colour != null)
+        {
             foreach (var c in Children)
             {
                 c.Colour = Colour;

@@ -12,6 +12,7 @@ public class CursorDisplayController : MonoBehaviour
     private PointModule.Model _position = PointModule.create(0, 0);
     private PointModule.Model _size = PointModule.create(1, 1);
 
+    private SpriteColourController ColourController;
     private GameObject BottomLeft;
     private GameObject BottomRight;
     private GameObject TopLeft;
@@ -34,10 +35,12 @@ public class CursorDisplayController : MonoBehaviour
                 _position = WorldObjectModule.btmLeft(obj.value);
 
                 Size = boundedSize;
+                ColourController.Colour = new Color(0.9f, 0.9f, 0.6f);
             }
             else
             {
                 Size = PointModule.p1x1;
+                ColourController.Colour = new Color(0.6f, 0.9f, 0.9f);
             }
 
             transform.position = new Vector3(_position.x, _position.y, _position.y);
@@ -49,8 +52,11 @@ public class CursorDisplayController : MonoBehaviour
         get => _size;
         set
         {
-            _size = value;
-            SetSpritePositions();
+            if (_size != value)
+            {
+                _size = value;
+                SetSpritePositions();
+            }
         }
     }
 
@@ -60,6 +66,14 @@ public class CursorDisplayController : MonoBehaviour
         BottomRight = Instantiate(CornerPrefab, transform);
         TopLeft = Instantiate(CornerPrefab, transform);
         TopRight = Instantiate(CornerPrefab, transform);
+
+        ColourController = gameObject.AddComponent<SpriteColourController>();
+        ColourController.Children = new SpriteColourController[]{
+            BottomLeft.GetComponent<SpriteColourController>(),
+            BottomRight.GetComponent<SpriteColourController>(),
+            TopLeft.GetComponent<SpriteColourController>(),
+            TopRight.GetComponent<SpriteColourController>()
+        };
 
         BottomLeft.transform.rotation = Quaternion.identity;
         BottomRight.transform.rotation = Quaternion.Euler(0, 0, 90);
