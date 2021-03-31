@@ -13,6 +13,7 @@ module ServerSideData =
             usernameClientMap: UsernameClientMap
             clientWorldMap: ClientWorldMap
             defaultWorld: Id.World
+            serverId: Id.Client
         }
 
     let create
@@ -20,12 +21,14 @@ module ServerSideData =
             (usernameClientMap: UsernameClientMap)
             (clientWorldMap: ClientWorldMap)
             (defaultWorld: Id.World)
+            (serverId: Id.Client)
             : Model =
         {
             worldObjectClientMap = worldObjectClientMap
             usernameClientMap = usernameClientMap
             clientWorldMap = clientWorldMap
             defaultWorld = defaultWorld
+            serverId = serverId
         }
 
     let empty (defaultWorld: Id.World): Model =
@@ -34,6 +37,7 @@ module ServerSideData =
             usernameClientMap = Map.empty
             clientWorldMap = Map.empty
             defaultWorld = defaultWorld
+            serverId = System.Guid.NewGuid().ToString()
         }
 
     let addToWocm

@@ -1,7 +1,6 @@
 ﻿namespace LuceRPG.Models
 
 module IntentionProcessing =
-    type ObjectBusyMap = Map<Id.WorldObject, int64>
 
     type ProcessWorldResult =
         {
@@ -28,6 +27,7 @@ module IntentionProcessing =
     let processWorld
             (now: int64)
             (tObjectClientMap: ServerSideData.ObjectClientMap Option)
+            (tServerId: Id.Client Option)
             (objectBusyMap: ObjectBusyMap)
             (world: World)
             (iIntention: IndexedIntention)
@@ -43,14 +43,22 @@ module IntentionProcessing =
         | Intention.Move (id, dir, amount) ->
             // May generate an event to move the object to its target location
             let clientOwnsObject =
-                tObjectClientMap
-                |> Option.map (fun objectClientMap ->
-                    objectClientMap
-                    |> Map.tryFind id
-                    |> Option.map (fun cId -> cId = clientId)
+                let isServer =
+                    tServerId
+                    |> Option.map (fun serverId -> clientId = serverId)
                     |> Option.defaultValue false
-                )
-                |> Option.defaultValue true
+
+                if isServer
+                then true
+                else
+                    tObjectClientMap
+                    |> Option.map (fun objectClientMap ->
+                        objectClientMap
+                        |> Map.tryFind id
+                        |> Option.map (fun cId -> cId = clientId)
+                        |> Option.defaultValue false
+                    )
+                    |> Option.defaultValue true
 
             if not clientOwnsObject
             then thisUnchanged (sprintf "Client %s does not own object %s" clientId id)
@@ -237,12 +245,14 @@ module IntentionProcessing =
                         |> Map.add clientId world.id
 
                     let defaultWorld = serverSideData.defaultWorld
+                    let serverId = serverSideData.serverId
 
                     ServerSideData.create
                         worldObjectClientMap
                         usernameClientMap
                         clientWorldMap
                         defaultWorld
+                        serverId
 
                 let event =
                     WorldEvent.Type.ObjectAdded obj
@@ -323,12 +333,14 @@ module IntentionProcessing =
                         |> Map.remove clientId
 
                     let defaultWorld = serverSideData.defaultWorld
+                    let serverId = serverSideData.serverId
 
                     ServerSideData.create
                         wocm
                         usernameClientMap
                         clientWorldMap
                         defaultWorld
+                        serverId
 
                 updatedServerSideData, updatedBusyMap, removeEvents
 
@@ -596,6 +608,7 @@ module IntentionProcessing =
                     processWorld
                         now
                         tObjectClientMap
+                        (Option.Some resGlobal.serverSideData.serverId)
                         resGlobal.objectBusyMap
                         world
                         i

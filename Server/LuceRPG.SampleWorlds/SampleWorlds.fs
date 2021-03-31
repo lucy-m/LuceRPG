@@ -7,7 +7,7 @@ module SampleWorlds =
     let world1Id = System.Guid.NewGuid().ToString()
     let world2Id = System.Guid.NewGuid().ToString()
 
-    let world1: (World * Interactions) =
+    let world1: (World * Interactions * BehaviourMap) =
         let bounds =
             [
                 Rect.create 0 0 44 8
@@ -153,9 +153,9 @@ module SampleWorlds =
 
         let interactions = [sayHiInteraction]
 
-        (world, interactions)
+        (world, interactions, Map.empty)
 
-    let world2: (World * Interactions) =
+    let world2: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
         let spawnPoint = Point.create 4 0
 
@@ -193,9 +193,9 @@ module SampleWorlds =
 
         let interactions = [sayHiInteraction]
 
-        (world, interactions)
+        (world, interactions, Map.empty)
 
     let collection =
         WorldCollection.create
-            (fst world1).id
+            world1Id
             [world1; world2]

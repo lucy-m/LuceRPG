@@ -18,6 +18,10 @@ namespace LuceRPG.Server
             string clientId,
             IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs
         );
+
+        void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result);
+
+        void Flush();
     }
 
     public class CsvLogService : ICsvLogService
@@ -31,6 +35,7 @@ namespace LuceRPG.Server
 
         private readonly ITimestampProvider _timestampProvider;
         private readonly ILogger<CsvLogService> _logger;
+        private readonly Queue<string> _toWrite = new Queue<string>();
 
         public CsvLogService(
             ITimestampProvider timestampProvider,
@@ -70,9 +75,39 @@ namespace LuceRPG.Server
             AddServerLogs(logLines);
         }
 
+        public void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result)
+        {
+            var logLines =
+                ToLogString
+                .behaviourUpdateResult(_timestampProvider.Now, result)
+                .ToArray();
+
+            AddServerLogs(logLines);
+        }
+
         private void AddServerLogs(params string[] logs)
         {
-            System.IO.File.AppendAllLines(ServerLogPath, logs);
+            foreach (var log in logs)
+            {
+                _toWrite.Enqueue(log);
+            }
+        }
+
+        public void Flush()
+        {
+            lock (this)
+            {
+                try
+                {
+                    var logs = _toWrite.ToArray();
+                    System.IO.File.AppendAllLines(ServerLogPath, logs);
+                    _toWrite.Clear();
+                }
+                catch
+                {
+                    _logger.LogError("Could not write logs to file");
+                }
+            }
         }
 
         public void AddClientLogs(
@@ -100,6 +135,10 @@ namespace LuceRPG.Server
 
     public class TestCsvLogService : ICsvLogService
     {
+        public void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result)
+        {
+        }
+
         public void AddClientLogs(string clientId, IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
         {
         }
@@ -109,6 +148,10 @@ namespace LuceRPG.Server
         }
 
         public void EstablishLog(string clientId, string username)
+        {
+        }
+
+        public void Flush()
         {
         }
     }

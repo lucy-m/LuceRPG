@@ -6,10 +6,10 @@ module WorldCollection =
     type Model =
         {
             defaultWorld: Id.World
-            allWorlds: (World * Interactions) seq
+            allWorlds: (World * Interactions * BehaviourMap) seq
         }
 
-    let create (defaultWorld: Id.World) (allWorlds: (World * Interactions) seq): Model =
+    let create (defaultWorld: Id.World) (allWorlds: (World * Interactions * BehaviourMap) seq): Model =
         {
             defaultWorld = defaultWorld
             allWorlds = allWorlds
@@ -18,12 +18,12 @@ module WorldCollection =
     let createWithoutInteractions (defaultWorld: Id.World) (withoutInteractions: World seq): Model =
         let withInteractions =
             withoutInteractions
-            |> Seq.map (fun w -> (w, List.empty<Interaction>))
+            |> Seq.map (fun w -> (w, List.empty<Interaction>, Map.empty))
 
         create defaultWorld withInteractions
 
     let interactions (wc: Model): Interactions =
-        wc.allWorlds |> Seq.collect snd |> List.ofSeq
+        wc.allWorlds |> Seq.collect (fun (w,i,b) -> i) |> List.ofSeq
 
     let interactionMap (wc: Model): Map<string, Interaction> =
         interactions wc

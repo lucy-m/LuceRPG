@@ -21,7 +21,7 @@ module PrimordiaVille =
         let gardener = System.Guid.NewGuid().ToString()
         let dontMindMe = System.Guid.NewGuid().ToString()
 
-    let primordiaVilleOutside: (World * Interactions) =
+    let primordiaVilleOutside: (World * Interactions * BehaviourMap) =
         let bounds =
             [
                 Rect.create 0 5 19 8
@@ -29,7 +29,7 @@ module PrimordiaVille =
                 Rect.create 19 0 22 16
             ]
 
-        let spawnPoint = Point.create 2 9
+        let spawnPoint = Point.create 16 7
 
         let trees =
             [
@@ -115,6 +115,41 @@ module PrimordiaVille =
             ]
             |> Map.ofList
 
+        let behaviourMap: BehaviourMap =
+            let simpleSquare =
+                Behaviour.patrolUniform
+                    [
+                        Direction.South, 2uy
+                        Direction.West, 1uy
+                        Direction.North, 2uy
+                        Direction.East, 1uy
+                    ]
+                    (System.TimeSpan.FromSeconds(3.0))
+                    true
+                |> WithId.create
+
+            let randomPatrol =
+                Behaviour.randomWalk
+                    System.TimeSpan.Zero
+                    (System.TimeSpan.FromSeconds(5.0))
+                |> WithId.create
+
+            let backAndForth =
+                Behaviour.patrolUniform
+                    [
+                        Direction.South, 8uy
+                        Direction.North, 8uy
+                    ]
+                    (System.TimeSpan.FromSeconds(2.0))
+                    true
+                |> WithId.create
+
+            [
+                NpcIds.annie, randomPatrol
+                NpcIds.harry, simpleSquare
+                NpcIds.bob, backAndForth
+            ] |> Map.ofList
+
         let allObjects =
             List.concat
                 [
@@ -135,9 +170,9 @@ module PrimordiaVille =
                 interactionMap
             |> WithId.useId MapIds.primordiaVilleOutside
 
-        (world, interactions)
+        (world, interactions, behaviourMap)
 
-    let theThreeCocks: (World * Interactions) =
+    let theThreeCocks: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
         let spawnPoint = Point.create 4 0
 
@@ -174,10 +209,9 @@ module PrimordiaVille =
                 interactionMap
             |> WithId.useId MapIds.theThreeCocks
 
-        (world, [greetingInteraction])
+        (world, [greetingInteraction], Map.empty)
 
-
-    let barrysEssentials: (World * Interactions) =
+    let barrysEssentials: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
         let spawnPoint = Point.create 4 0
 
@@ -214,7 +248,7 @@ module PrimordiaVille =
                 interactionMap
             |> WithId.useId MapIds.barrysEssentials
 
-        (world, [greetingInteraction])
+        (world, [greetingInteraction], Map.empty)
 
     let collection =
         WorldCollection.create
