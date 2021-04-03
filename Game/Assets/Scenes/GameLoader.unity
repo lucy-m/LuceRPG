@@ -690,7 +690,7 @@ GameObject:
   - component: {fileID: 1953119997}
   - component: {fileID: 1953119996}
   m_Layer: 0
-  m_Name: CursorDisplayOverlord
+  m_Name: CursorOverlord
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -708,7 +708,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a1ae5da32b838245bc8ad072b68e6b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CursorDisplay: {fileID: 302946531}
 --- !u!4 &1953119997
 Transform:
   m_ObjectHideFlags: 0

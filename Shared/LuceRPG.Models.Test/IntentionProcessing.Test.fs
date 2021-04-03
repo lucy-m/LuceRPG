@@ -396,6 +396,62 @@ module IntentionProcessing =
                     let ``logs`` () =
                         result.log.IsSome |> should equal true
 
+            [<TestFixture>]
+            module ``turn towards`` =
+
+                [<Test>]
+                let ``turn towards north turns player`` () =
+                    let dir = Direction.North
+                    player.value.facing |> should not' (equal dir)
+
+                    let intention =
+                        Intention.TurnTowards (player.id, dir)
+                        |> makeIntention
+
+                    let result = processFn intention
+
+                    result.events |> Seq.length |> should equal 1
+                    let expected = WorldEvent.TurnedTowards (player.id, dir)
+                    result.events |> Seq.head |> fun e -> e.t |> should equal expected
+
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
+                    newPlayer.IsSome |> should equal true
+                    newPlayer.Value.value.btmLeft |> should equal (player.value.btmLeft)
+                    newPlayer.Value.value.facing |> should equal dir
+
+                [<Test>]
+                let ``turn unknown object is ignored`` () =
+                    let intention =
+                        Intention.TurnTowards ("unknown", Direction.North)
+                        |> makeIntention
+
+                    let result = processFn intention
+
+                    result.events |> Seq.length |> should equal 0
+
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
+                    newPlayer.IsSome |> should equal true
+                    newPlayer.Value.value.btmLeft |> should equal (player.value.btmLeft)
+                    newPlayer.Value.value.facing |> should equal (player.value.facing)
+
+                [<Test>]
+                let ``incorrect client id is ignored`` () =
+                    let intention =
+                        Intention.TurnTowards (player.id, Direction.North)
+                        |> Intention.makePayload "other-client"
+                        |> TestUtil.withId
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create worldId
+
+                    let result = processFn intention
+
+                    result.events |> Seq.length |> should equal 0
+
+                    let newPlayer = result.world.value.objects |> Map.tryFind player.id
+                    newPlayer.IsSome |> should equal true
+                    newPlayer.Value.value.btmLeft |> should equal (player.value.btmLeft)
+                    newPlayer.Value.value.facing |> should equal (player.value.facing)
+
             [<Test>]
             let ``join game does nothing`` () =
                 let intention =

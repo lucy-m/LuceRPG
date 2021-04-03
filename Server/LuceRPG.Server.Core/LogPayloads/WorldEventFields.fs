@@ -10,6 +10,8 @@ module WorldEventFields =
             match t with
             | WorldEvent.Type.Moved (id, dir) ->
                 sprintf "Moved %c %s" (Direction.asLetter dir) id
+            | WorldEvent.Type.TurnedTowards (id, dir) ->
+                sprintf "Turned to %c %s" (Direction.asLetter dir) id
             | WorldEvent.Type.ObjectAdded o ->
                 sprintf "Added %s" o.id
             | WorldEvent.Type.ObjectRemoved id ->

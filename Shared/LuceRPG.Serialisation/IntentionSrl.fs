@@ -12,6 +12,7 @@ module IntentionSrl =
             | Intention.JoinWorld _ -> 4uy
             | Intention.LeaveWorld -> 5uy
             | Intention.Warp _ -> 6uy
+            | Intention.TurnTowards _ -> 7uy
 
         let addtInfo =
             match i with
@@ -30,6 +31,11 @@ module IntentionSrl =
                     StringSrl.serialise worldId
                     PointSrl.serialise point
                     StringSrl.serialise objectId
+                ]
+            | Intention.TurnTowards (id, d) ->
+                Array.concat [
+                    (StringSrl.serialise id)
+                    (DirectionSrl.serialise d)
                 ]
 
         Array.append [|label|] addtInfo
@@ -76,6 +82,12 @@ module IntentionSrl =
                     PointSrl.deserialise
                     StringSrl.deserialise
                     (fun wId p oId -> Intention.Warp(wId, p, oId))
+                    objectBytes
+            | 7uy ->
+                DesrlUtil.getTwo
+                    StringSrl.deserialise
+                    DirectionSrl.deserialise
+                    (fun id d -> Intention.TurnTowards (id, d))
                     objectBytes
             | _ ->
                 printfn "Unknown Intention tag %u" tag

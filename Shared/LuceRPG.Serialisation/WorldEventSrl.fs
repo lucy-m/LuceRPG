@@ -11,6 +11,7 @@ module WorldEventSrl =
             | WorldEvent.ObjectAdded _ -> 2uy
             | WorldEvent.ObjectRemoved _ -> 3uy
             | WorldEvent.JoinedWorld _ -> 4uy
+            | WorldEvent.TurnedTowards _ -> 5uy
 
         let addtInfo =
             match i with
@@ -25,6 +26,11 @@ module WorldEventSrl =
                 StringSrl.serialise id
             | WorldEvent.JoinedWorld cId ->
                 StringSrl.serialise cId
+            | WorldEvent.TurnedTowards (id, d) ->
+                Array.concat [
+                    (StringSrl.serialise id)
+                    (DirectionSrl.serialise d)
+                ]
 
         Array.append [|label|] addtInfo
 
@@ -54,6 +60,12 @@ module WorldEventSrl =
             | 4uy ->
                 StringSrl.deserialise objectBytes
                 |> DesrlResult.map WorldEvent.Type.JoinedWorld
+            | 5uy ->
+                DesrlUtil.getTwo
+                    StringSrl.deserialise
+                    DirectionSrl.deserialise
+                    (fun id d -> WorldEvent.Type.TurnedTowards (id, d))
+                    objectBytes
             | _ ->
                 printfn "Unknown WorldEvent tag %u" tag
                 Option.None
