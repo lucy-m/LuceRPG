@@ -1,6 +1,8 @@
 ﻿using LuceRPG.Adapters;
 using LuceRPG.Game.Models;
 using LuceRPG.Models;
+using Microsoft.FSharp.Collections;
+using Microsoft.FSharp.Core;
 
 namespace LuceRPG.Game.Stores
 {
@@ -38,6 +40,18 @@ namespace LuceRPG.Game.Stores
         public bool HasWorld()
         {
             return World != null;
+        }
+
+        public FSharpOption<WithId.Model<WorldObjectModule.Payload>> GetObject(string id)
+        {
+            if (World == null)
+            {
+                return FSharpOption<WithId.Model<WorldObjectModule.Payload>>.None;
+            }
+            else
+            {
+                return MapModule.TryFind(id, World.objects);
+            }
         }
     }
 }

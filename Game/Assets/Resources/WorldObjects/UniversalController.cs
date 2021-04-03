@@ -161,8 +161,7 @@ namespace LuceRPG.Game.WorldObjects
 
         public WorldObjectModule.Payload GetModel()
         {
-            var worldStore = Registry.Stores.World.World;
-            var tModel = MapModule.TryFind(Id, worldStore.objects);
+            var tModel = Registry.Stores.World.GetObject(Id);
 
             if (tModel.HasValue())
             {

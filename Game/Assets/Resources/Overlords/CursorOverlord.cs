@@ -15,10 +15,11 @@ public class CursorOverlord : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (Camera.current != null)
-        {
-            var worldPosition = InputProvider.GetMousePosition(Camera.current);
+        var tWorldPosition = InputProvider.GetMousePosition(Camera.current);
 
+        if (tWorldPosition.HasValue && WorldStore.HasWorld())
+        {
+            var worldPosition = tWorldPosition.Value;
             var point = PointModule.create((int)worldPosition.x, (int)worldPosition.y);
             CursorStore.Position = point;
 

@@ -410,12 +410,10 @@ public class WorldLoadTests
     [UnityTest]
     public IEnumerator CursorDisplayCorrect()
     {
-        // Wall is at 2,4
-        // Spawn point is at 0,1
+        // Wall at 2,4
+        // Spawn point at 0,1
+        // Player at 4,8
         // world bounds are 0,0 10,10
-
-        // Need to yield here to ensure Camera.current is set
-        yield return null;
 
         // Objects correctly loaded
         var cursorOverlord = GameObject.FindObjectOfType<CursorOverlord>();
@@ -437,7 +435,6 @@ public class WorldLoadTests
         Assert.That(cursorDisplay.Size, Is.EqualTo(PointModule.p1x1));
         Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.NoObjectColour));
 
-
         // Cursor is over the wall object
         testInputProvider.MousePosition = new Vector3(2.3f, 5.6f);
         yield return null;
@@ -452,7 +449,6 @@ public class WorldLoadTests
         Assert.That(cursorDisplay.Size, Is.EqualTo(WorldObjectModule.size(wallModel.value)));
         Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.OverObjectColor));
 
-
         // Cursor is over spawn point
         testInputProvider.MousePosition = new Vector3(0, 1.3f);
         yield return null;
@@ -466,5 +462,50 @@ public class WorldLoadTests
         Assert.That(cursorDisplay.Position, Is.EqualTo(CursorStore.Position));
         Assert.That(cursorDisplay.Size, Is.EqualTo(PointModule.p1x1));
         Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.NoObjectColour));
+    }
+
+    [UnityTest]
+    public IEnumerator PlayerLooksAtCursor()
+    {
+        // Player at 4,8
+
+        // Objects correctly loaded
+        var cursorOverlord = GameObject.FindObjectOfType<CursorOverlord>();
+        var cursorDisplay = GameObject.FindObjectOfType<CursorDisplayController>();
+        Assert.That(cursorOverlord == null, Is.False);
+        Assert.That(cursorDisplay == null, Is.False);
+
+        var playerObject = UniversalController.GetById(playerModel.id);
+        Assert.That(playerObject == null, Is.False);
+
+        // Cursor to east of player
+        testInputProvider.MousePosition = new Vector3(6.1f, 8.3f);
+        yield return null;
+        Assert.That(playerObject.GetModel().facing, Is.EqualTo(DirectionModule.Model.East));
+        yield return null;
+
+        // Cursor to north of player
+        testInputProvider.MousePosition = new Vector3(5.1f, 13.3f);
+        yield return null;
+        Assert.That(playerObject.GetModel().facing, Is.EqualTo(DirectionModule.Model.North));
+        yield return null;
+
+        // Cursor on player does not change direction
+        testInputProvider.MousePosition = new Vector3(4.1f, 8.3f);
+        yield return null;
+        Assert.That(playerObject.GetModel().facing, Is.EqualTo(DirectionModule.Model.North));
+        yield return null;
+
+        // Cursor west of player
+        testInputProvider.MousePosition = new Vector3(1.1f, 9.3f);
+        yield return null;
+        Assert.That(playerObject.GetModel().facing, Is.EqualTo(DirectionModule.Model.West));
+        yield return null;
+
+        // Cursor south of player
+        testInputProvider.MousePosition = new Vector3(3f, -11.3f);
+        yield return null;
+        Assert.That(playerObject.GetModel().facing, Is.EqualTo(DirectionModule.Model.South));
+        yield return null;
     }
 }
