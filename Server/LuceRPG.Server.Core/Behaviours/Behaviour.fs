@@ -12,6 +12,7 @@ module Behaviour =
 
     type MovementStep =
         | Move of Direction * byte
+        | TurnTo of Direction
         | Wait of int64
 
     let rec patrol
@@ -23,14 +24,27 @@ module Behaviour =
         let update (timestamp: int64): ObjectlessIntention seq * Model Option =
             match steps with
             | nextStep::tl ->
+                let newSteps =
+                    if repeat
+                    then List.append tl [nextStep]
+                    else tl
+
                 match nextStep with
                 | Move (d, n) ->
                     let intention (id: Id.WorldObject)
                         = Intention.Type.Move (id, d, n)
-                    let newSteps =
-                        if repeat
-                        then List.append tl [nextStep]
-                        else tl
+
+                    // if this is the last step then terminate
+                    let next =
+                        if newSteps |> List.isEmpty
+                        then Option.None
+                        else Option.Some (patrol newSteps repeat Option.None)
+
+                    Seq.singleton intention, next
+
+                | TurnTo d ->
+                    let intention (id: Id.WorldObject)
+                        = Intention.Type.TurnTowards (id, d)
 
                     // if this is the last step then terminate
                     let next =
@@ -48,10 +62,6 @@ module Behaviour =
                         then
                             // Finished waiting, move on to next step
                             // Initiate next step immediately
-                            let newSteps =
-                                if repeat
-                                then List.append tl [nextStep]
-                                else tl
 
                             (patrol newSteps repeat Option.None).update timestamp
                         else
@@ -91,6 +101,26 @@ module Behaviour =
             |> List.ofSeq
 
         patrol steps repeat Option.None
+
+    let spinner (pauseBetween: System.TimeSpan): Model =
+        let wait = MovementStep.Wait pauseBetween.Ticks
+
+        let steps =
+            [
+                Direction.North
+                Direction.East
+                Direction.South
+                Direction.West
+            ]
+            |> List.collect (fun d ->
+                let turn = MovementStep.TurnTo d
+
+                if pauseBetween.Ticks >= 0L
+                then [turn; wait]
+                else [turn]
+            )
+
+        patrol steps true Option.None
 
     /// minWait and maxWait should be <= 3 minutes due to number truncation
     let randomWalk

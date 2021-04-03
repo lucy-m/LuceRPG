@@ -128,6 +128,10 @@ module PrimordiaVille =
                     true
                 |> WithId.create
 
+            let spinner =
+                Behaviour.spinner (System.TimeSpan.FromSeconds(1.0))
+                |> WithId.create
+
             let randomPatrol =
                 Behaviour.randomWalk
                     System.TimeSpan.Zero
@@ -146,7 +150,7 @@ module PrimordiaVille =
 
             [
                 NpcIds.annie, randomPatrol
-                NpcIds.harry, simpleSquare
+                NpcIds.harry, spinner
                 NpcIds.bob, backAndForth
             ] |> Map.ofList
 
