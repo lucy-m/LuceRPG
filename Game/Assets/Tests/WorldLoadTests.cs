@@ -4,6 +4,7 @@ using LuceRPG.Game.Models;
 using LuceRPG.Game.Overlords;
 using LuceRPG.Game.Providers;
 using LuceRPG.Game.Services;
+using LuceRPG.Game.Stores;
 using LuceRPG.Game.Utility;
 using LuceRPG.Game.WorldObjects;
 using LuceRPG.Models;
@@ -30,6 +31,8 @@ public class WorldLoadTests
     private readonly string clientId = "client-id";
     private readonly string playerName = "test-player";
     private readonly string interactionText = "Hello {player}!";
+
+    private CursorStore CursorStore => Registry.Stores.Cursor;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -88,7 +91,7 @@ public class WorldLoadTests
     {
         // Scene correctly loaded
         var worldOverlord = GameObject.FindObjectOfType<WorldOverlord>();
-        Assert.That(worldOverlord, Is.Not.Null);
+        Assert.That(worldOverlord == null, Is.False);
 
         // Store data is correct
         var worldStore = Registry.Stores.World;
@@ -304,6 +307,8 @@ public class WorldLoadTests
 
         testCommsService.OnUpdate(tsGetSinceResult);
 
+        // Need to wait two frames since objects are destroyed at the end of the frame
+        yield return null;
         yield return null;
 
         // wall object should be destroyed
@@ -400,5 +405,66 @@ public class WorldLoadTests
         var bcs = GameObject.FindObjectsOfType<BackgroundController>();
         Assert.That(bcs.Length, Is.EqualTo(1));
         Assert.That(bcs.Single().Rect, Is.EqualTo(bounds.Single()));
+    }
+
+    [UnityTest]
+    public IEnumerator CursorDisplayCorrect()
+    {
+        // Wall is at 2,4
+        // Spawn point is at 0,1
+        // world bounds are 0,0 10,10
+
+        // Need to yield here to ensure Camera.current is set
+        yield return null;
+
+        // Objects correctly loaded
+        var cursorOverlord = GameObject.FindObjectOfType<CursorOverlord>();
+        var cursorDisplay = GameObject.FindObjectOfType<CursorDisplayController>();
+        Assert.That(cursorOverlord == null, Is.False);
+        Assert.That(cursorDisplay == null, Is.False);
+
+        // Cursor is over no object
+        testInputProvider.MousePosition = new Vector3(5.5f, 6.1f);
+        yield return null;
+
+        // Store is correct
+        Assert.That(CursorStore.Position, Is.EqualTo(PointModule.create(5, 6)));
+        Assert.That(CursorStore.CursorOverObject, Is.EqualTo(null));
+
+        // Cursor display is correct on next frame
+        yield return null;
+        Assert.That(cursorDisplay.Position, Is.EqualTo(CursorStore.Position));
+        Assert.That(cursorDisplay.Size, Is.EqualTo(PointModule.p1x1));
+        Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.NoObjectColour));
+
+
+        // Cursor is over the wall object
+        testInputProvider.MousePosition = new Vector3(2.3f, 5.6f);
+        yield return null;
+
+        // store is correct
+        Assert.That(CursorStore.Position, Is.EqualTo(PointModule.create(2, 5)));
+        Assert.That(CursorStore.CursorOverObject, Is.EqualTo(wallModel));
+
+        // Cursor display is correct on next frame
+        yield return null;
+        Assert.That(cursorDisplay.Position, Is.EqualTo(wallModel.value.btmLeft));
+        Assert.That(cursorDisplay.Size, Is.EqualTo(WorldObjectModule.size(wallModel.value)));
+        Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.OverObjectColor));
+
+
+        // Cursor is over spawn point
+        testInputProvider.MousePosition = new Vector3(0, 1.3f);
+        yield return null;
+
+        // Store is correct
+        Assert.That(CursorStore.Position, Is.EqualTo(PointModule.create(0, 1)));
+        Assert.That(CursorStore.CursorOverObject, Is.EqualTo(null));
+
+        // Cursor display is correct on next frame
+        yield return null;
+        Assert.That(cursorDisplay.Position, Is.EqualTo(CursorStore.Position));
+        Assert.That(cursorDisplay.Size, Is.EqualTo(PointModule.p1x1));
+        Assert.That(cursorDisplay.ColourController.Colour, Is.EqualTo(CursorDisplayController.NoObjectColour));
     }
 }
