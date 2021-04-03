@@ -39,28 +39,28 @@ module IntentionProcessing =
         let timestamp = iIntention.tsIntention.timestamp
         let clientId = intention.value.clientId
 
+        let clientOwnsObject (id: Id.WorldObject): bool =
+            let isServer =
+                tServerId
+                |> Option.map (fun serverId -> clientId = serverId)
+                |> Option.defaultValue false
+
+            if isServer
+            then true
+            else
+                tObjectClientMap
+                |> Option.map (fun objectClientMap ->
+                    objectClientMap
+                    |> Map.tryFind id
+                    |> Option.map (fun cId -> cId = clientId)
+                    |> Option.defaultValue false
+                )
+                |> Option.defaultValue true
+
         match intention.value.t with
         | Intention.Move (id, dir, amount) ->
             // May generate an event to move the object to its target location
-            let clientOwnsObject =
-                let isServer =
-                    tServerId
-                    |> Option.map (fun serverId -> clientId = serverId)
-                    |> Option.defaultValue false
-
-                if isServer
-                then true
-                else
-                    tObjectClientMap
-                    |> Option.map (fun objectClientMap ->
-                        objectClientMap
-                        |> Map.tryFind id
-                        |> Option.map (fun cId -> cId = clientId)
-                        |> Option.defaultValue false
-                    )
-                    |> Option.defaultValue true
-
-            if not clientOwnsObject
+            if not (clientOwnsObject id)
             then thisUnchanged (sprintf "Client %s does not own object %s" clientId id)
             else
                 let tBusyUntil =
@@ -148,6 +148,34 @@ module IntentionProcessing =
                                     world = newWorld
                                     log = Option.None
                                 }
+
+        | Intention.TurnTowards (id, dir) ->
+            if not (clientOwnsObject id)
+            then thisUnchanged (sprintf "Client %s does not own object %s" clientId id)
+            else
+                let tObj = world.value.objects |> Map.tryFind id
+
+                match tObj with
+                | Option.None -> thisUnchanged (sprintf "Unknown object %s in world %s" id world.id)
+                | Option.Some obj ->
+                    let newObj = WithId.map (WorldObject.turnTowards dir) obj
+
+                    if not (World.canPlace newObj world.value)
+                    then thisIgnored
+                    else
+                        let event =
+                            WorldEvent.TurnedTowards (id, dir)
+                            |> WorldEvent.asResult intention.id world.id iIntention.index
+
+                        let newWorld = EventApply.apply event world
+
+                        {
+                            events = [event]
+                            delayed = []
+                            objectBusyMap = objectBusyMap
+                            world = newWorld
+                            log = Option.None
+                        }
 
         // These are not processed at the world level
         | Intention.JoinWorld _ -> thisIgnored
@@ -538,6 +566,7 @@ module IntentionProcessing =
             | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
 
         | Intention.Move _ -> thisIgnored
+        | Intention.TurnTowards _ -> thisIgnored
 
     type ProcessManyResult =
         {

@@ -15,6 +15,14 @@ module EventApply =
                 )
                 |> Option.defaultValue world
 
+            | WorldEvent.Type.TurnedTowards (id, dir) ->
+                world.value.objects |> Map.tryFind id
+                |> Option.map (fun obj ->
+                    let newObj = WithId.map (WorldObject.turnTowards dir) obj
+                    world |> WithId.map (World.addObject newObj)
+                )
+                |> Option.defaultValue world
+
             | WorldEvent.Type.ObjectAdded obj ->
                 world |> WithId.map (World.addObject obj)
 

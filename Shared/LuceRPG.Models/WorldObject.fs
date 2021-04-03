@@ -91,6 +91,12 @@ module WorldObject =
     let moveObject (direction: Direction) (obj: Payload): Payload =
         moveObjectN direction 1 obj
 
+    let turnTowards (direction: Direction) (obj: Payload): Payload =
+        {
+            obj with
+                facing = direction
+        }
+
     let atLocation (btmLeft: Point) (obj: Payload): Payload =
         {
             obj with
