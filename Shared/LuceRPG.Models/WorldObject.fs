@@ -5,7 +5,7 @@ module WorldObject =
     module Type =
         type Model =
             | Wall
-            | Path of int * int
+            | Path of Point
             | Player of CharacterData
             | NPC of CharacterData
             | Warp of Warp
@@ -46,7 +46,7 @@ module WorldObject =
     let size (obj: Payload): Point =
         match obj.t with
         | Type.Wall -> Point.p2x2
-        | Type.Path (w,h) -> Point.create w h
+        | Type.Path s -> s
         | Type.Player _ -> Point.p2x1
         | Type.NPC _ -> Point.p2x1
         | Type.Warp w -> Warp.size w obj.facing

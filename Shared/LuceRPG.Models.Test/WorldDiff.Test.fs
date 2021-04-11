@@ -55,7 +55,7 @@ module WorldDiff =
             |> WithId.create
 
         let unmatchingObject2 =
-            WorldObject.create (WorldObject.Type.Path (1, 1)) (Point.create 8 10) Direction.South
+            WorldObject.create (WorldObject.Type.Path Point.p1x1) (Point.create 8 10) Direction.South
             |> WithId.useId unmatchingObject1.id
 
         let world1 =

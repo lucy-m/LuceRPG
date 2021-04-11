@@ -261,6 +261,36 @@ module World =
                     warpAtPos.IsSome |> should equal true
                     warpAtPos.Value |> snd |> should equal warpData.Value
 
+            [<TestFixture>]
+            module ``with paths`` =
+                // Paths overlap at point 3,0
+
+                let path1 =
+                    WorldObject.Type.Path (Point.create 4 1)
+                    |> fun t -> WorldObject.create t Point.zero Direction.South
+                    |> WithId.create
+
+                let path2 =
+                    WorldObject.Type.Path (Point.create 2 2)
+                    |> fun t -> WorldObject.create t (Point.create 3 0) Direction.South
+                    |> WithId.create
+
+                let pathWorld = World.addObjects [path1; path2] emptyWorld
+
+                [<Test>]
+                let ``paths returns correct value`` () =
+                    let expected =
+                        [
+                            0,0; 1,0; 2,0; 3,0;     // from path 1
+                            4,0; 3,1; 4,1;          // from path 2
+                        ]
+                        |> List.map (fun (x,y) -> Point.create x y)
+                        |> Set.ofList
+
+                    let actual = World.paths pathWorld
+
+                    actual |> should equal expected
+
         [<TestFixture>]
         module ``for a world made of two rects`` =
             let bounds =

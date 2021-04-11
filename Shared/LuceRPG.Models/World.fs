@@ -22,6 +22,17 @@ module World =
     let objectList (world: Payload): WorldObject List =
         WithId.toList world.objects
 
+    let paths (world: Payload): Point Set =
+        world.objects
+        |> Map.toSeq
+        |> Seq.choose (fun (_id, obj) ->
+            match obj.value.t with
+            | WorldObject.Type.Path _ -> WorldObject.getPoints obj.value |> Option.Some
+            | _ -> Option.None
+        )
+        |> Seq.collect id
+        |> Set.ofSeq
+
     let empty
             (name: string)
             (bounds: Rect seq)

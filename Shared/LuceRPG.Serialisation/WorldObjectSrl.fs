@@ -18,8 +18,7 @@ module WorldObjectSrl =
         let addtInfo =
             match t with
             | WorldObject.Type.Wall -> [||]
-            | WorldObject.Type.Path (w,h) ->
-                Array.append (IntSrl.serialise w) (IntSrl.serialise h)
+            | WorldObject.Type.Path s -> PointSrl.serialise s
             | WorldObject.Type.Player d -> CharacterDataSrl.serialise d
             | WorldObject.Type.NPC d -> CharacterDataSrl.serialise d
             | WorldObject.Type.Warp wd -> WarpSrl.serialise wd
@@ -37,11 +36,8 @@ module WorldObjectSrl =
             match tag with
             | 1uy -> DesrlResult.create WorldObject.Type.Wall 0
             | 2uy ->
-                DesrlUtil.getTwo
-                    IntSrl.deserialise
-                    IntSrl.deserialise
-                    (fun w h -> WorldObject.Type.Path (w,h))
-                    objectBytes
+                PointSrl.deserialise objectBytes
+                |> DesrlResult.map WorldObject.Type.Path
             | 3uy ->
                 CharacterDataSrl.deserialise objectBytes
                 |> DesrlResult.map WorldObject.Type.Player
