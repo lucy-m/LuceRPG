@@ -250,7 +250,8 @@ namespace LuceRPG.Game.Overlords
             var prefab = PathPrefab;
             var parent = PathRoot.transform;
 
-            Instantiate(prefab, location, Quaternion.identity, parent);
+            var pc = Instantiate(prefab, location, Quaternion.identity, parent);
+            pc.Point = path;
         }
 
         private void OnDiff(
