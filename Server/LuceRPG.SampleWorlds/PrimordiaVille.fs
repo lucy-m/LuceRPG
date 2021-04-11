@@ -34,7 +34,10 @@ module PrimordiaVille =
         let paths =
             [
                 4,9,14,1
-                16,10,2,4
+                16,10,2,5
+                17,8,1,1
+                17,7,21,1
+                36,9,2,2
             ]
             |> List.map (fun (x,y,w,h) ->
                 WorldObject.create
