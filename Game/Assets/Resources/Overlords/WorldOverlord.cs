@@ -13,13 +13,14 @@ namespace LuceRPG.Game.Overlords
     public class WorldOverlord : MonoBehaviour
     {
         public GameObject WallPrefab = null;
-        public GameObject PathPrefab = null;
         public GameObject PlayerPrefab = null;
         public GameObject NpcPrefab = null;
         public GameObject WarpPrefab = null;
         public GameObject TreePrefab = null;
         public GameObject InnPrefab = null;
         public GameObject FlowerPrefab;
+
+        public PathController PathPrefab = null;
 
         public BackgroundController BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
@@ -28,11 +29,13 @@ namespace LuceRPG.Game.Overlords
 
         public GameObject FlowerRoot = null;
         public GameObject TreeRoot = null;
+        public GameObject PathRoot = null;
 
         private void Start()
         {
             FlowerRoot = new GameObject("FlowerRoot");
             TreeRoot = new GameObject("TreeRoot");
+            PathRoot = new GameObject("PathRoot");
 
             Registry.Processors.Intentions.RegisterOnEvent(we => OnWorldEvent(we, UpdateSource.Game));
 
@@ -60,7 +63,8 @@ namespace LuceRPG.Game.Overlords
             }
             else if (t.IsPath)
             {
-                return PathPrefab;
+                // Handled as special case
+                return null;
             }
             else if (t.IsPlayer)
             {
@@ -132,6 +136,13 @@ namespace LuceRPG.Game.Overlords
                     var obj = kvp.Value;
                     AddObject(obj);
                 }
+
+                var paths = Registry.Stores.World.Paths;
+
+                foreach (var path in paths)
+                {
+                    AddPath(path);
+                }
             }
         }
 
@@ -153,6 +164,12 @@ namespace LuceRPG.Game.Overlords
             foreach (var bg in bgs)
             {
                 Destroy(bg.gameObject);
+            }
+
+            var paths = GameObject.FindObjectsOfType<PathController>();
+            foreach (var path in paths)
+            {
+                Destroy(path.gameObject);
             }
 
             yield return null;
@@ -202,13 +219,6 @@ namespace LuceRPG.Game.Overlords
                 uc.Id = obj.id;
                 uc.SetModelProps(obj.value);
 
-                if (obj.value.t.IsPath)
-                {
-                    var size = WorldObjectModule.size(obj.value);
-                    var spriteRenderer = go.GetComponent<SpriteRenderer>();
-                    spriteRenderer.size = new Vector2(size.x, size.y);
-                }
-
                 if (obj.id == Registry.Stores.World.PlayerId)
                 {
                     Debug.Log($"Adding camera to {obj.id}");
@@ -232,6 +242,15 @@ namespace LuceRPG.Game.Overlords
                     caController.CharacterData = charData.Value;
                 }
             }
+        }
+
+        private void AddPath(PointModule.Model path)
+        {
+            var location = path.ToVector3();
+            var prefab = PathPrefab;
+            var parent = PathRoot.transform;
+
+            Instantiate(prefab, location, Quaternion.identity, parent);
         }
 
         private void OnDiff(

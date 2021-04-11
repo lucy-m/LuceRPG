@@ -8,11 +8,23 @@ namespace LuceRPG.Game.Stores
 {
     public class WorldStore
     {
+        private WithId.Model<WorldModule.Payload> _idWorld;
+
         public string PlayerId { get; private set; }
         public string ClientId { get; private set; }
-        public WithId.Model<WorldModule.Payload> IdWorld { get; set; }
         public InteractionStore Interactions { get; set; }
+        public FSharpSet<PointModule.Model> Paths { get; private set; }
         public long LastUpdate { get; set; }
+
+        public WithId.Model<WorldModule.Payload> IdWorld
+        {
+            get => _idWorld;
+            set
+            {
+                _idWorld = value;
+                Paths = WorldModule.paths(_idWorld.value);
+            }
+        }
 
         public string WorldId => IdWorld.id;
 

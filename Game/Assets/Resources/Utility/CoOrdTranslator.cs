@@ -41,7 +41,7 @@ namespace LuceRPG.Game.Utility
 
         public static Vector3 ToVector3(this PointModule.Model p)
         {
-            return new Vector3(p.x, p.y);
+            return new Vector3(p.x, p.y, p.y);
         }
     }
 }

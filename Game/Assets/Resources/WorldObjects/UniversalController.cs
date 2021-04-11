@@ -39,9 +39,7 @@ namespace LuceRPG.Game.WorldObjects
             get => _target;
             set
             {
-                var z = value.y;
-                _target = new Vector3(value.x, value.y, z);
-                transform.position = new Vector3(transform.position.x, transform.position.y, z);
+                _target = value;
             }
         }
 
