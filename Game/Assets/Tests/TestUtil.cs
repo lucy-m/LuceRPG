@@ -18,10 +18,4 @@ public static class TestUtil
 
         return WithId.create(payload);
     }
-
-    public static void AssertXYMatch(Vector3 actual, Vector3 expected)
-    {
-        Assert.That(actual.x, Is.EqualTo(expected.x));
-        Assert.That(actual.y, Is.EqualTo(expected.y));
-    }
 }

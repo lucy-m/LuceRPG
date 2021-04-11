@@ -13,8 +13,6 @@ namespace LuceRPG.Game.WorldObjects
         public readonly static Dictionary<string, UniversalController> Controllers
             = new Dictionary<string, UniversalController>();
 
-        private Vector3 _target;
-
         [SerializeField]
         private string _id = "";
 
@@ -34,14 +32,7 @@ namespace LuceRPG.Game.WorldObjects
             }
         }
 
-        public Vector3 Target
-        {
-            get => _target;
-            set
-            {
-                _target = value;
-            }
-        }
+        public Vector3 Target { get; private set; }
 
         public static UniversalController GetById(string id)
         {
