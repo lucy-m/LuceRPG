@@ -26,8 +26,14 @@ namespace LuceRPG.Game.Overlords
         public GameObject UnitNamePrefab = null;
         public Canvas WorldTextCanvas = null;
 
+        public GameObject FlowerRoot = null;
+        public GameObject TreeRoot = null;
+
         private void Start()
         {
+            FlowerRoot = new GameObject("FlowerRoot");
+            TreeRoot = new GameObject("TreeRoot");
+
             Registry.Processors.Intentions.RegisterOnEvent(we => OnWorldEvent(we, UpdateSource.Game));
 
             Registry.Services.ConfigLoader.LoadConfig();
@@ -82,6 +88,22 @@ namespace LuceRPG.Game.Overlords
             }
 
             Debug.Log($"Unknown object type {t.Tag}");
+            return null;
+        }
+
+        private Transform GetParent(WithId.Model<WorldObjectModule.Payload> obj)
+        {
+            var t = obj.value.t;
+
+            if (t.IsTree)
+            {
+                return TreeRoot.transform;
+            }
+            else if (t.IsFlower)
+            {
+                return FlowerRoot.transform;
+            }
+
             return null;
         }
 
@@ -169,7 +191,8 @@ namespace LuceRPG.Game.Overlords
 
             if (prefab != null)
             {
-                var go = Instantiate(prefab, location, Quaternion.identity);
+                var parent = GetParent(obj);
+                var go = Instantiate(prefab, location, Quaternion.identity, parent);
 
                 if (!go.TryGetComponent<UniversalController>(out var uc))
                 {
