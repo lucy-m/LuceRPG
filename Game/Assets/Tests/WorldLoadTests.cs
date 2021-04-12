@@ -104,14 +104,14 @@ public class WorldLoadTests
         Assert.That(playerObject, Is.Not.Null);
         var location = playerObject.transform.position;
         var expectedLocation = playerModel.GetBtmLeft();
-        TestUtil.AssertXYMatch(location, expectedLocation);
+        Assert.That(location, Is.EqualTo(expectedLocation));
 
         //Wall loads correctly
         var wallObject = UniversalController.GetById(wallModel.id);
         Assert.That(wallObject, Is.Not.Null);
         location = wallObject.gameObject.transform.position;
         expectedLocation = wallModel.GetBtmLeft();
-        TestUtil.AssertXYMatch(location, expectedLocation);
+        Assert.That(location, Is.EqualTo(expectedLocation));
 
         yield return null;
     }
@@ -216,7 +216,7 @@ public class WorldLoadTests
         var playerObject = UniversalController.GetById(playerModel.id);
         var expectedTarget = playerObject.GetModel().btmLeft.ToVector3();
 
-        TestUtil.AssertXYMatch(playerObject.Target, expectedTarget);
+        Assert.That(playerObject.Target, Is.EqualTo(expectedTarget));
 
         // wall object target should be unchanged
         var wallObject = UniversalController.GetById(wallModel.id);
@@ -227,11 +227,12 @@ public class WorldLoadTests
         // after a frame the player moves towards the target
         var priorPosition = playerObject.transform.position;
         yield return null;
+        yield return null;
         var afterPosition = playerObject.transform.position;
         var positionChange = afterPosition - priorPosition;
 
-        var movesSouth = Vector3.Dot(positionChange.normalized, new Vector3(0, -1)) == 1;
-        Assert.That(movesSouth, Is.True);
+        Assert.That(positionChange.x, Is.EqualTo(0));
+        Assert.That(positionChange.y, Is.LessThan(0));
 
         // the player eventually reaches the target
         for (var i = 0; i < 10; i++)

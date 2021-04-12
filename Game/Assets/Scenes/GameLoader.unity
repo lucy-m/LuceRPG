@@ -153,17 +153,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   WallPrefab: {fileID: 1043136130290738900, guid: 716fdbb9a817f3744907912a8df15f2a, type: 3}
-  PathPrefab: {fileID: 8145506027414206273, guid: f23905c806685a34ab6772670663faba, type: 3}
   PlayerPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
   NpcPrefab: {fileID: 1113982545424815417, guid: 1688722a3fd2be24f93769ebaeec85f4, type: 3}
   WarpPrefab: {fileID: 5365399715254733196, guid: a825a54bebeed7c44b8a5474e5a95ec0, type: 3}
   TreePrefab: {fileID: 6954832426385836639, guid: 5d2b0f4c8d0649d42b982945e1d86158, type: 3}
   InnPrefab: {fileID: 6639082945074291125, guid: 80db9a0a587461645895b58ee8273060, type: 3}
   FlowerPrefab: {fileID: 553352091567951100, guid: faf83f751185d524cba5ab09bd0f7a7a, type: 3}
+  PathPrefab: {fileID: 5450514620963316511, guid: 05ded45bc831a11409fcb14f6c93bdf8, type: 3}
   BackgroundPrefab: {fileID: 8901204032175359068, guid: 207287b1931d5cd42ba1666f386c911f, type: 3}
   CameraPrefab: {fileID: 4397631990221490018, guid: 9a171321d98dd374a8aa309e3588b60b, type: 3}
   UnitNamePrefab: {fileID: 7693043972235348111, guid: e247afec652705246812a363826525e1, type: 3}
   WorldTextCanvas: {fileID: 6379862769691336820}
+  FlowerRoot: {fileID: 0}
+  TreeRoot: {fileID: 0}
+  PathRoot: {fileID: 0}
 --- !u!4 &45292519
 Transform:
   m_ObjectHideFlags: 0

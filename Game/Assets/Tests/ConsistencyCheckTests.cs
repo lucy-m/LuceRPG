@@ -96,7 +96,7 @@ public class ConsistencyCheckTests
         var actual = go.transform.position;
         var expected = wo.GetBtmLeft();
 
-        TestUtil.AssertXYMatch(actual, expected);
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     [UnityTest]
@@ -125,7 +125,7 @@ public class ConsistencyCheckTests
         ObjMatchesModelPosition(objToMove, modelToMove);
 
         // target should be set to the new location
-        TestUtil.AssertXYMatch(objToMove.Target, updatedToMove.GetBtmLeft());
+        Assert.That(objToMove.Target, Is.EqualTo(updatedToMove.GetBtmLeft()));
 
         yield return null;
     }
@@ -138,7 +138,7 @@ public class ConsistencyCheckTests
         // moves position and target to the new location
         var objToSnap = UniversalController.GetById(modelToSnap.id);
         ObjMatchesModelPosition(objToSnap, updatedToSnap);
-        TestUtil.AssertXYMatch(objToSnap.Target, updatedToSnap.GetBtmLeft());
+        Assert.That(objToSnap.Target, Is.EqualTo(updatedToSnap.GetBtmLeft()));
 
         yield return null;
     }

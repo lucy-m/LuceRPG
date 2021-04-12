@@ -29,7 +29,23 @@ module PrimordiaVille =
                 Rect.create 19 0 22 16
             ]
 
-        let spawnPoint = Point.create 16 7
+        let spawnPoint = Point.create 2 9
+
+        let paths =
+            [
+                4,9,14,1
+                16,10,2,5
+                17,8,1,1
+                17,7,21,1
+                36,9,2,2
+            ]
+            |> List.map (fun (x,y,w,h) ->
+                WorldObject.create
+                    (WorldObject.Type.Path (Point.create w h))
+                    (Point.create x y)
+                    Direction.South
+                |> WithId.create
+            )
 
         let trees =
             [
@@ -157,6 +173,7 @@ module PrimordiaVille =
         let allObjects =
             List.concat
                 [
+                    paths
                     trees
                     flowers
                     flowerBeds

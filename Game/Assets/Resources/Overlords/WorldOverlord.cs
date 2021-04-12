@@ -13,7 +13,6 @@ namespace LuceRPG.Game.Overlords
     public class WorldOverlord : MonoBehaviour
     {
         public GameObject WallPrefab = null;
-        public GameObject PathPrefab = null;
         public GameObject PlayerPrefab = null;
         public GameObject NpcPrefab = null;
         public GameObject WarpPrefab = null;
@@ -21,13 +20,23 @@ namespace LuceRPG.Game.Overlords
         public GameObject InnPrefab = null;
         public GameObject FlowerPrefab;
 
+        public PathController PathPrefab = null;
+
         public BackgroundController BackgroundPrefab = null;
         public GameObject CameraPrefab = null;
         public GameObject UnitNamePrefab = null;
         public Canvas WorldTextCanvas = null;
 
+        public GameObject FlowerRoot = null;
+        public GameObject TreeRoot = null;
+        public GameObject PathRoot = null;
+
         private void Start()
         {
+            FlowerRoot = new GameObject("FlowerRoot");
+            TreeRoot = new GameObject("TreeRoot");
+            PathRoot = new GameObject("PathRoot");
+
             Registry.Processors.Intentions.RegisterOnEvent(we => OnWorldEvent(we, UpdateSource.Game));
 
             Registry.Services.ConfigLoader.LoadConfig();
@@ -54,7 +63,8 @@ namespace LuceRPG.Game.Overlords
             }
             else if (t.IsPath)
             {
-                return PathPrefab;
+                // Handled as special case
+                return null;
             }
             else if (t.IsPlayer)
             {
@@ -85,6 +95,22 @@ namespace LuceRPG.Game.Overlords
             return null;
         }
 
+        private Transform GetParent(WithId.Model<WorldObjectModule.Payload> obj)
+        {
+            var t = obj.value.t;
+
+            if (t.IsTree)
+            {
+                return TreeRoot.transform;
+            }
+            else if (t.IsFlower)
+            {
+                return FlowerRoot.transform;
+            }
+
+            return null;
+        }
+
         private void LoadWorldGameObjects()
         {
             var world = Registry.Stores.World.World;
@@ -110,6 +136,13 @@ namespace LuceRPG.Game.Overlords
                     var obj = kvp.Value;
                     AddObject(obj);
                 }
+
+                var paths = Registry.Stores.World.Paths;
+
+                foreach (var path in paths)
+                {
+                    AddPath(path);
+                }
             }
         }
 
@@ -131,6 +164,12 @@ namespace LuceRPG.Game.Overlords
             foreach (var bg in bgs)
             {
                 Destroy(bg.gameObject);
+            }
+
+            var paths = GameObject.FindObjectsOfType<PathController>();
+            foreach (var path in paths)
+            {
+                Destroy(path.gameObject);
             }
 
             yield return null;
@@ -169,7 +208,8 @@ namespace LuceRPG.Game.Overlords
 
             if (prefab != null)
             {
-                var go = Instantiate(prefab, location, Quaternion.identity);
+                var parent = GetParent(obj);
+                var go = Instantiate(prefab, location, Quaternion.identity, parent);
 
                 if (!go.TryGetComponent<UniversalController>(out var uc))
                 {
@@ -178,13 +218,6 @@ namespace LuceRPG.Game.Overlords
 
                 uc.Id = obj.id;
                 uc.SetModelProps(obj.value);
-
-                if (obj.value.t.IsPath)
-                {
-                    var size = WorldObjectModule.size(obj.value);
-                    var spriteRenderer = go.GetComponent<SpriteRenderer>();
-                    spriteRenderer.size = new Vector2(size.x, size.y);
-                }
 
                 if (obj.id == Registry.Stores.World.PlayerId)
                 {
@@ -209,6 +242,16 @@ namespace LuceRPG.Game.Overlords
                     caController.CharacterData = charData.Value;
                 }
             }
+        }
+
+        private void AddPath(PointModule.Model path)
+        {
+            var location = path.ToVector3();
+            var prefab = PathPrefab;
+            var parent = PathRoot.transform;
+
+            var pc = Instantiate(prefab, location, Quaternion.identity, parent);
+            pc.Point = path;
         }
 
         private void OnDiff(
