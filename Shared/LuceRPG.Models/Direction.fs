@@ -17,6 +17,17 @@ module Direction =
 
         Point.add offset point
 
+    let rotateCw (direction: Model): Model =
+        match direction with
+        | North -> East
+        | East -> South
+        | South -> West
+        | West -> North
+
+    let rotateCwN (direction: Model) (turns: uint): Model =
+        [1u.. (turns % 4u)]
+        |> List.fold (fun d _ -> rotateCw d) direction
+
     let asLetter (d: Model): char =
         match d with
         | North -> 'N'
