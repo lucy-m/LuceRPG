@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="WorldGenerator\TileSet.fs" />
     <Compile Include="WorldGenerator\PathWorld.fs" />
     <Compile Include="Behaviours\Behaviour.fs" />
     <Compile Include="Behaviours\BehaviourMap.fs" />
