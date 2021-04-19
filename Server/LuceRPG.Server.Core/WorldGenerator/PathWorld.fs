@@ -186,7 +186,7 @@ module PathWorld =
             }
         )
 
-    let fill (random: System.Random) (tileSet: TileSet) (model: Model): Model =
+    let fill (tileSet: TileSet) (model: Model) (random: System.Random): Model =
         let initial = getLinks model
 
         let rec fillInner (withLinks: WithLinks): WithLinks =

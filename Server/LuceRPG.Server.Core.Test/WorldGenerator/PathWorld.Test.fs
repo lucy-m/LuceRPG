@@ -264,17 +264,82 @@ module PathWorld =
                 }
 
         [<Test>]
-        let ``terminates`` () =
+        let ``does not change world bounds`` () =
+            let checkFn (seed: int): bool =
+                let random = System.Random(seed)
+
+                let bounds = Rect.create 0 0 10 10
+                let tileMap = Map.empty
+                let external = [ Point.create -1 3, set [Direction.East] ] |> Map.ofList
+
+                let model = PathWorld.create tileMap external bounds
+
+                let filled = PathWorld.fill tileSet model random
+
+                filled.bounds = bounds
+
+            Check.QuickThrowOnFailure checkFn
+
+        [<Test>]
+        let ``same seed produces same result`` () =
+            let checkFn (seed: int): bool =
+                let r1 = System.Random(seed)
+                let r2 = System.Random(seed)
+
+                let bounds = Rect.create 0 0 10 10
+                let tileMap = Map.empty
+                let external = [ Point.create -1 3, set [Direction.East] ] |> Map.ofList
+
+                let model = PathWorld.create tileMap external bounds
+
+                let filled1 = PathWorld.fill tileSet model r1
+                let filled2 = PathWorld.fill tileSet model r2
+
+                filled1 = filled2
+
+            Check.QuickThrowOnFailure checkFn
+
+        [<Test>]
+        let ``for a partially filled map, will include the given tiles`` () =
+            let checkFn (seed: int): bool =
+                let random = System.Random(seed)
+
+                let bounds = Rect.create 0 0 10 10
+                let tileMap =
+                    [
+                        0, 0, Tile.LNE
+                        0, 1, Tile.straightEW
+                        4, 4, Tile.cross
+                    ]
+                    |> List.map (fun (x, y, t) -> Point.create x y, t)
+                    |> Map.ofList
+                let external = Map.empty
+
+                let model = PathWorld.create tileMap external bounds
+
+                let filled = PathWorld.fill tileSet model random
+
+                let originalTiles =
+                    tileMap
+                    |> Map.toSeq
+                    |> Set.ofSeq
+
+                filled.tileMap
+                |> Map.toSeq
+                |> Set.ofSeq
+                |> Set.isSubset originalTiles
+
+            Check.QuickThrowOnFailure checkFn
+
+        [<Test>]
+        let ``empty model produces empty result`` () =
             let random = System.Random()
 
-            let bounds = Rect.create 0 0 18 12
+            let bounds = Rect.create 0 0 10 10
             let tileMap = Map.empty
-            let external = [ Point.create -1 3, set [Direction.East] ] |> Map.ofList
+            let external = Map.empty
 
             let model = PathWorld.create tileMap external bounds
+            let filled = PathWorld.fill tileSet model random
 
-            let filled = PathWorld.fill random tileSet model
-
-            let dbg = PathWorld.debugPrint filled
-
-            filled.bounds |> should equal bounds
+            filled.tileMap |> Map.isEmpty |> should equal true
