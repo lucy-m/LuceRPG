@@ -51,7 +51,7 @@ module PathWorld =
 
             let external =
                 [
-                    Direction.movePoint Direction.East 1 btmRight, set [Direction.West]
+                    Direction.movePoint Direction.East 1 btmRight, Direction.West
                 ]
                 |> Map.ofList
 
@@ -71,16 +71,13 @@ module PathWorld =
         let ``external tiles without links are active`` () =
             let bounds = Rect.create 0 0 2 2
             let externalPoint = Point.create -1 0
-            let external =
-                [
-                    externalPoint, set [Direction.East]
-                ]
-                |> Map.ofList
+            let external = [ externalPoint, Direction.East ] |> Map.ofList
 
             let model = PathWorld.create Map.empty external bounds
 
             let withLinks = PathWorld.getLinks model
-            let expected = external
+
+            let expected = [ externalPoint, set[Direction.East]] |> Map.ofList
 
             withLinks.activeLinks |> should equal expected
 
@@ -179,7 +176,7 @@ module PathWorld =
 
                 let expectedExternalMap =
                     [
-                        Point.create 1 0, set [Direction.West]
+                        Point.create 1 0, Direction.West
                     ]
                     |> Map.ofList
 
@@ -191,7 +188,7 @@ module PathWorld =
         module ``adding a tile next to an active external link`` =
             let bounds = Rect.create 0 0 1 1
             let tileSet = TileSet.create [ Tile.deadEndE, 1u, set [0] ]
-            let external = [Point.create 1 0, set [Direction.West]] |> Map.ofList
+            let external = [Point.create 1 0, Direction.West] |> Map.ofList
 
             let model = PathWorld.create Map.empty external bounds
             let withLinks = PathWorld.getLinks model
@@ -200,7 +197,8 @@ module PathWorld =
 
             [<Test>]
             let ``links are correct`` () =
-                withLinks.activeLinks |> should equal external
+                let expected = [Point.create 1 0, set [Direction.West]] |> Map.ofList
+                withLinks.activeLinks |> should equal expected
 
             [<Test>]
             let ``removes the active external link`` () =
@@ -270,7 +268,7 @@ module PathWorld =
 
                 let bounds = Rect.create 0 0 10 10
                 let tileMap = Map.empty
-                let external = [ Point.create -1 3, set [Direction.East] ] |> Map.ofList
+                let external = [ Point.create -1 3, Direction.East ] |> Map.ofList
 
                 let model = PathWorld.create tileMap external bounds
 
@@ -288,7 +286,7 @@ module PathWorld =
 
                 let bounds = Rect.create 0 0 10 10
                 let tileMap = Map.empty
-                let external = [ Point.create -1 3, set [Direction.East] ] |> Map.ofList
+                let external = [ Point.create -1 3, Direction.East ] |> Map.ofList
 
                 let model = PathWorld.create tileMap external bounds
 

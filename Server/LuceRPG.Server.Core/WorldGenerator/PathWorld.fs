@@ -7,7 +7,7 @@ module PathWorld =
     type Model =
         {
             tileMap: Map<Point, Tile>
-            external: Map<Point, Tile>
+            external: Map<Point, Direction>
             bounds: Rect
         }
 
@@ -49,7 +49,7 @@ module PathWorld =
         let activeLinks =
             model.tileMap
             |> Map.toSeq
-            |> Seq.append (model.external |> Map.toSeq)
+            |> Seq.append (model.external |> Map.toSeq |> Seq.map (fun (p, d) -> p, set[d]))
             |> Seq.map (fun (point, tile) ->
                 // Find all directions that point to a missing tile
                 let activeDirections =
@@ -132,13 +132,8 @@ module PathWorld =
             let external =
                 externalLinks
                 |> Seq.fold (fun acc (d, dp) ->
-                    let mapEntry =
-                        acc
-                        |> Map.tryFind dp
-                        |> Option.defaultValue Set.empty
-                        |> Set.add d
 
-                    acc |> Map.add dp mapEntry
+                    acc |> Map.add dp d
 
                 ) withLinks.model.external
 
