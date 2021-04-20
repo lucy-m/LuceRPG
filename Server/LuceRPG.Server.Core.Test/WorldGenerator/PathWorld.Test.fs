@@ -343,3 +343,162 @@ module PathWorld =
             let filled = PathWorld.fill tileSet model random
 
             filled.tileMap |> Map.isEmpty |> should equal true
+
+    [<TestFixture>]
+    module ``getDirMostTiles`` =
+        let bounds = Rect.create 0 0 5 5
+
+        let northMost = 2, 4  // Filled to edge
+        let westMost = set [ 0, 2; 0, 3 ] // Filled to edge
+        let southMost = 2, 1  // Not filled to edge
+        let eastMost = 4, 2   // Filled to edge
+
+        let tileMap =
+            [
+                northMost; southMost; eastMost
+            ]
+            |> Seq.append westMost
+            |> Seq.map (fun (x, y) -> Point.create x y, Tile.deadEnd)
+            |> Map.ofSeq
+
+        let model = PathWorld.create tileMap Map.empty bounds
+
+        [<Test>]
+        let ``north correct`` () =
+            let isFilled, tiles = PathWorld.getDirMostTiles Direction.North model
+
+            isFilled |> should equal true
+            tiles |> List.length |> should equal 1
+
+            let tileCoOrds = tiles.Head |> fst
+
+            (tileCoOrds.x, tileCoOrds.y) |> should equal northMost
+
+        [<Test>]
+        let ``west correct`` () =
+            let isFilled, tiles = PathWorld.getDirMostTiles Direction.West model
+
+            isFilled |> should equal true
+            tiles |> List.length |> should equal 2
+
+            let actual = tiles |> List.map (fun (p, t) -> p.x, p.y) |> Set.ofList
+            actual |> should equal westMost
+
+        [<Test>]
+        let ``south correct`` () =
+            let isFilled, tiles = PathWorld.getDirMostTiles Direction.South model
+
+            isFilled |> should equal false
+            tiles |> List.length |> should equal 1
+
+            let tileCoOrds = tiles.Head |> fst
+
+            (tileCoOrds.x, tileCoOrds.y) |> should equal southMost
+
+        [<Test>]
+        let ``east correct`` () =
+            let isFilled, tiles = PathWorld.getDirMostTiles Direction.East model
+
+            isFilled |> should equal true
+            tiles |> List.length |> should equal 1
+
+            let tileCoOrds = tiles.Head |> fst
+
+            (tileCoOrds.x, tileCoOrds.y) |> should equal eastMost
+
+    [<TestFixture>]
+    module ``fillInDirection`` =
+        let random = System.Random()
+
+        [<TestFixture>]
+        module ``given partially filled world`` =
+            let bounds = Rect.create 0 0 10 10
+
+            let tileMap =       // Create an L shape in SW corner
+                [
+                    0, 1, Tile.deadEndE
+                    1, 1, Tile.LSW
+                    1, 0, Tile.deadEndN
+                ]
+                |> List.map (fun (x, y, t) -> Point.create x y, t)
+                |> Map.ofList
+
+            let initial = PathWorld.create tileMap Map.empty bounds
+
+            let dbg = PathWorld.debugPrint initial
+
+            [<Test>]
+            let ``fill north correct`` () =
+                let northFilled =
+                    PathWorld.fillInDirection
+                        TileSet.fullUniform
+                        Direction.North
+                        initial
+                        random
+
+                let filledDbg = PathWorld.debugPrint northFilled
+
+                let isFilled, _ = PathWorld.getDirMostTiles Direction.North northFilled
+
+                isFilled |> should equal true
+
+            [<Test>]
+            let ``fill east correct`` () =
+                let eastFilled =
+                    PathWorld.fillInDirection
+                        TileSet.fullUniform
+                        Direction.East
+                        initial
+                        random
+
+                let filledDbg = PathWorld.debugPrint eastFilled
+
+                let isFilled, _ = PathWorld.getDirMostTiles Direction.East eastFilled
+
+                isFilled |> should equal true
+
+            [<Test>]
+            let ``fill west does nothing`` () =
+                let westFilled =
+                    PathWorld.fillInDirection
+                        TileSet.fullUniform
+                        Direction.West
+                        initial
+                        random
+
+                westFilled |> should equal initial
+
+            [<Test>]
+            let ``fill south does nothing`` () =
+                let southFilled =
+                    PathWorld.fillInDirection
+                        TileSet.fullUniform
+                        Direction.South
+                        initial
+                        random
+
+                southFilled |> should equal initial
+
+            [<Test>]
+            let ``given same seed will produce same map`` () =
+                let checkFn (seed: int): bool =
+                    let r1 = System.Random(seed)
+                    let r2 = System.Random(seed)
+
+                    let f1 =
+                        PathWorld.fillInDirection
+                            TileSet.fullUniform
+                            Direction.North
+                            initial
+                            r1
+
+                    let f2 =
+                        PathWorld.fillInDirection
+                            TileSet.fullUniform
+                            Direction.North
+                            initial
+                            r2
+
+                    f1 = f2
+
+                Check.QuickThrowOnFailure checkFn

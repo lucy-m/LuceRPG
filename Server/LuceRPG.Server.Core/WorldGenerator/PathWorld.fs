@@ -208,4 +208,84 @@ module PathWorld =
 
         (fillInner initial).model
 
+    /// Gets the tiles in the direction and returns true/false depending on
+    ///   whether the map is filled in that direction
+    let getDirMostTiles (dir: Direction) (model: Model): bool * (Point * Tile) List =
+        if model.tileMap |> Map.isEmpty
+        then false, []
+        else
+            let tiles = model.tileMap |> Map.toList
+
+            match dir with
+            | Direction.North ->
+                let maxY =
+                    tiles
+                    |> List.map (fun (p, t) -> p.y)
+                    |> List.max
+                let bound = (model.bounds |> Rect.topBound) - 1
+                maxY = bound, tiles |> List.filter (fun (p, t) -> p.y = maxY)
+
+            | Direction.South ->
+                let minY =
+                    tiles
+                    |> List.map (fun (p, t) -> p.y)
+                    |> List.min
+                let bound = model.bounds |> Rect.bottomBound
+                minY = bound, tiles |> List.filter (fun (p, t) -> p.y = minY)
+
+            | Direction.East ->
+                let maxX =
+                    tiles
+                    |> List.map (fun (p, t) -> p.x)
+                    |> List.max
+                let bound = (model.bounds |> Rect.rightBound) - 1
+                maxX = bound, tiles |> List.filter (fun (p, t) -> p.x = maxX)
+
+            | Direction.West ->
+                let minX =
+                    tiles
+                    |> List.map (fun (p, t) -> p.x)
+                    |> List.min
+                let bound = model.bounds |> Rect.leftBound
+                minX = bound, tiles |> List.filter (fun (p, t) -> p.x = minX)
+
+    /// Fills out the PathWorld in the given direction, ensuring
+    ///   the path will reach to the edge
+    let fillInDirection
+            (tileSet: TileSet)
+            (dir: Direction)
+            (model: Model)
+            (random: System.Random)
+            : Model =
+
+        let rec fillInner (model: Model): Model =
+            if model.tileMap |> Map.isEmpty
+            then model
+            else
+                let isFilled, candidateTiles = getDirMostTiles dir model
+
+                if isFilled
+                then model
+                else
+                    let n = random.Next(List.length candidateTiles)
+
+                    let point, tile =
+                        candidateTiles
+                        |> List.skip n
+                        |> List.head
+
+                    let newTile = tile |> Set.add dir
+                    let tileMap = model.tileMap |> Map.add point newTile
+                    let newModel = { model with tileMap = tileMap }
+
+                    fill tileSet newModel random
+                    |> fillInner
+
+        fillInner model
+
+    type ExternalCountConstraint =
+        | None
+        | Exactly of int
+        | Between of int * int
+
 type PathWorld = PathWorld.Model
