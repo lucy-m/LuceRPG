@@ -1,20 +1,21 @@
 ﻿namespace LuceRPG.Server.Core.WorldGenerator
 
 open LuceRPG.Models
+open LuceRPG.Server.Core
 
 module PathWorld =
 
     type Model =
         {
             tileMap: Map<Point, Tile>
-            external: Map<Point, Direction>
+            externalMap: Map<Point, Direction>
             bounds: Rect
         }
 
     let create tileMap external bounds: Model =
         {
             tileMap = tileMap
-            external = external
+            externalMap = external
             bounds = bounds
         }
 
@@ -49,7 +50,7 @@ module PathWorld =
         let activeLinks =
             model.tileMap
             |> Map.toSeq
-            |> Seq.append (model.external |> Map.toSeq |> Seq.map (fun (p, d) -> p, set[d]))
+            |> Seq.append (model.externalMap |> Map.toSeq |> Seq.map (fun (p, d) -> p, set[d]))
             |> Seq.map (fun (point, tile) ->
                 // Find all directions that point to a missing tile
                 let activeDirections =
@@ -57,7 +58,7 @@ module PathWorld =
                     |> Set.filter (fun d ->
                         let dp = Direction.movePoint d 1 point
                         let hasTile = model.tileMap |> Map.containsKey dp
-                        let hasExternal = model.external |> Map.containsKey dp
+                        let hasExternal = model.externalMap |> Map.containsKey dp
 
                         not hasTile && not hasExternal
                     )
@@ -135,13 +136,13 @@ module PathWorld =
 
                     acc |> Map.add dp d
 
-                ) withLinks.model.external
+                ) withLinks.model.externalMap
 
             let model =
                 {
                     withLinks.model with
                         tileMap = tileMap
-                        external = external
+                        externalMap = external
                 }
 
             let activeLinks =
@@ -262,25 +263,18 @@ module PathWorld =
                 if isFilled
                 then model
                 else
-                    let n = random.Next(List.length candidateTiles)
+                    let tNext = Util.randomOf random candidateTiles
 
-                    let point, tile =
-                        candidateTiles
-                        |> List.skip n
-                        |> List.head
+                    match tNext with
+                    | Option.Some (point, tile) ->
+                        let newTile = tile |> Set.add dir
+                        let tileMap = model.tileMap |> Map.add point newTile
+                        let newModel = { model with tileMap = tileMap }
 
-                    let newTile = tile |> Set.add dir
-                    let tileMap = model.tileMap |> Map.add point newTile
-                    let newModel = { model with tileMap = tileMap }
-
-                    fill tileSet newModel random
-                    |> fillInner
+                        fill tileSet newModel random
+                        |> fillInner
+                    | Option.None -> model
 
         fillInner model
-
-    type ExternalCountConstraint =
-        | None
-        | Exactly of int
-        | Between of int * int
 
 type PathWorld = PathWorld.Model

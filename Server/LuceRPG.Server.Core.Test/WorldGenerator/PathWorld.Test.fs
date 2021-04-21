@@ -180,7 +180,7 @@ module PathWorld =
                     ]
                     |> Map.ofList
 
-                addedTile.Value.model.external |> should equal expectedExternalMap
+                addedTile.Value.model.externalMap |> should equal expectedExternalMap
 
                 addedTile.Value.activeLinks |> Map.isEmpty |> should equal true
 
