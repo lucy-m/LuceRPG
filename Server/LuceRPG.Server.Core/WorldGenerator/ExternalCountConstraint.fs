@@ -148,7 +148,7 @@ module ExternalCountConstraint =
                             |> fun t -> t, 1u
                             |> List.singleton
 
-                        PathWorld.fill fillTileSet withActiveLink random
+                        PathWorld.fill fillTileSet random withActiveLink
                         |> constrainInner
                 )
 

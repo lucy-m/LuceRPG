@@ -182,7 +182,7 @@ module PathWorld =
             }
         )
 
-    let fill (tileSet: TileSet) (model: Model) (random: System.Random): Model =
+    let fill (tileSet: TileSet) (random: System.Random) (model: Model): Model =
         let initial = getLinks model
 
         let rec fillInner (withLinks: WithLinks): WithLinks =
@@ -250,8 +250,8 @@ module PathWorld =
     let fillInDirection
             (tileSet: TileSet)
             (dir: Direction)
-            (model: Model)
             (random: System.Random)
+            (model: Model)
             : Model =
 
         let rec fillInner (model: Model): Model =
@@ -271,7 +271,7 @@ module PathWorld =
                         let tileMap = model.tileMap |> Map.add point newTile
                         let newModel = { model with tileMap = tileMap }
 
-                        fill tileSet newModel random
+                        fill tileSet random newModel
                         |> fillInner
                     | Option.None -> model
 

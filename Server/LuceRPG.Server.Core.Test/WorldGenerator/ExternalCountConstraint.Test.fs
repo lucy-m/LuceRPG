@@ -119,8 +119,7 @@ module ExternalCountConstraint =
                     1, 0, Tile.straightEW
                     0, 1, Tile.deadEndS
                 ]
-                |> List.map (fun (x, y, t) -> Point.create x y, t)
-                |> Map.ofList
+                |> Point.toPointMap
 
             let externals = [ Point.create 2 0, Direction.West] |> Map.ofList
 
@@ -244,21 +243,20 @@ module ExternalCountConstraint =
                     1, 1, Tile.LWN
                     1, 2, Tile.LES
                     2, 2, Tile.straightEW
-                    2, 2, Tile.LSW
+                    3, 2, Tile.LSW
                     3, 1, Tile.straightNS
                     3, 0, Tile.straightNS
                 ]
-                |> List.map (fun (x, y, t) -> Point.create x y, t)
-                |> Map.ofList
+                |> Point.toPointMap
 
-            let externalMap = [ Point.create 3 -1, Direction.North ] |> Map.ofList
+            let externalMap = [ 3, -1, Direction.North ] |> Point.toPointMap
 
             let initial = PathWorld.create tileMap externalMap bounds
 
             [<Test>]
             let ``adding west constraints always adds in same order`` () =
-                let checkFn (seed: int): bool =
-                    let random = System.Random(seed)
+                let checkFn (): bool =
+                    let random = System.Random()
 
                     let first =
                         ExternalCountConstraint.constrainOnEdge
@@ -326,8 +324,8 @@ module ExternalCountConstraint =
 
             [<Test>]
             let ``produces correct number of externals`` () =
-                let checkFn (seed: int): bool =
-                    let r = System.Random(seed)
+                let checkFn (): bool =
+                    let r = System.Random()
                     let targetCount = r.Next(0, 4)
 
                     let result =

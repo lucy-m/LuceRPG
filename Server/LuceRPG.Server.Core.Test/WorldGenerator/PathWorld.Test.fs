@@ -272,7 +272,7 @@ module PathWorld =
 
                 let model = PathWorld.create tileMap external bounds
 
-                let filled = PathWorld.fill tileSet model random
+                let filled = PathWorld.fill tileSet random model
 
                 filled.bounds = bounds
 
@@ -290,8 +290,8 @@ module PathWorld =
 
                 let model = PathWorld.create tileMap external bounds
 
-                let filled1 = PathWorld.fill tileSet model r1
-                let filled2 = PathWorld.fill tileSet model r2
+                let filled1 = PathWorld.fill tileSet r1 model
+                let filled2 = PathWorld.fill tileSet r2 model
 
                 filled1 = filled2
 
@@ -309,13 +309,12 @@ module PathWorld =
                         0, 1, Tile.straightEW
                         4, 4, Tile.cross
                     ]
-                    |> List.map (fun (x, y, t) -> Point.create x y, t)
-                    |> Map.ofList
+                    |> Point.toPointMap
                 let external = Map.empty
 
                 let model = PathWorld.create tileMap external bounds
 
-                let filled = PathWorld.fill tileSet model random
+                let filled = PathWorld.fill tileSet random model
 
                 let originalTiles =
                     tileMap
@@ -338,7 +337,7 @@ module PathWorld =
             let external = Map.empty
 
             let model = PathWorld.create tileMap external bounds
-            let filled = PathWorld.fill tileSet model random
+            let filled = PathWorld.fill tileSet random model
 
             filled.tileMap |> Map.isEmpty |> should equal true
 
@@ -418,8 +417,7 @@ module PathWorld =
                     1, 1, Tile.LSW
                     1, 0, Tile.deadEndN
                 ]
-                |> List.map (fun (x, y, t) -> Point.create x y, t)
-                |> Map.ofList
+                |> Point.toPointMap
 
             let initial = PathWorld.create tileMap Map.empty bounds
 
@@ -431,8 +429,8 @@ module PathWorld =
                     PathWorld.fillInDirection
                         TileSet.fullUniform
                         Direction.North
-                        initial
                         random
+                        initial
 
                 let filledDbg = PathWorld.debugPrint northFilled
 
@@ -446,8 +444,8 @@ module PathWorld =
                     PathWorld.fillInDirection
                         TileSet.fullUniform
                         Direction.East
-                        initial
                         random
+                        initial
 
                 let filledDbg = PathWorld.debugPrint eastFilled
 
@@ -461,8 +459,8 @@ module PathWorld =
                     PathWorld.fillInDirection
                         TileSet.fullUniform
                         Direction.West
-                        initial
                         random
+                        initial
 
                 westFilled |> should equal initial
 
@@ -472,8 +470,8 @@ module PathWorld =
                     PathWorld.fillInDirection
                         TileSet.fullUniform
                         Direction.South
-                        initial
                         random
+                        initial
 
                 southFilled |> should equal initial
 
@@ -487,15 +485,15 @@ module PathWorld =
                         PathWorld.fillInDirection
                             TileSet.fullUniform
                             Direction.North
-                            initial
                             r1
+                            initial
 
                     let f2 =
                         PathWorld.fillInDirection
                             TileSet.fullUniform
                             Direction.North
-                            initial
                             r2
+                            initial
 
                     f1 = f2
 
