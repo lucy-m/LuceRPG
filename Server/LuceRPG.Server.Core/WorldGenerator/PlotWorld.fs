@@ -2,6 +2,8 @@
 
 open LuceRPG.Models
 
+type Plot = Point Set
+
 // Expands a TileWorld into map 3x the size and
 //   fills in blank spots with plots
 module PlotWorld =
@@ -9,7 +11,7 @@ module PlotWorld =
         {
             bounds: Rect
             paths: Point Set
-            groupedPlots: Point Set Set
+            groupedPlots: Plot Set
             externals: Map<Point, Direction>
         }
 
@@ -21,12 +23,7 @@ module PlotWorld =
             externals: Map<Point, Direction>
         }
 
-    let debugPrint (model: Model): string =
-        let xs = [Rect.leftBound model.bounds .. Rect.rightBound model.bounds - 1]
-        let ys =
-            [Rect.bottomBound model.bounds .. Rect.topBound model.bounds - 1]
-            |> List.rev
-
+    let debugString (model: Model): string =
         let pointByPlotGroup =
             model.groupedPlots
             |> Seq.indexed
@@ -37,25 +34,16 @@ module PlotWorld =
                 ) map
             ) Map.empty
 
-        ys
-        |> Seq.map (fun y ->
-            xs
-            |> Seq.map (fun x ->
-                let point = Point.create x y
+        let mapFn (point: Point): char =
+            if model.paths |> Set.contains point
+            then '▓'
+            else
+                pointByPlotGroup
+                |> Map.tryFind point
+                |> Option.map (fun i -> char(i + int 'A'))
+                |> Option.defaultValue ' '
 
-                if model.paths |> Set.contains point
-                then '▓'
-                else
-                    pointByPlotGroup
-                    |> Map.tryFind point
-                    |> Option.map (fun i -> char(i + int 'A'))
-                    |> Option.defaultValue ' '
-            )
-            |> Array.ofSeq
-            |> System.String
-            |> fun s -> s + "\n"
-        )
-        |> Seq.reduce (+)
+        Rect.debugString model.bounds mapFn
 
     let tileToPaths (tile: Tile) (pathWorldPosition: Point): Point Set =
         [
@@ -239,3 +227,5 @@ module PlotWorld =
         )
 
     let generateGrouped = generateUngrouped >> group
+
+type PlotWorld = PlotWorld.Model

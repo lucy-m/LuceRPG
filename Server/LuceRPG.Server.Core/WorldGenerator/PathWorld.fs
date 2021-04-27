@@ -20,25 +20,13 @@ module PathWorld =
         }
 
     let debugPrint (model: Model): string =
-        let xs = [Rect.leftBound model.bounds .. Rect.rightBound model.bounds - 1]
-        let ys =
-            [Rect.bottomBound model.bounds .. Rect.topBound model.bounds - 1]
-            |> List.rev
+        let mapFn (point: Point): char =
+            model.tileMap
+            |> Map.tryFind point
+            |> Option.map (Tile.asSymbol)
+            |> Option.defaultValue ' '
 
-        ys
-        |> List.map (fun y ->
-            xs
-            |> List.map (fun x ->
-                model.tileMap
-                |> Map.tryFind (Point.create x y)
-                |> Option.map (Tile.asSymbol)
-                |> Option.defaultValue ' '
-            )
-            |> Array.ofList
-            |> System.String
-            |> fun s -> s + "\n"
-        )
-        |> List.reduce (+)
+        Rect.debugString model.bounds mapFn
 
     type WithLinks =
         {

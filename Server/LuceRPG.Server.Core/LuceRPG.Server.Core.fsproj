@@ -10,6 +10,7 @@
     <Compile Include="WorldGenerator\PathWorld.fs" />
     <Compile Include="WorldGenerator\ExternalCountConstraint.fs" />
     <Compile Include="WorldGenerator\PlotWorld.fs" />
+    <Compile Include="WorldGenerator\RectWorld.fs" />
     <Compile Include="Behaviours\Behaviour.fs" />
     <Compile Include="Behaviours\BehaviourMap.fs" />
     <Compile Include="WorldCollection.fs" />

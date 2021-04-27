@@ -69,3 +69,24 @@ module Rect =
                     |> Set.ofList
 
                 points |> should equal expected
+
+    [<TestFixture>]
+    module ``debugString`` =
+        [<Test>]
+        let ``correct`` () =
+            let rect = Rect.create 0 0 5 5
+
+            let mapFn (point: Point): char =
+                char(point.x + point.y + int '0')
+
+            let result = Rect.debugString rect mapFn
+
+            let expected =
+                "45678\n" +
+                "34567\n" +
+                "23456\n" +
+                "12345\n" +
+                "01234\n"
+
+            result |> should equal expected
+

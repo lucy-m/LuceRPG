@@ -102,7 +102,7 @@ module PlotWorld =
         let ``generateGrouped correct`` () =
             let ungrouped = PlotWorld.generateUngrouped pathWorld
             let plotWorld = PlotWorld.group ungrouped
-            let dbg = PlotWorld.debugPrint plotWorld
+            let dbg = PlotWorld.debugString plotWorld
 
             plotWorld.groupedPlots |> Set.count |> should equal 3
 
@@ -112,21 +112,3 @@ module PlotWorld =
                 |> Seq.reduce (+)
 
             totalPlotCount |> should equal ungrouped.plots.Count
-
-    [<Test>]
-    let ``foo`` () =
-        let random = System.Random ()
-        let bounds = Rect.create 0 0 6 6
-        let external = [ -1, 5, Direction.East ] |> Point.toPointMap
-        let tileSet = TileSet.fullUniform
-
-        let initial = PathWorld.create Map.empty external bounds
-
-        let plotWorld =
-            PathWorld.fill tileSet random initial
-            |> PathWorld.fillInDirection tileSet Direction.East random
-            |> PlotWorld.generateGrouped
-
-        let debugString = PlotWorld.debugPrint plotWorld
-
-        true |> should equal true
