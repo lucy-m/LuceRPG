@@ -66,8 +66,8 @@ module ExternalCountConstraint =
     let constrainOnEdge
             (direction: Direction)
             (ecc: Model)
-            (model: PathWorld)
             (random: System.Random)
+            (model: PathWorld)
             : PathWorld Option =
 
         let rec constrainInner (model: PathWorld): PathWorld Option =
@@ -153,3 +153,19 @@ module ExternalCountConstraint =
                 )
 
         constrainInner model
+
+    /// Applies all the given constraints
+    /// Unsatisfiable constraints are ignored
+    let constrainAll
+            (eccs: Map<Direction, Model>)
+            (random: System.Random)
+            (model: PathWorld)
+            : PathWorld =
+
+        eccs
+        |> Map.fold (fun acc d ecc ->
+            constrainOnEdge d ecc random acc
+            |> Option.defaultValue acc
+        ) model
+
+type ExternalCountConstraint = ExternalCountConstraint.Model

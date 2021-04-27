@@ -10,3 +10,4 @@ module Util =
             let n = random.Next(Seq.length ls)
 
             ls |> Seq.skip n |> Seq.head |> Option.Some
+

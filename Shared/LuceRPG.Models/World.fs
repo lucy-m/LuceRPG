@@ -93,18 +93,21 @@ module World =
         let points = WorldObject.getPoints obj.value
 
         let isNotBlocked =
-            let blockedPoints =
-                points
-                |> Seq.choose (fun p -> getBlocker p world)
-                |> Seq.filter (fun b ->
-                    match b with
-                    // objects are blocked by other objects with a differing id
-                    | BlockedType.Object o -> o.id <> obj.id
-                    // players are not blocked by spawn points
-                    | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj.value)
-                )
+            match obj.value.t with
+            | WorldObject.Type.Path _ -> true
+            | _ ->
+                let blockedPoints =
+                    points
+                    |> Seq.choose (fun p -> getBlocker p world)
+                    |> Seq.filter (fun b ->
+                        match b with
+                        // objects are blocked by other objects with a differing id
+                        | BlockedType.Object o -> o.id <> obj.id
+                        // players are not blocked by spawn points
+                        | BlockedType.SpawnPoint _ -> not (WorldObject.isPlayer obj.value)
+                    )
 
-            blockedPoints |> Seq.isEmpty
+                blockedPoints |> Seq.isEmpty
 
         let inBounds = objInBounds obj world
 

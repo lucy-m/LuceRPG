@@ -498,3 +498,46 @@ module PathWorld =
                     f1 = f2
 
                 Check.QuickThrowOnFailure checkFn
+
+    [<TestFixture>]
+    module ``generateFilled`` =
+
+        [<TestFixture>]
+        module ``for full tile set`` =
+            let tileSet = TileSet.fullUniform
+
+            [<Test>]
+            let ``creates external links on all edges`` () =
+                let checkFn (): bool =
+                    let random = System.Random()
+                    let bounds = Rect.create 0 0 10 10
+
+                    let generated =
+                        PathWorld.generateFilled
+                            bounds
+                            tileSet
+                            random
+
+                    let tilePoints =
+                        generated.tileMap
+                        |> Map.toSeq
+                        |> Seq.map fst
+
+                    let minX, maxX =
+                        tilePoints
+                        |> Seq.map (fun p -> p.x)
+                        |> fun s -> Seq.min s, Seq.max s
+
+                    let minY, maxY =
+                        tilePoints
+                        |> Seq.map (fun p -> p.y)
+                        |> fun s -> Seq.min s, Seq.max s
+
+                    let dbg = PathWorld.debugPrint generated
+
+                    minX = Rect.leftBound bounds
+                    && maxX = (Rect.rightBound bounds - 1)
+                    && minY = Rect.bottomBound bounds
+                    && maxY = (Rect.topBound bounds - 1)
+
+                Check.QuickThrowOnFailure checkFn

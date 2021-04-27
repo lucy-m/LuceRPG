@@ -164,3 +164,5 @@ module RectWorld =
             rectPlots = rectPlots
             externals = plotWorld.externals
         }
+
+type RectWorld = RectWorld.Model

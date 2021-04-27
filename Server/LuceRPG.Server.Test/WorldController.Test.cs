@@ -452,7 +452,8 @@ namespace LuceRPG.Server.Test
                 timestampProvider.Now = 300L;
 
                 var toPoint = PointModule.create(5, 6);
-                var t = IntentionModule.Type.NewWarp(secondWorld.id, toPoint, playerId1);
+                var warpData = WarpModule.Target.NewStatic(secondWorld.id, toPoint);
+                var t = IntentionModule.Type.NewWarp(warpData, playerId1);
                 var payload = IntentionModule.makePayload(client1, t);
                 var intention = WithId.create(payload);
                 var bytes = IntentionSrl.serialise(intention);

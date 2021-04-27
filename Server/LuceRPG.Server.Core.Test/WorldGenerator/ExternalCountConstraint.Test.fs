@@ -136,8 +136,8 @@ module ExternalCountConstraint =
                     ExternalCountConstraint.constrainOnEdge
                         Direction.North
                         (ExternalCountConstraint.Exactly 1)
-                        initial
                         random
+                        initial
 
                 let expectedTileMap =
                     tileMap
@@ -162,8 +162,8 @@ module ExternalCountConstraint =
                     ExternalCountConstraint.constrainOnEdge
                         Direction.North
                         (ExternalCountConstraint.Exactly 2)
-                        initial
                         random
+                        initial
 
                 let expectedTileMap =
                     tileMap
@@ -186,8 +186,8 @@ module ExternalCountConstraint =
                     ExternalCountConstraint.constrainOnEdge
                         Direction.North
                         (ExternalCountConstraint.Exactly 3)
-                        initial
                         random
+                        initial
 
                 constrained |> Option.isNone |> should equal true
 
@@ -197,8 +197,8 @@ module ExternalCountConstraint =
                     ExternalCountConstraint.constrainOnEdge
                         Direction.North
                         (ExternalCountConstraint.Exactly 0)
-                        initial
                         random
+                        initial
 
                 constrained |> Option.isSome |> should equal true
                 constrained.Value |> should equal initial
@@ -214,8 +214,8 @@ module ExternalCountConstraint =
                     ExternalCountConstraint.constrainOnEdge
                         Direction.East
                         (ExternalCountConstraint.Exactly 0)
-                        initial
                         random
+                        initial
 
                 let expectedTileMap =
                     tileMap
@@ -262,8 +262,8 @@ module ExternalCountConstraint =
                         ExternalCountConstraint.constrainOnEdge
                             Direction.West
                             (ExternalCountConstraint.Exactly 1)
-                            initial
                             random
+                            initial
 
                     let expectedTileMap =
                         tileMap
@@ -281,8 +281,8 @@ module ExternalCountConstraint =
                         ExternalCountConstraint.constrainOnEdge
                             Direction.West
                             (ExternalCountConstraint.Exactly 2)
-                            first.Value
                             random
+                            first.Value
 
                     let expectedTileMap =
                         tileMap
@@ -310,10 +310,11 @@ module ExternalCountConstraint =
                     let r2 = System.Random(seed)
 
                     let v1, v2 =
-                        let make =
+                        let make (random: System.Random) =
                             ExternalCountConstraint.constrainOnEdge
                                 Direction.North
                                 (ExternalCountConstraint.Exactly 2)
+                                random
                                 initial
 
                         make r1, make r2
@@ -332,8 +333,8 @@ module ExternalCountConstraint =
                         ExternalCountConstraint.constrainOnEdge
                             Direction.South
                             (ExternalCountConstraint.Exactly targetCount)
-                            initial
                             r
+                            initial
 
                     result |> Option.isSome |> should equal true
 

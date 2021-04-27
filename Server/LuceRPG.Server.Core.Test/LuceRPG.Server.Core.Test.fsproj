@@ -22,6 +22,7 @@
     <Compile Include="WorldGenerator\ExternalCountConstraint.Test.fs" />
     <Compile Include="WorldGenerator\PlotWorld.Test.fs" />
     <Compile Include="WorldGenerator\RectWorld.Test.fs" />
+    <Compile Include="WorldGenerator\WorldGenerator.Test.fs" />
     <Compile Include="WorldEventsStore.Test.fs" />
     <Compile Include="LastPingStore.Test.fs" />
     <Compile Include="Behaviour.Test.fs" />

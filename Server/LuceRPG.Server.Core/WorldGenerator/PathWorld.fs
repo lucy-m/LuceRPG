@@ -265,4 +265,42 @@ module PathWorld =
 
         fillInner model
 
+    /// Fills out the PathWorld in all directions, ensuring
+    ///   the path will reach all edges
+    let fillAllDirections
+            (tileSet: TileSet)
+            (random: System.Random)
+            (model: Model)
+            : Model =
+
+        let fillOne (direction: Direction) = fillInDirection tileSet direction random
+
+        model
+        |> fillOne Direction.North
+        |> fillOne Direction.East
+        |> fillOne Direction.South
+        |> fillOne Direction.West
+
+    /// Creates a PathWorld in the given bounds
+    ///   and attempts to fill it to all edges
+    let generateFilled
+            (bounds: Rect)
+            (tileSet: TileSet)
+            (random: System.Random)
+            : Model =
+
+        let blank = create Map.empty Map.empty bounds
+
+        Rect.getPoints bounds
+        |> Util.randomOf random
+        |> Option.bind (fun p ->
+            getLinks blank
+            |> addTile random tileSet p
+            |> Option.map (fun withLinks ->
+                fill tileSet random withLinks.model
+                |> fillAllDirections tileSet random
+            )
+        )
+        |> Option.defaultValue blank
+
 type PathWorld = PathWorld.Model

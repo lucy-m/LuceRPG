@@ -2,12 +2,14 @@
 
 open LuceRPG.Models
 open LuceRPG.Server.Core
+open LuceRPG.Server.Core.WorldGenerator
 
 module PrimordiaVille =
     module MapIds =
         let primordiaVilleOutside = System.Guid.NewGuid().ToString()
         let theThreeCocks = System.Guid.NewGuid().ToString()
         let barrysEssentials = System.Guid.NewGuid().ToString()
+        let random = System.Guid.NewGuid().ToString()
 
     module NpcIds =
         let harry = System.Guid.NewGuid().ToString()
@@ -29,7 +31,7 @@ module PrimordiaVille =
                 Rect.create 19 0 22 16
             ]
 
-        let spawnPoint = Point.create 2 9
+        let spawnPoint = Point.create 25 7
 
         let paths =
             [
@@ -38,6 +40,7 @@ module PrimordiaVille =
                 17,8,1,1
                 17,7,21,1
                 36,9,2,2
+                25,0,2,7
             ]
             |> List.map (fun (x,y,w,h) ->
                 WorldObject.create
@@ -94,6 +97,15 @@ module PrimordiaVille =
             ]
             |> List.map (fun (x, y, warp) ->
                 WorldObject.Type.Inn warp
+                |> fun t -> WorldObject.create t (Point.create x y) Direction.South
+                |> WithId.create
+            )
+
+        let warps =
+            [ 25, 0, Warp.createTarget MapIds.random Point.zero ]
+            |> List.map (fun (x, y, warpTarget) ->
+                Warp.create warpTarget Warp.Appearance.Mat
+                |> WorldObject.Type.Warp
                 |> fun t -> WorldObject.create t (Point.create x y) Direction.South
                 |> WithId.create
             )
@@ -178,6 +190,7 @@ module PrimordiaVille =
                     flowers
                     flowerBeds
                     inns
+                    warps
                     npcs
                 ]
 
@@ -271,6 +284,27 @@ module PrimordiaVille =
 
         (world, [greetingInteraction], Map.empty)
 
+    let random: (World * Interactions * BehaviourMap) =
+        let eccs =
+            [
+                Direction.North, ExternalCountConstraint.Between (1, 2)
+                Direction.South, ExternalCountConstraint.Between (1, 4)
+            ]
+            |> Map.ofList
+
+        let parameters: WorldGenerator.Parameters =
+            {
+                bounds = Rect.create 0 0 4 4
+                eccs = eccs
+                tileSet = Option.None
+            }
+
+        let world =
+            WorldGenerator.generate parameters 1234
+            |> fun w -> WithId.useId MapIds.random w.value
+
+        (world, Interactions.Empty, Map.empty)
+
     let collection =
         WorldCollection.create
             MapIds.primordiaVilleOutside
@@ -278,4 +312,5 @@ module PrimordiaVille =
                 primordiaVilleOutside
                 theThreeCocks
                 barrysEssentials
+                random
             ]

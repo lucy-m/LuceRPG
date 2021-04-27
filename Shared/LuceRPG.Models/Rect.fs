@@ -23,6 +23,12 @@ module Rect =
             size = size
         }
 
+    let scale (s: int) (rect: Model): Model =
+        {
+            btmLeft = Point.scale s rect.btmLeft
+            size = Point.scale s rect.size
+        }
+
     /// inclusive left bound
     let leftBound (rect: Model): int =
         rect.btmLeft.x
