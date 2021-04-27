@@ -121,7 +121,7 @@ module IntentionProcessing =
                                     match tWarp with
                                     | Option.Some warpData ->
                                         let intention =
-                                            Intention.Warp (warpData.toWorld, warpData.toPoint, id)
+                                            Intention.Warp (warpData, id)
                                             |> Intention.makePayload clientId
                                             |> WithId.useId intention.id
                                             |> WithTimestamp.create timestamp
@@ -520,50 +520,58 @@ module IntentionProcessing =
                     log = Option.None
                 }
 
-        | Intention.Warp (toWorldId, toPoint, objectId) ->
-            // If world ID exists and object ID points to a valid
-            //   object in the current world then create JoinWorld
-            //   and LeaveWorld intentions
-            let fromWorldId = iIntention.worldId
-            let tToWorld = worldMap |> Map.tryFind toWorldId
-            let tFromWorld = worldMap |> Map.tryFind fromWorldId
-            let tObject =
-                tFromWorld
-                |> Option.bind (fun fromWorld ->
-                    fromWorld.value.objects
-                    |> Map.tryFind objectId
-                )
-                |> Option.map (fun oldPosition ->
-                    WithId.map (WorldObject.atLocation toPoint) oldPosition
-                )
+        | Intention.Warp (warpData, objectId) ->
+            match warpData with
+            | Warp.Static (toWorldId, toPoint) ->
+                // If world ID exists and object ID points to a valid
+                //   object in the current world then create JoinWorld
+                //   and LeaveWorld intentions
+                let fromWorldId = iIntention.worldId
+                let tToWorld = worldMap |> Map.tryFind toWorldId
+                let tFromWorld = worldMap |> Map.tryFind fromWorldId
+                let tObject =
+                    tFromWorld
+                    |> Option.bind (fun fromWorld ->
+                        fromWorld.value.objects
+                        |> Map.tryFind objectId
+                    )
+                    |> Option.map (fun oldPosition ->
+                        WithId.map (WorldObject.atLocation toPoint) oldPosition
+                    )
 
-            match (tToWorld, tObject) with
-            | Option.Some toWorld, Option.Some obj ->
-                let joinWorldIntention =
-                    Intention.JoinWorld obj
-                    |> Intention.makePayload clientId
-                    |> WithId.create
-                    |> WithTimestamp.create timestamp
-                    |> IndexedIntention.useIndex (iIntention.index + 1) toWorld.id
+                match (tToWorld, tObject) with
+                | Option.Some toWorld, Option.Some obj ->
+                    let joinWorldIntention =
+                        Intention.JoinWorld obj
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) toWorld.id
 
-                let leaveWorldIntention =
-                    Intention.LeaveWorld
-                    |> Intention.makePayload clientId
-                    |> WithId.create
-                    |> WithTimestamp.create timestamp
-                    |> IndexedIntention.useIndex (iIntention.index + 1) fromWorldId
+                    let leaveWorldIntention =
+                        Intention.LeaveWorld
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) fromWorldId
 
-                let delayed = [joinWorldIntention; leaveWorldIntention]
+                    let delayed = [joinWorldIntention; leaveWorldIntention]
 
-                {
-                    events = []
-                    delayed = delayed
-                    worldMap = worldMap
-                    objectBusyMap = objectBusyMap
-                    serverSideData = serverSideData
-                    log = Option.None
-                }
-            | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
+                    {
+                        events = []
+                        delayed = delayed
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = Option.None
+                    }
+                | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
+
+            | Warp.Dynamic (toSeed, direction) ->
+                // Generate this world if not already existing
+                //   then replace with a Static Warp to a suitable
+                //   point on the map
+                failwith("NYI")
 
         | Intention.Move _ -> thisIgnored
         | Intention.TurnTowards _ -> thisIgnored
