@@ -272,6 +272,7 @@ module IntentionProcessing =
                         serverSideData.clientWorldMap
                         |> Map.add clientId world.id
 
+                    let generatedWorldMap = serverSideData.generatedWorldMap
                     let defaultWorld = serverSideData.defaultWorld
                     let serverId = serverSideData.serverId
 
@@ -279,6 +280,7 @@ module IntentionProcessing =
                         worldObjectClientMap
                         usernameClientMap
                         clientWorldMap
+                        generatedWorldMap
                         defaultWorld
                         serverId
 
@@ -360,6 +362,7 @@ module IntentionProcessing =
                         serverSideData.clientWorldMap
                         |> Map.remove clientId
 
+                    let generatedWorldMap = serverSideData.generatedWorldMap
                     let defaultWorld = serverSideData.defaultWorld
                     let serverId = serverSideData.serverId
 
@@ -367,6 +370,7 @@ module IntentionProcessing =
                         wocm
                         usernameClientMap
                         clientWorldMap
+                        generatedWorldMap
                         defaultWorld
                         serverId
 
@@ -568,10 +572,57 @@ module IntentionProcessing =
                 | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
 
             | Warp.Dynamic (toSeed, direction) ->
-                // Generate this world if not already existing
-                //   then replace with a Static Warp to a suitable
-                //   point on the map
-                failwith("NYI")
+                serverSideData.generatedWorldMap
+                |> Map.tryFind toSeed
+                |> Option.map (fun (worldId, point) ->
+                    // This seed has already been generated, convert
+                    //   to a static warp
+                    let staticWarp = Warp.createTarget worldId point
+
+                    let warpIntention =
+                        Intention.Warp (staticWarp, objectId)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) iIntention.worldId
+
+                    let log =
+                        sprintf "Converted dynamic warp %i to static warp %s (%i, %i)"
+                            toSeed
+                            worldId
+                            point.x
+                            point.y
+                        |> Option.Some
+
+                    {
+                        events = []
+                        delayed = [warpIntention]
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = log
+                    }
+                )
+                |> Option.defaultWith (fun () ->
+                    // This world needs to be generated
+                    let event =
+                        WorldEvent.WorldGenerateRequest (toSeed, direction)
+                        |> WorldEvent.asResult intention.id iIntention.worldId iIntention.index
+                    let log =
+                        sprintf "Requesting generation of %i in direction %c"
+                            toSeed
+                            (Direction.asLetter direction)
+                        |> Option.Some
+
+                    {
+                        events = [event]
+                        delayed = [iIntention]
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = log
+                    }
+                )
 
         | Intention.Move _ -> thisIgnored
         | Intention.TurnTowards _ -> thisIgnored

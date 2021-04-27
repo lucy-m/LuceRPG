@@ -7,6 +7,7 @@ module WorldEvent =
         | ObjectAdded of WorldObject
         | ObjectRemoved of Id.WorldObject
         | JoinedWorld of Id.Client
+        | WorldGenerateRequest of int * Direction
 
     type Model =
         {
@@ -35,6 +36,8 @@ module WorldEvent =
         | Type.TurnedTowards (id, _) -> id |> Option.Some
         | Type.ObjectAdded o -> o.id |> Option.Some
         | Type.ObjectRemoved id -> id |> Option.Some
+
+        | Type.WorldGenerateRequest _
         | Type.JoinedWorld _ -> Option.None
 
 type WorldEvent = WorldEvent.Model

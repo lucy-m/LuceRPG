@@ -568,6 +568,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 
@@ -854,6 +855,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 
@@ -1186,6 +1188,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 

@@ -6,12 +6,14 @@ module ServerSideData =
     type ClientWorldMap = Map<Id.Client, Id.World>
 
     type WorldObjectClientMap = Map<Id.World, ObjectClientMap>
+    type GeneratedWorldMap = Map<int, (Id.World * Point)>
 
     type Model =
         {
             worldObjectClientMap: WorldObjectClientMap
             usernameClientMap: UsernameClientMap
             clientWorldMap: ClientWorldMap
+            generatedWorldMap: GeneratedWorldMap
             defaultWorld: Id.World
             serverId: Id.Client
         }
@@ -20,6 +22,7 @@ module ServerSideData =
             (worldObjectClientMap: WorldObjectClientMap)
             (usernameClientMap: UsernameClientMap)
             (clientWorldMap: ClientWorldMap)
+            (generatedWorldMap: GeneratedWorldMap)
             (defaultWorld: Id.World)
             (serverId: Id.Client)
             : Model =
@@ -27,6 +30,7 @@ module ServerSideData =
             worldObjectClientMap = worldObjectClientMap
             usernameClientMap = usernameClientMap
             clientWorldMap = clientWorldMap
+            generatedWorldMap = generatedWorldMap
             defaultWorld = defaultWorld
             serverId = serverId
         }
@@ -36,6 +40,7 @@ module ServerSideData =
             worldObjectClientMap = Map.empty
             usernameClientMap = Map.empty
             clientWorldMap = Map.empty
+            generatedWorldMap = Map.empty
             defaultWorld = defaultWorld
             serverId = System.Guid.NewGuid().ToString()
         }

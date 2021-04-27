@@ -5,6 +5,8 @@ open LuceRPG.Server.Core
 open LuceRPG.Server.Core.WorldGenerator
 
 module PrimordiaVille =
+    let random = System.Random()
+
     module MapIds =
         let primordiaVilleOutside = System.Guid.NewGuid().ToString()
         let theThreeCocks = System.Guid.NewGuid().ToString()
@@ -102,7 +104,7 @@ module PrimordiaVille =
             )
 
         let warps =
-            [ 25, 0, Warp.createTarget MapIds.random Point.zero ]
+            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South) ]
             |> List.map (fun (x, y, warpTarget) ->
                 Warp.create warpTarget Warp.Appearance.Mat
                 |> WorldObject.Type.Warp
@@ -204,7 +206,7 @@ module PrimordiaVille =
                 interactionMap
             |> WithId.useId MapIds.primordiaVilleOutside
 
-        (world, interactions, behaviourMap)
+        (world, interactions, Map.empty)
 
     let theThreeCocks: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
@@ -284,27 +286,6 @@ module PrimordiaVille =
 
         (world, [greetingInteraction], Map.empty)
 
-    let random: (World * Interactions * BehaviourMap) =
-        let eccs =
-            [
-                Direction.North, ExternalCountConstraint.Between (1, 2)
-                Direction.South, ExternalCountConstraint.Between (1, 4)
-            ]
-            |> Map.ofList
-
-        let parameters: WorldGenerator.Parameters =
-            {
-                bounds = Rect.create 0 0 4 4
-                eccs = eccs
-                tileSet = Option.None
-            }
-
-        let world =
-            WorldGenerator.generate parameters 1234
-            |> fun w -> WithId.useId MapIds.random w.value
-
-        (world, Interactions.Empty, Map.empty)
-
     let collection =
         WorldCollection.create
             MapIds.primordiaVilleOutside
@@ -312,5 +293,4 @@ module PrimordiaVille =
                 primordiaVilleOutside
                 theThreeCocks
                 barrysEssentials
-                random
             ]

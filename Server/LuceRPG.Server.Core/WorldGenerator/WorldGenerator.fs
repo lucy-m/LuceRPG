@@ -56,7 +56,7 @@ module WorldGenerator =
             background
             paths
 
-    let generate (parameters: Parameters) (seed: int): World =
+    let generate (parameters: Parameters) (seed: int): World * Map<Point, Direction> =
         let random = System.Random(seed)
         let tileSet = parameters.tileSet |> Option.defaultValue TileSet.fullUniform
 
@@ -70,7 +70,18 @@ module WorldGenerator =
         let plotWorld = PlotWorld.generateGrouped pathWorld
         let rectWorld = RectWorld.divide random plotWorld
 
+        let spawnPoints =
+            rectWorld.externals
+            |> Map.toSeq
+            |> Seq.map (fun (p, d) ->
+                let moved = Direction.movePoint d 1 p
+                let scaled = Point.scale 2 p
+
+                scaled, d
+            )
+            |> Map.ofSeq
+
         let id = sprintf "Generated-%i" seed
 
-        fromRectWorld id rectWorld |> WithId.useId id
+        fromRectWorld id rectWorld |> WithId.useId id, spawnPoints
 

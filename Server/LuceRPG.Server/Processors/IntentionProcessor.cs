@@ -75,6 +75,18 @@ namespace LuceRPG.Server.Processors
                 }
 
                 _store.Update(processed);
+
+                var worldGenerationRequests =
+                    events
+                    .Where(e => e.t.IsWorldGenerateRequest)
+                    .Select(e => e.t)
+                    .Cast<WorldEventModule.Type.WorldGenerateRequest>();
+
+                foreach (var request in worldGenerationRequests)
+                {
+                    _logger.LogDebug($"Generating world {request.Item1}");
+                    _store.Generate(request.Item1, request.Item2);
+                }
             }
         }
     }
