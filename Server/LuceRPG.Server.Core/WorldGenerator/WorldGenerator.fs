@@ -75,7 +75,7 @@ module WorldGenerator =
             |> Map.toSeq
             |> Seq.map (fun (p, d) ->
                 let moved = Direction.movePoint d 1 p
-                let scaled = Point.scale 2 p
+                let scaled = Point.scale 2 moved
 
                 scaled, d
             )

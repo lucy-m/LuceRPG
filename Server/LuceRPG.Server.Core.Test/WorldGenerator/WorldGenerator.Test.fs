@@ -78,3 +78,48 @@ module WorldGenerator =
             |> Set.ofSeq
             |> should equal (set[Point.p2x2])
 
+    [<Test>]
+    let ``same seed generated same world`` () =
+        let parameters: WorldGenerator.Parameters =
+            {
+                bounds = Rect.create 0 0 8 8
+                eccs = Map.empty
+                tileSet = Option.None
+            }
+
+        let checkProps: (World.Payload -> obj) List =
+            [
+                fun w -> w.background :> obj
+                fun w -> w.blocked :> obj
+                fun w -> w.bounds :> obj
+                fun w -> w.interactions :> obj
+                fun w -> w.name :> obj
+                fun w -> w.playerSpawner :> obj
+                fun w -> w.warps :> obj
+
+                // Object IDs will be generated differently
+                fun w ->
+                    w.objects
+                    |> Map.toSeq
+                    |> Seq.map (fun (id, obj) -> obj.value)
+                    |> Set.ofSeq :> obj
+            ]
+
+        let checkFn (seed: int): bool =
+            let g1 = WorldGenerator.generate parameters seed
+            let g2 = WorldGenerator.generate parameters seed
+
+            let w1 = (fst g1).value
+            let w2 = (fst g2).value
+
+            let pass =
+                let failures =
+                    checkProps
+                    |> List.map (fun fn -> fn, (fn w1).Equals(fn w2))
+                    |> List.filter (fun (fn, pass) -> not pass)
+
+                failures |> List.isEmpty
+
+            pass
+
+        Check.QuickThrowOnFailure checkFn
