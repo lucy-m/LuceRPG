@@ -18,6 +18,8 @@ module WorldEventFields =
                 sprintf "Removed %s" id
             | WorldEvent.Type.JoinedWorld cId ->
                 sprintf "Client joined %s" cId
+            | WorldEvent.Type.WorldGenerateRequest (seed, dir) ->
+                sprintf "World generation requested %i %c" seed (Direction.asLetter dir)
 
         let resultOf = sprintf "Result of %s" e.resultOf
         let index = sprintf "Index %i" e.index

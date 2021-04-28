@@ -4,16 +4,10 @@ module Warp =
     type Appearance = Door | Mat
 
     type Target =
-        {
-            toWorld: Id.World
-            toPoint: Point
-        }
+        | Static of Id.World * Point
+        | Dynamic of int * Direction
 
-    let createTarget (toWorld: Id.World) (toPoint: Point): Target =
-        {
-            toWorld = toWorld
-            toPoint = toPoint
-        }
+    let createTarget (toWorld: Id.World) (toPoint: Point): Target = Static (toWorld, toPoint)
 
     type Model =
         {

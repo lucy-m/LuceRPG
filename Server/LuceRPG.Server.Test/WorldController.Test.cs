@@ -452,7 +452,8 @@ namespace LuceRPG.Server.Test
                 timestampProvider.Now = 300L;
 
                 var toPoint = PointModule.create(5, 6);
-                var t = IntentionModule.Type.NewWarp(secondWorld.id, toPoint, playerId1);
+                var warpData = WarpModule.Target.NewStatic(secondWorld.id, toPoint);
+                var t = IntentionModule.Type.NewWarp(warpData, playerId1);
                 var payload = IntentionModule.makePayload(client1, t);
                 var intention = WithId.create(payload);
                 var bytes = IntentionSrl.serialise(intention);
@@ -538,6 +539,64 @@ namespace LuceRPG.Server.Test
 
                 var objectRemoved = ((WorldEventModule.Type.ObjectRemoved)e.value.t).Item;
                 Assert.That(objectRemoved, Is.EqualTo(playerId1));
+            }
+
+            [Test]
+            public void DynamicWarpIntention()
+            {
+                timestampProvider.Now = 300L;
+
+                var seed = 1234;
+                var direction = DirectionModule.Model.South;
+
+                var warpData = WarpModule.Target.NewDynamic(seed, direction);
+                var t = IntentionModule.Type.NewWarp(warpData, playerId1);
+                var payload = IntentionModule.makePayload(client1, t);
+                var intention = WithId.create(payload);
+                var bytes = IntentionSrl.serialise(intention);
+
+                request.Body = new MemoryStream(bytes);
+                worldController.Intention().Wait();
+
+                // Adds item to the queue
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(1));
+
+                intentionProcessor.Process();
+
+                // A new world is generated
+                var generatedWorldMap = worldStorer.ServerSideData.generatedWorldMap;
+                Assert.That(generatedWorldMap.ContainsKey(seed), Is.True);
+                Assert.That(worldStorer.AllWorlds.Count(), Is.EqualTo(3));
+                var generatedId = generatedWorldMap[seed].Item1;
+                Assert.That(worldStorer.WorldMap.ContainsKey(generatedId), Is.True);
+
+                // The player is not moved immediately
+                var resultInitialWorld = worldStorer.GetWorld(initialWorld.id);
+                var initialContainsPlayer1 =
+                    MapModule.ContainsKey(
+                        playerId1,
+                        resultInitialWorld.value.objects
+                    );
+                Assert.That(initialContainsPlayer1, Is.True);
+
+                // The initial intention is requeued
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(1));
+                var qIntention = intentionQueue.Queue.Peek();
+                Assert.That(qIntention.Intention.tsIntention.value, Is.EqualTo(intention));
+
+                intentionProcessor.Process();
+
+                // A static warp intention is queued
+                Assert.That(intentionQueue.Queue.Count, Is.EqualTo(1));
+                qIntention = intentionQueue.Queue.Peek();
+                var asWarp =
+                    qIntention.Intention.tsIntention.value.value.t
+                    as IntentionModule.Type.Warp;
+                Assert.That(asWarp, Is.Not.Null);
+                var asStatic =
+                    asWarp.Item1 as WarpModule.Target.Static;
+                Assert.That(asStatic, Is.Not.Null);
+                Assert.That(asStatic.Item1, Is.EqualTo(generatedId));
             }
         }
     }

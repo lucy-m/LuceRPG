@@ -29,6 +29,7 @@ module EventApply =
             | WorldEvent.Type.ObjectRemoved id ->
                 world |> WithId.map (World.removeObject id)
 
+            | WorldEvent.Type.WorldGenerateRequest _
             | WorldEvent.Type.JoinedWorld _ -> world
 
     let applyMany (events: WorldEvent seq) (world: World): World =

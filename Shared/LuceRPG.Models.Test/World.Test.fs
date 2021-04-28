@@ -209,8 +209,11 @@ module World =
                     added.warps
                     |> Map.find btmLeft
                     |> fun (woId, wd) ->
-                        wd.toWorld |> should equal toWorldId
-                        wd.toPoint |> should equal toPoint
+                        match wd with
+                        | Warp.Static (warpWorld, warpPoint) ->
+                            warpWorld |> should equal toWorldId
+                            warpPoint |> should equal toPoint
+                        | _ -> failwith "Incorrect case"
 
                 [<TestFixture>]
                 module ``when the warp overlaps a player`` =
@@ -227,8 +230,11 @@ module World =
                         let tWarpData = World.getWarp player.id withPlayer
                         tWarpData.IsSome |> should equal true
 
-                        tWarpData.Value.toWorld |> should equal toWorldId
-                        tWarpData.Value.toPoint |> should equal toPoint
+                        match tWarpData.Value with
+                        | Warp.Static (warpWorld, warpPoint) ->
+                            warpWorld |> should equal toWorldId
+                            warpPoint |> should equal toPoint
+                        | _ -> failwith "Incorrect case"
 
                 [<TestFixture>]
                 module ``removing the warp`` =

@@ -527,8 +527,10 @@ module IntentionProcessing =
                     delayed
                     |> List.choose (fun i ->
                         match i.tsIntention.value.value.t with
-                        | Intention.Type.Warp (wId, point, objId) ->
-                            Option.Some (wId, point, objId, i.worldId)
+                        | Intention.Type.Warp (warpData, objId) ->
+                            match warpData with
+                            | Warp.Static (wId, point) -> Option.Some (wId, point, objId, i.worldId)
+                            | _ -> Option.None
                         | _ -> Option.None
                     )
 
@@ -566,6 +568,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 
@@ -852,6 +855,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 
@@ -1049,7 +1053,8 @@ module IntentionProcessing =
                     let toPoint = Point.create 7 1
 
                     let intention =
-                        Intention.Warp (world2.id, toPoint, player1.id)
+                        Warp.Static (world2.id, toPoint)
+                        |> fun warpData -> Intention.Warp (warpData, player1.id)
                         |> Intention.makePayload clientId
                         |> WithId.create
                         |> WithTimestamp.create 100L
@@ -1105,7 +1110,8 @@ module IntentionProcessing =
                     let toWorld = "not-a-world"
 
                     let intention =
-                        Intention.Warp (toWorld, toPoint, player1.id)
+                        Warp.Static (toWorld, toPoint)
+                        |> fun warpData -> Intention.Warp (warpData, player1.id)
                         |> Intention.makePayload clientId
                         |> WithId.create
                         |> WithTimestamp.create 100L
@@ -1132,7 +1138,8 @@ module IntentionProcessing =
                     let objectId = "not-an-object"
 
                     let intention =
-                        Intention.Warp (world2.id, toPoint, objectId)
+                        Warp.Static (world2.id, toPoint)
+                        |> fun warpData -> Intention.Warp (warpData, objectId)
                         |> Intention.makePayload clientId
                         |> WithId.create
                         |> WithTimestamp.create 100L
@@ -1181,6 +1188,7 @@ module IntentionProcessing =
                     wocm
                     usernameClientMap
                     clientWorldMap
+                    Map.empty
                     world1.id
                     serverId
 

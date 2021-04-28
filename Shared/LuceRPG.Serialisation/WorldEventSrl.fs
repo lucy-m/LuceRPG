@@ -12,13 +12,14 @@ module WorldEventSrl =
             | WorldEvent.ObjectRemoved _ -> 3uy
             | WorldEvent.JoinedWorld _ -> 4uy
             | WorldEvent.TurnedTowards _ -> 5uy
+            | WorldEvent.WorldGenerateRequest _ -> 6uy
 
         let addtInfo =
             match i with
             | WorldEvent.Moved (id, d) ->
                 Array.concat [
-                    (StringSrl.serialise id)
-                    (DirectionSrl.serialise d)
+                    StringSrl.serialise id
+                    DirectionSrl.serialise d
                 ]
             | WorldEvent.ObjectAdded obj ->
                 WorldObjectSrl.serialise obj
@@ -28,8 +29,13 @@ module WorldEventSrl =
                 StringSrl.serialise cId
             | WorldEvent.TurnedTowards (id, d) ->
                 Array.concat [
-                    (StringSrl.serialise id)
-                    (DirectionSrl.serialise d)
+                    StringSrl.serialise id
+                    DirectionSrl.serialise d
+                ]
+            | WorldEvent.WorldGenerateRequest (seed, dir) ->
+                Array.concat [
+                    IntSrl.serialise seed
+                    DirectionSrl.serialise dir
                 ]
 
         Array.append [|label|] addtInfo
@@ -65,6 +71,12 @@ module WorldEventSrl =
                     StringSrl.deserialise
                     DirectionSrl.deserialise
                     (fun id d -> WorldEvent.Type.TurnedTowards (id, d))
+                    objectBytes
+            | 6uy ->
+                DesrlUtil.getTwo
+                    IntSrl.deserialise
+                    DirectionSrl.deserialise
+                    (fun seed dir -> WorldEvent.Type.WorldGenerateRequest (seed, dir))
                     objectBytes
             | _ ->
                 printfn "Unknown WorldEvent tag %u" tag

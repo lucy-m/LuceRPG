@@ -85,5 +85,10 @@ namespace LuceRPG.Server
             var timestamp = _timestampProvider.Now - _cullThreshold;
             _store = WorldEventsStoreModule.cull(timestamp, _store);
         }
+
+        public void Generate(int seed, DirectionModule.Model direction)
+        {
+            _store = WorldEventsStoreModule.generate(seed, direction, _store);
+        }
     }
 }

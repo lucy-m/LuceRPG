@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Include="TestUtil.fs" />
     <Compile Include="Rect.Test.fs" />
+    <Compile Include="Direction.Test.fs" />
     <Compile Include="WorldObject.Test.fs" />
     <Compile Include="World.Test.fs" />
     <Compile Include="WorldDiff.Test.fs" />

@@ -20,6 +20,22 @@ module Point =
             y = p1.y + p2.y
         }
 
+    let scale (s: int) (p: Model): Model =
+        {
+            x = p.x * s
+            y = p.y * s
+        }
+
+    let toPointMap (entries: (int * int * 'a) seq): Map<Model, 'a> =
+        entries
+        |> Seq.map (fun (x,y,e) -> create x y, e)
+        |> Map.ofSeq
+
+    let toPointSet (entries: (int * int) seq): Model Set =
+        entries
+        |> Seq.map (fun (x,y) -> create x y)
+        |> Set.ofSeq
+
     let p1x1 = create 1 1
     let p2x2 = create 2 2
     let p2x1 = create 2 1

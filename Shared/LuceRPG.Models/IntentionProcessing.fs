@@ -121,7 +121,7 @@ module IntentionProcessing =
                                     match tWarp with
                                     | Option.Some warpData ->
                                         let intention =
-                                            Intention.Warp (warpData.toWorld, warpData.toPoint, id)
+                                            Intention.Warp (warpData, id)
                                             |> Intention.makePayload clientId
                                             |> WithId.useId intention.id
                                             |> WithTimestamp.create timestamp
@@ -272,6 +272,7 @@ module IntentionProcessing =
                         serverSideData.clientWorldMap
                         |> Map.add clientId world.id
 
+                    let generatedWorldMap = serverSideData.generatedWorldMap
                     let defaultWorld = serverSideData.defaultWorld
                     let serverId = serverSideData.serverId
 
@@ -279,6 +280,7 @@ module IntentionProcessing =
                         worldObjectClientMap
                         usernameClientMap
                         clientWorldMap
+                        generatedWorldMap
                         defaultWorld
                         serverId
 
@@ -360,6 +362,7 @@ module IntentionProcessing =
                         serverSideData.clientWorldMap
                         |> Map.remove clientId
 
+                    let generatedWorldMap = serverSideData.generatedWorldMap
                     let defaultWorld = serverSideData.defaultWorld
                     let serverId = serverSideData.serverId
 
@@ -367,6 +370,7 @@ module IntentionProcessing =
                         wocm
                         usernameClientMap
                         clientWorldMap
+                        generatedWorldMap
                         defaultWorld
                         serverId
 
@@ -520,50 +524,105 @@ module IntentionProcessing =
                     log = Option.None
                 }
 
-        | Intention.Warp (toWorldId, toPoint, objectId) ->
-            // If world ID exists and object ID points to a valid
-            //   object in the current world then create JoinWorld
-            //   and LeaveWorld intentions
-            let fromWorldId = iIntention.worldId
-            let tToWorld = worldMap |> Map.tryFind toWorldId
-            let tFromWorld = worldMap |> Map.tryFind fromWorldId
-            let tObject =
-                tFromWorld
-                |> Option.bind (fun fromWorld ->
-                    fromWorld.value.objects
-                    |> Map.tryFind objectId
+        | Intention.Warp (warpData, objectId) ->
+            match warpData with
+            | Warp.Static (toWorldId, toPoint) ->
+                // If world ID exists and object ID points to a valid
+                //   object in the current world then create JoinWorld
+                //   and LeaveWorld intentions
+                let fromWorldId = iIntention.worldId
+                let tToWorld = worldMap |> Map.tryFind toWorldId
+                let tFromWorld = worldMap |> Map.tryFind fromWorldId
+                let tObject =
+                    tFromWorld
+                    |> Option.bind (fun fromWorld ->
+                        fromWorld.value.objects
+                        |> Map.tryFind objectId
+                    )
+                    |> Option.map (fun oldPosition ->
+                        WithId.map (WorldObject.atLocation toPoint) oldPosition
+                    )
+
+                match (tToWorld, tObject) with
+                | Option.Some toWorld, Option.Some obj ->
+                    let joinWorldIntention =
+                        Intention.JoinWorld obj
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) toWorld.id
+
+                    let leaveWorldIntention =
+                        Intention.LeaveWorld
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) fromWorldId
+
+                    let delayed = [joinWorldIntention; leaveWorldIntention]
+
+                    {
+                        events = []
+                        delayed = delayed
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = Option.None
+                    }
+                | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
+
+            | Warp.Dynamic (toSeed, direction) ->
+                serverSideData.generatedWorldMap
+                |> Map.tryFind toSeed
+                |> Option.map (fun (worldId, point) ->
+                    // This seed has already been generated, convert
+                    //   to a static warp
+                    let staticWarp = Warp.createTarget worldId point
+
+                    let warpIntention =
+                        Intention.Warp (staticWarp, objectId)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create timestamp
+                        |> IndexedIntention.useIndex (iIntention.index + 1) iIntention.worldId
+
+                    let log =
+                        sprintf "Converted dynamic warp %i to static warp %s (%i, %i)"
+                            toSeed
+                            worldId
+                            point.x
+                            point.y
+                        |> Option.Some
+
+                    {
+                        events = []
+                        delayed = [warpIntention]
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = log
+                    }
                 )
-                |> Option.map (fun oldPosition ->
-                    WithId.map (WorldObject.atLocation toPoint) oldPosition
+                |> Option.defaultWith (fun () ->
+                    // This world needs to be generated
+                    let event =
+                        WorldEvent.WorldGenerateRequest (toSeed, direction)
+                        |> WorldEvent.asResult intention.id iIntention.worldId iIntention.index
+                    let log =
+                        sprintf "Requesting generation of %i in direction %c"
+                            toSeed
+                            (Direction.asLetter direction)
+                        |> Option.Some
+
+                    {
+                        events = [event]
+                        delayed = [iIntention]
+                        worldMap = worldMap
+                        objectBusyMap = objectBusyMap
+                        serverSideData = serverSideData
+                        log = log
+                    }
                 )
-
-            match (tToWorld, tObject) with
-            | Option.Some toWorld, Option.Some obj ->
-                let joinWorldIntention =
-                    Intention.JoinWorld obj
-                    |> Intention.makePayload clientId
-                    |> WithId.create
-                    |> WithTimestamp.create timestamp
-                    |> IndexedIntention.useIndex (iIntention.index + 1) toWorld.id
-
-                let leaveWorldIntention =
-                    Intention.LeaveWorld
-                    |> Intention.makePayload clientId
-                    |> WithId.create
-                    |> WithTimestamp.create timestamp
-                    |> IndexedIntention.useIndex (iIntention.index + 1) fromWorldId
-
-                let delayed = [joinWorldIntention; leaveWorldIntention]
-
-                {
-                    events = []
-                    delayed = delayed
-                    worldMap = worldMap
-                    objectBusyMap = objectBusyMap
-                    serverSideData = serverSideData
-                    log = Option.None
-                }
-            | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
 
         | Intention.Move _ -> thisIgnored
         | Intention.TurnTowards _ -> thisIgnored

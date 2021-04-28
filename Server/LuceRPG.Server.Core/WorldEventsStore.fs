@@ -1,6 +1,7 @@
 ﻿namespace LuceRPG.Server.Core
 
 open LuceRPG.Models
+open LuceRPG.Server.Core.WorldGenerator
 
 /// This stores all events that occurred in the world
 /// Later this can discard old events and for any
@@ -144,5 +145,41 @@ module WorldEventsStore =
             objectBusyMap = culledBusyMap
             serverSideData = state.serverSideData
         }
+
+    let generate (seed: int) (direction: Direction) (state: Model): Model =
+        if state.serverSideData.generatedWorldMap |> Map.containsKey seed
+        then state
+        else
+            let parameters: WorldGenerator.Parameters =
+                {
+                    bounds = Rect.create 0 0 6 6
+                    eccs = [direction, ExternalCountConstraint.Between(1,4)] |> Map.ofList
+                    tileSet = Option.None
+                }
+
+            let world, externals = WorldGenerator.generate parameters seed
+
+            let spawnPoint =
+                externals
+                |> Map.toSeq
+                |> Seq.filter (fun (p, d) -> d = direction)
+                |> Seq.tryHead
+                |> Option.map fst
+                |> Option.defaultValue Point.zero
+
+            let worldMap = state.worldMap |> Map.add world.id world
+            let generatedWorldMap =
+                state.serverSideData.generatedWorldMap |> Map.add seed (world.id, spawnPoint)
+            let serverSideData =
+                {
+                    state.serverSideData
+                        with generatedWorldMap = generatedWorldMap
+                }
+
+            {
+                state with
+                    worldMap = worldMap
+                    serverSideData = serverSideData
+            }
 
 type WorldEventsStore = WorldEventsStore.Model

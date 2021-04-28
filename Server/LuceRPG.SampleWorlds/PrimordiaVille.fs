@@ -2,12 +2,16 @@
 
 open LuceRPG.Models
 open LuceRPG.Server.Core
+open LuceRPG.Server.Core.WorldGenerator
 
 module PrimordiaVille =
+    let random = System.Random()
+
     module MapIds =
         let primordiaVilleOutside = System.Guid.NewGuid().ToString()
         let theThreeCocks = System.Guid.NewGuid().ToString()
         let barrysEssentials = System.Guid.NewGuid().ToString()
+        let random = System.Guid.NewGuid().ToString()
 
     module NpcIds =
         let harry = System.Guid.NewGuid().ToString()
@@ -29,7 +33,7 @@ module PrimordiaVille =
                 Rect.create 19 0 22 16
             ]
 
-        let spawnPoint = Point.create 2 9
+        let spawnPoint = Point.create 25 7
 
         let paths =
             [
@@ -38,6 +42,7 @@ module PrimordiaVille =
                 17,8,1,1
                 17,7,21,1
                 36,9,2,2
+                25,0,2,7
             ]
             |> List.map (fun (x,y,w,h) ->
                 WorldObject.create
@@ -94,6 +99,15 @@ module PrimordiaVille =
             ]
             |> List.map (fun (x, y, warp) ->
                 WorldObject.Type.Inn warp
+                |> fun t -> WorldObject.create t (Point.create x y) Direction.South
+                |> WithId.create
+            )
+
+        let warps =
+            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South) ]
+            |> List.map (fun (x, y, warpTarget) ->
+                Warp.create warpTarget Warp.Appearance.Mat
+                |> WorldObject.Type.Warp
                 |> fun t -> WorldObject.create t (Point.create x y) Direction.South
                 |> WithId.create
             )
@@ -178,6 +192,7 @@ module PrimordiaVille =
                     flowers
                     flowerBeds
                     inns
+                    warps
                     npcs
                 ]
 
@@ -191,7 +206,7 @@ module PrimordiaVille =
                 interactionMap
             |> WithId.useId MapIds.primordiaVilleOutside
 
-        (world, interactions, behaviourMap)
+        (world, interactions, Map.empty)
 
     let theThreeCocks: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]

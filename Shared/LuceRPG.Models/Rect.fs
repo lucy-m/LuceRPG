@@ -23,6 +23,12 @@ module Rect =
             size = size
         }
 
+    let scale (s: int) (rect: Model): Model =
+        {
+            btmLeft = Point.scale s rect.btmLeft
+            size = Point.scale s rect.size
+        }
+
     /// inclusive left bound
     let leftBound (rect: Model): int =
         rect.btmLeft.x
@@ -45,9 +51,17 @@ module Rect =
 
         inX && inY
 
+    let xs (rect: Model): int seq =
+        [leftBound rect .. rightBound rect - 1]
+        |> Seq.ofList
+
+    let ys (rect: Model): int seq =
+        [bottomBound rect .. topBound rect - 1]
+        |> Seq.ofList
+
     let getPoints (rect: Model): Point seq =
-        let xs = [leftBound rect .. rightBound rect - 1]
-        let ys = [bottomBound rect .. topBound rect - 1]
+        let xs = xs rect
+        let ys = ys rect
 
         let points =
             xs
@@ -57,5 +71,22 @@ module Rect =
             )
 
         points
+
+    let debugString (rect: Model) (mapFn: Point -> char): string =
+        let xs = xs rect
+        let ys = ys rect |> Seq.rev
+
+        ys
+        |> Seq.map (fun y ->
+            xs
+            |> Seq.map (fun x ->
+                let point = Point.create x y
+                mapFn point
+            )
+            |> Array.ofSeq
+            |> System.String
+            |> fun s -> s + "\n"
+        )
+        |> Seq.reduce (+)
 
 type Rect = Rect.Model

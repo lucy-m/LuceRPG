@@ -26,10 +26,9 @@ module IntentionSrl =
             | Intention.LeaveGame -> [||]
             | Intention.JoinWorld obj -> WorldObjectSrl.serialise obj
             | Intention.LeaveWorld -> [||]
-            | Intention.Warp (worldId, point, objectId) ->
+            | Intention.Warp (warpTarget, objectId) ->
                 Array.concat [
-                    StringSrl.serialise worldId
-                    PointSrl.serialise point
+                    WarpSrl.serialiseTarget warpTarget
                     StringSrl.serialise objectId
                 ]
             | Intention.TurnTowards (id, d) ->
@@ -77,11 +76,10 @@ module IntentionSrl =
             | 5uy ->
                 DesrlResult.create Intention.LeaveWorld 0
             | 6uy ->
-                DesrlUtil.getThree
+                DesrlUtil.getTwo
+                    WarpSrl.deserialiseTarget
                     StringSrl.deserialise
-                    PointSrl.deserialise
-                    StringSrl.deserialise
-                    (fun wId p oId -> Intention.Warp(wId, p, oId))
+                    (fun warpTarget oId -> Intention.Warp(warpTarget, oId))
                     objectBytes
             | 7uy ->
                 DesrlUtil.getTwo
