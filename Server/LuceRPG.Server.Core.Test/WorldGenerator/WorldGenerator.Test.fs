@@ -83,7 +83,7 @@ module WorldGenerator =
         let parameters: WorldGenerator.Parameters =
             {
                 bounds = Rect.create 0 0 8 8
-                eccs = Map.empty
+                existingWarps = Map.empty
                 tileSet = Option.None
             }
 

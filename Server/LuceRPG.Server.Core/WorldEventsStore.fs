@@ -146,15 +146,37 @@ module WorldEventsStore =
             serverSideData = state.serverSideData
         }
 
-    let generate (seed: int) (inDirection: Direction) (state: Model): Model =
+    let generate (seed: int) (fromWorldId: Id.World) (inDirection: Direction) (state: Model): Model =
         if state.serverSideData.generatedWorldMap |> Map.containsKey seed
         then state
         else
+            // Direction from new map outwards
             let outDirection = Direction.inverse inDirection
+
+            let returnPoints =
+                state.worldMap
+                |> Map.tryFind fromWorldId
+                |> Option.map (fun fromWorld ->
+                    let warps =
+                        fromWorld.value.dynamicWarps
+                        |> Map.filter (fun p d -> d = inDirection)
+
+                    warps
+                    |> Map.toSeq
+                    |> Seq.map (fun (p,d) -> Direction.movePoint outDirection 2 p)
+                )
+                |> Option.defaultValue Seq.empty
+
+            let existingWarp: WorldGenerator.ExistingWarp =
+                {
+                    fromWorld = fromWorldId
+                    returnPoints = returnPoints
+                }
+
             let parameters: WorldGenerator.Parameters =
                 {
                     bounds = Rect.create 0 0 6 6
-                    eccs = [outDirection, ExternalCountConstraint.Between(1,4)] |> Map.ofList
+                    existingWarps = [outDirection, existingWarp] |> Map.ofList
                     tileSet = Option.None
                 }
 

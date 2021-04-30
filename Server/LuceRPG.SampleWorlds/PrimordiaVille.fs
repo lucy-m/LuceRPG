@@ -112,6 +112,8 @@ module PrimordiaVille =
                 |> WithId.create
             )
 
+        let dynamicWarps = [25, 0, Direction.South] |> Point.toPointMap
+
         let npcs =
             [
                 9, 8, "Harry", NpcIds.harry
@@ -204,6 +206,7 @@ module PrimordiaVille =
                 WorldBackground.GreenGrass
                 allObjects
                 interactionMap
+            |> World.withDynamicWarps dynamicWarps
             |> WithId.useId MapIds.primordiaVilleOutside
 
         (world, interactions, Map.empty)

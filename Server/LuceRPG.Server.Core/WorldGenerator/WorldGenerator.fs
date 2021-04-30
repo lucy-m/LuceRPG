@@ -13,12 +13,14 @@ module WorldGenerator =
     type Parameters =
         {
             bounds: Rect
-            eccs: Map<Direction, ExternalCountConstraint>
+            /// Direction should be the direction FROM new map
+            existingWarps: Map<Direction, ExistingWarp>
             tileSet: TileSet Option
         }
 
     /// Creates a World from the RectWorld
     /// This will scale the world by 2x
+    /// Fills in paths but not warps
     let fromRectWorld (name: string) (rectWorld: RectWorld): World.Payload =
         let dynamicWarps =
             rectWorld.externals
@@ -74,17 +76,87 @@ module WorldGenerator =
         let random = System.Random(seed)
         let tileSet = parameters.tileSet |> Option.defaultValue TileSet.fullUniform
 
+        let eccs =
+            parameters.existingWarps
+            |> Map.map (fun d ew -> ew.returnPoints |> Seq.length |> ExternalCountConstraint.Exactly)
+
         let pathWorld =
             PathWorld.generateFilled
                 parameters.bounds
                 tileSet
                 random
-            |> ExternalCountConstraint.constrainAll parameters.eccs random
+            |> ExternalCountConstraint.constrainAll eccs random
 
         let plotWorld = PlotWorld.generateGrouped pathWorld
         let rectWorld = RectWorld.divide random plotWorld
 
         let id = sprintf "Generated-%i" seed
 
-        fromRectWorld id rectWorld |> WithId.useId id
+        let warpless = fromRectWorld id rectWorld
+
+        // For the existing warps, want to create a static warp back to
+        //   the given world
+        let staticWarps =
+            parameters.existingWarps
+            |> Map.toSeq
+            |> Seq.collect (fun (outDir, ew) ->
+                // Find all valid warp points from the generated map
+                let warpLocations =
+                    warpless.dynamicWarps
+                    |> Map.filter (fun p warpDir -> warpDir = outDir)
+                    |> Map.toSeq
+                    |> Seq.map fst
+
+                let sortByX =
+                    match outDir with
+                    | Direction.North | Direction.South -> true
+                    | Direction.East | Direction.West -> false
+
+                let sortPoints (ps: Point seq) =
+                    ps
+                    |> Seq.sortBy (fun p -> if sortByX then p.x else p.y)
+
+                Seq.zip
+                    (sortPoints warpLocations)
+                    (sortPoints ew.returnPoints)
+                |> Seq.map (fun (warpPoint, toPoint) ->
+                    warpPoint, toPoint, outDir, ew.fromWorld
+                )
+            )
+            |> Seq.map (fun (warpPoint, toPoint, outDir, toWorldId) ->
+                Warp.createTarget toWorldId toPoint
+                |> fun t -> Warp.create t Warp.Mat
+                |> WorldObject.Type.Warp
+                |> fun t -> WorldObject.create t warpPoint outDir
+                |> WithId.create
+            )
+
+        // Create dynamic warps objects for all other warp points in this map
+        let dynamicWarpObjects =
+            Direction.all
+            |> Seq.filter (fun d -> parameters.existingWarps |> Map.containsKey d |> not)
+            |> Seq.collect (fun outDir ->
+                let seed = random.Next()
+
+                let warpLocations =
+                    warpless.dynamicWarps
+                    |> Map.filter (fun p warpDir -> warpDir = outDir)
+                    |> Map.toSeq
+                    |> Seq.map fst
+
+                warpLocations
+                |> Seq.map (fun p ->
+                    Warp.Dynamic (seed, outDir)
+                    |> fun t -> Warp.create t Warp.Mat
+                    |> WorldObject.Type.Warp
+                    |> fun t -> WorldObject.create t p outDir
+                    |> WithId.create
+                )
+            )
+
+        let warpObjects = Seq.append staticWarps dynamicWarpObjects
+
+        let warpful = World.addObjects warpObjects warpless
+
+        warpful |> WithId.useId id
 
