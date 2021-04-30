@@ -20,20 +20,28 @@ module WorldGenerator =
     /// Creates a World from the RectWorld
     /// This will scale the world by 2x
     let fromRectWorld (name: string) (rectWorld: RectWorld): World.Payload =
-        let bounds =
+        let dynamicWarps =
             rectWorld.externals
             |> Map.toSeq
             |> Seq.map (fun (p, d) ->
                 let offset =
                     match d with
-                    | Direction.East -> Point.create 1 0
-                    | Direction.North -> Point.create 0 1
-                    | Direction.West | Direction.South -> Point.zero
+                    | Direction.North | Direction.East -> Point.zero
+                    | Direction.South -> Point.create 0 1
+                    | Direction.West -> Point.create 1 0
 
                 let origin =
                     Point.scale 2 p
                     |> Point.add offset
 
+                origin, d
+            )
+            |> Map.ofSeq
+
+        let bounds =
+            dynamicWarps
+            |> Map.toSeq
+            |> Seq.map (fun (origin, d) ->
                 let size =
                     match d with
                     | Direction.North | Direction.South -> Point.p2x1
@@ -41,10 +49,6 @@ module WorldGenerator =
                 Rect.pointCreate origin size
             )
             |> Seq.append ([ Rect.scale 2 rectWorld.bounds ])
-
-        let dynamicWarps =
-            rectWorld.externals
-            |> Map.map (fun p d -> Direction.inverse d)
 
         let pathPoints = rectWorld.paths |> Set.map (Point.scale 2)
         let spawn = pathPoints |> Seq.tryHead |> Option.defaultValue Point.zero
@@ -64,8 +68,9 @@ module WorldGenerator =
             spawn
             background
             paths
+        |> World.withDynamicWarps dynamicWarps
 
-    let generate (parameters: Parameters) (seed: int): World * Map<Point, Direction> =
+    let generate (parameters: Parameters) (seed: int): World =
         let random = System.Random(seed)
         let tileSet = parameters.tileSet |> Option.defaultValue TileSet.fullUniform
 
@@ -79,18 +84,7 @@ module WorldGenerator =
         let plotWorld = PlotWorld.generateGrouped pathWorld
         let rectWorld = RectWorld.divide random plotWorld
 
-        let spawnPoints =
-            rectWorld.externals
-            |> Map.toSeq
-            |> Seq.map (fun (p, d) ->
-                let moved = Direction.movePoint d 1 p
-                let scaled = Point.scale 2 moved
-
-                scaled, d
-            )
-            |> Map.ofSeq
-
         let id = sprintf "Generated-%i" seed
 
-        fromRectWorld id rectWorld |> WithId.useId id, spawnPoints
+        fromRectWorld id rectWorld |> WithId.useId id
 

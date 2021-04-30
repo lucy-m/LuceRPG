@@ -507,7 +507,7 @@ module PathWorld =
             let tileSet = TileSet.fullUniform
 
             [<Test>]
-            let ``creates external links on all edges`` () =
+            let ``creates filled map`` () =
                 let checkFn (): bool =
                     let random = System.Random()
                     let bounds = Rect.create 0 0 10 10

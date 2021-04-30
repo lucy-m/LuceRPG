@@ -24,7 +24,7 @@ module WorldGenerator =
                 ]
             let externals =
                 [
-                    -1,2, Direction.East
+                    -1,2, Direction.West
                 ]
                 |> Point.toPointMap
 
@@ -109,8 +109,8 @@ module WorldGenerator =
             let g1 = WorldGenerator.generate parameters seed
             let g2 = WorldGenerator.generate parameters seed
 
-            let w1 = (fst g1).value
-            let w2 = (fst g2).value
+            let w1 = g1.value
+            let w2 = g2.value
 
             let pass =
                 let failures =
