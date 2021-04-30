@@ -100,6 +100,28 @@ module DesrlUtil =
                 (fun (v1,v2,v3) (v4,v5,v6) -> map v1 v2 v3 v4 v5 v6)
                 bytes
 
+    let getSeven
+        (fn1: byte[] -> 'T1 DesrlResult)
+        (fn2: byte[] -> 'T2 DesrlResult)
+        (fn3: byte[] -> 'T3 DesrlResult)
+        (fn4: byte[] -> 'T4 DesrlResult)
+        (fn5: byte[] -> 'T5 DesrlResult)
+        (fn6: byte[] -> 'T6 DesrlResult)
+        (fn7: byte[] -> 'T7 DesrlResult)
+        (map: 'T1 -> 'T2 -> 'T3 -> 'T4 -> 'T5 -> 'T6 -> 'T7 -> 'TR)
+        (bytes: byte[])
+        : 'TR DesrlResult =
+            let fn123 = getThree fn1 fn2 fn3 (fun v1 v2 v3 -> (v1, v2, v3))
+            let fn45 = getTwo fn4 fn5 (fun v4 v5 -> (v4, v5))
+            let fn67 = getTwo fn6 fn7 (fun v6 v7 -> (v6, v7))
+
+            getThree
+                fn123
+                fn45
+                fn67
+                (fun (v1,v2,v3) (v4,v5) (v6, v7) -> map v1 v2 v3 v4 v5 v6 v7)
+                bytes
+
     let getTagged
         (fn: byte -> byte[] -> 'T DesrlResult)
         (bytes: byte[])
