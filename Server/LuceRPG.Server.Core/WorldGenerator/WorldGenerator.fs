@@ -15,7 +15,6 @@ module WorldGenerator =
             bounds: Rect
             /// Direction should be the direction FROM new map
             existingWarps: Map<Direction, ExistingWarp>
-            tileSet: TileSet Option
         }
 
     /// Creates a World from the RectWorld
@@ -74,7 +73,7 @@ module WorldGenerator =
 
     let generate (parameters: Parameters) (seed: int): World =
         let random = System.Random(seed)
-        let tileSet = parameters.tileSet |> Option.defaultValue TileSet.fullUniform
+        let tileSet = TileSet.fullUniform
 
         let eccs =
             parameters.existingWarps

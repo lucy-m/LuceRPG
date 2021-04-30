@@ -177,7 +177,6 @@ module WorldEventsStore =
                 {
                     bounds = Rect.create 0 0 6 6
                     existingWarps = [outDirection, existingWarp] |> Map.ofList
-                    tileSet = Option.None
                 }
 
             let world = WorldGenerator.generate parameters seed

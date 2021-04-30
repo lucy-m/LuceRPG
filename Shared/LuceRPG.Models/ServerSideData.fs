@@ -6,7 +6,7 @@ module ServerSideData =
     type ClientWorldMap = Map<Id.Client, Id.World>
 
     type WorldObjectClientMap = Map<Id.World, ObjectClientMap>
-    type GeneratedWorldMap = Map<int, (Id.World * Point)>
+    type GeneratedWorldMap = Map<int, Id.World>
 
     type Model =
         {
