@@ -1160,6 +1160,144 @@ module IntentionProcessing =
                     let ``logs`` () =
                         processResult.log.IsSome |> should equal true
 
+                [<TestFixture>]
+                module ``for a dynamic warp to an unknown world`` =
+                    let seed = 123
+                    let dir = Direction.South
+
+                    let intention =
+                        Warp.Dynamic (seed, dir, 0)
+                        |> fun warpData -> Intention.Warp (warpData, player1.id)
+                        |> Intention.makePayload clientId
+                        |> WithId.create
+                        |> WithTimestamp.create 100L
+                        |> IndexedIntention.create world1.id
+
+                    let processResult =
+                        IntentionProcessing.processGlobal
+                            serverSideData
+                            Map.empty
+                            worldMap
+                            intention
+
+                    [<Test>]
+                    let ``creates an event to request world generation`` () =
+                        processResult.events |> Seq.length |> should equal 1
+
+                        let e = processResult.events |> Seq.head
+                        e.resultOf |> should equal intention.tsIntention.value.id
+
+                        match e.t with
+                        | WorldEvent.WorldGenerateRequest (toSeed, outDir) ->
+                            toSeed |> should equal seed
+                            outDir |> should equal dir
+                        | _ -> failwith "Incorrect case"
+
+                    [<Test>]
+                    let ``delays unchanged intention`` () =
+                        processResult.delayed |> should equal [intention]
+
+                [<TestFixture>]
+                module ``for a dynamic warp to a generated world with two return warps`` =
+                    let seed = 123
+                    let worldId = "generated-world-123"
+                    let dir = Direction.South
+                    let warpZero = Point.create 2 9
+                    let warpOne = Point.create 6 9
+
+                    let generatedWorld =
+                        World.empty
+                            "generated"
+                            [ Rect.create 0 0 10 10 ]
+                            Point.zero
+                            WorldBackground.GreenGrass
+                        |> World.withDynamicWarps (
+                            [warpZero, Direction.North; warpOne, Direction.North]
+                            |> Map.ofList
+                        )
+                        |> WithId.useId worldId
+
+                    let worldMap = worldMap |> Map.add generatedWorld.id generatedWorld
+
+                    let serverSideData =
+                        let generatedWorldMap = [seed, generatedWorld.id] |> Map.ofList
+                        {
+                            serverSideData with
+                                generatedWorldMap = generatedWorldMap
+                        }
+
+                    [<TestFixture>]
+                    module ``warp with index 0`` =
+                        let intention =
+                            Warp.Dynamic (seed, dir, 0)
+                            |> fun warpData -> Intention.Warp (warpData, player1.id)
+                            |> Intention.makePayload clientId
+                            |> WithId.create
+                            |> WithTimestamp.create 100L
+                            |> IndexedIntention.create world1.id
+
+                        let processResult =
+                            IntentionProcessing.processGlobal
+                                serverSideData
+                                Map.empty
+                                worldMap
+                                intention
+
+                        [<Test>]
+                        let ``creates no events`` () =
+                            processResult.events |> Seq.isEmpty |> should equal true
+
+                        [<Test>]
+                        let ``delays a static warp to the correct location`` () =
+                            processResult.delayed |> Seq.length |> should equal 1
+
+                            let delayed = processResult.delayed |> Seq.head
+
+                            match delayed.tsIntention.value.value.t with
+                            | Intention.Warp (target, objId) ->
+                                match target with
+                                | Warp.Static (toWorld, toPoint) ->
+                                    toWorld |> should equal worldId
+                                    toPoint.x |> should equal warpZero.x
+                                | _ -> failwith "Incorrect case"
+                            | _ -> failwith "Incorrect case"
+
+                    [<TestFixture>]
+                    module ``warp with index 1`` =
+                        let intention =
+                            Warp.Dynamic (seed, dir, 1)
+                            |> fun warpData -> Intention.Warp (warpData, player1.id)
+                            |> Intention.makePayload clientId
+                            |> WithId.create
+                            |> WithTimestamp.create 100L
+                            |> IndexedIntention.create world1.id
+
+                        let processResult =
+                            IntentionProcessing.processGlobal
+                                serverSideData
+                                Map.empty
+                                worldMap
+                                intention
+
+                        [<Test>]
+                        let ``creates no events`` () =
+                            processResult.events |> Seq.isEmpty |> should equal true
+
+                        [<Test>]
+                        let ``delays a static warp to the correct location`` () =
+                            processResult.delayed |> Seq.length |> should equal 1
+
+                            let delayed = processResult.delayed |> Seq.head
+
+                            match delayed.tsIntention.value.value.t with
+                            | Intention.Warp (target, objId) ->
+                                match target with
+                                | Warp.Static (toWorld, toPoint) ->
+                                    toWorld |> should equal worldId
+                                    toPoint.x |> should equal warpOne.x
+                                | _ -> failwith "Incorrect case"
+                            | _ -> failwith "Incorrect case"
+
     [<TestFixture>]
     module ``processMany`` =
         let serverId = "server"

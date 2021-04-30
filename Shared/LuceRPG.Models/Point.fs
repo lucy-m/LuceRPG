@@ -31,10 +31,11 @@ module Point =
         |> Seq.map (fun (x,y,e) -> create x y, e)
         |> Map.ofSeq
 
-    let toPointSet (entries: (int * int) seq): Model Set =
+    let toPointSeq (entries: (int * int) seq): Model seq =
         entries
         |> Seq.map (fun (x,y) -> create x y)
-        |> Set.ofSeq
+
+    let toPointSet: (int * int) seq -> Model Set = toPointSeq >> Set.ofSeq
 
     let p1x1 = create 1 1
     let p2x2 = create 2 2

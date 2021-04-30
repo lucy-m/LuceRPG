@@ -5,7 +5,7 @@ module Warp =
 
     type Target =
         | Static of Id.World * Point
-        | Dynamic of int * Direction
+        | Dynamic of int * Direction * int
 
     let createTarget (toWorld: Id.World) (toPoint: Point): Target = Static (toWorld, toPoint)
 

@@ -66,4 +66,16 @@ module Direction =
 
     let all = set [North; South; East; West]
 
+    /// Sorts points from smallest to largest in given direction
+    let sortPoints (direction: Model) (ps: Point seq): Point seq =
+        let sortFn: Point -> int =
+            match direction with
+            | North -> fun p -> p.y
+            | South -> fun p -> -p.y
+            | East -> fun p -> p.x
+            | West -> fun p -> -p.x
+
+        ps
+        |> Seq.sortBy sortFn
+
 type Direction = Direction.Model

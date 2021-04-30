@@ -14,12 +14,13 @@ module WarpSrl =
                     PointSrl.serialise point
                 ]
 
-        | Warp.Dynamic (toSeed, direction) ->
+        | Warp.Dynamic (toSeed, direction, index) ->
             Array.concat
                 [
                     [|2uy|]
                     IntSrl.serialise toSeed
                     DirectionSrl.serialise direction
+                    IntSrl.serialise index
                 ]
 
     let deserialiseTarget (bytes: byte[]): Warp.Target DesrlResult =
@@ -32,10 +33,11 @@ module WarpSrl =
                     (fun worldId point -> Warp.Static (worldId, point))
                     objectBytes
             | 2uy ->
-                DesrlUtil.getTwo
+                DesrlUtil.getThree
                     IntSrl.deserialise
                     DirectionSrl.deserialise
-                    (fun toSeed dir -> Warp.Dynamic (toSeed, dir))
+                    IntSrl.deserialise
+                    (fun toSeed dir index -> Warp.Dynamic (toSeed, dir, index))
                     objectBytes
             | _ ->
                 printfn "Unknown WarpTarget tag %u" tag
