@@ -38,7 +38,7 @@ module PathWorld =
         let activeLinks =
             model.tileMap
             |> Map.toSeq
-            |> Seq.append (model.externalMap |> Map.toSeq |> Seq.map (fun (p, d) -> p, set[d]))
+            |> Seq.append (model.externalMap |> Map.toSeq |> Seq.map (fun (p, d) -> p, set[Direction.inverse d]))
             |> Seq.map (fun (point, tile) ->
                 // Find all directions that point to a missing tile
                 let activeDirections =
@@ -121,9 +121,7 @@ module PathWorld =
             let external =
                 externalLinks
                 |> Seq.fold (fun acc (d, dp) ->
-
-                    acc |> Map.add dp d
-
+                    acc |> Map.add dp (Direction.inverse d)
                 ) withLinks.model.externalMap
 
             let model =

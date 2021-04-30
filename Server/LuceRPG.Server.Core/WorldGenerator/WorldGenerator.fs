@@ -4,6 +4,11 @@ open LuceRPG.Models
 open LuceRPG.Server.Core
 
 module WorldGenerator =
+    type ExistingWarp =
+        {
+            fromWorld: Id.World
+            returnPoints: Point seq
+        }
 
     type Parameters =
         {
@@ -36,6 +41,10 @@ module WorldGenerator =
                 Rect.pointCreate origin size
             )
             |> Seq.append ([ Rect.scale 2 rectWorld.bounds ])
+
+        let dynamicWarps =
+            rectWorld.externals
+            |> Map.map (fun p d -> Direction.inverse d)
 
         let pathPoints = rectWorld.paths |> Set.map (Point.scale 2)
         let spawn = pathPoints |> Seq.tryHead |> Option.defaultValue Point.zero

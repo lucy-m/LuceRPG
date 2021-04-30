@@ -16,7 +16,7 @@ module ExternalCountConstraint =
 
     let externalsInDirection (pathWorld: PathWorld) (dir: Direction): Point Set =
         pathWorld.externalMap
-        |> Map.filter (fun p d -> Direction.inverse d = dir)
+        |> Map.filter (fun p d -> d = dir)
         |> Map.toSeq
         |> Seq.map fst
         |> Set.ofSeq
@@ -130,7 +130,7 @@ module ExternalCountConstraint =
                     then
                         let externalMap =
                             let externalPoint = Direction.movePoint direction 1 point
-                            model.externalMap |> Map.add externalPoint (Direction.inverse direction)
+                            model.externalMap |> Map.add externalPoint direction
 
                         PathWorld.create tileMap externalMap model.bounds
                         |> constrainInner

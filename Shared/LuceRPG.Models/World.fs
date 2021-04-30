@@ -17,6 +17,7 @@ module World =
             warps: Map<Point, Id.WorldObject * Warp.Target>
             playerSpawner: Point
             background: WorldBackground
+            /// Direction points from the map outwards
             dynamicWarps: Map<Point, Direction>
         }
 

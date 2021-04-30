@@ -69,10 +69,10 @@ module PlotWorld =
     let convertExternal (external: Point * Direction): Point * Direction =
         let offset =
             match snd external with
-            | Direction.North -> 1, 2
-            | Direction.East  -> 2, 1
-            | Direction.South -> 1, 0
-            | Direction.West -> 0, 1
+            | Direction.North -> 1, 0
+            | Direction.East  -> 0, 1
+            | Direction.South -> 1, 2
+            | Direction.West -> 2, 1
             |> fun (x, y) -> Point.create x y
 
         let origin = Point.scale 3 (fst external)

@@ -13,7 +13,7 @@ module ExternalCountConstraint =
         let bounds = Rect.create 0 1 4 4
         let externals =
             [ 0; 1; 2 ]
-            |> List.map (fun x -> Point.create x 0, Direction.North)
+            |> List.map (fun x -> Point.create x 0, Direction.South)
             |> Map.ofList
 
         let pathWorld = PathWorld.create Map.empty externals bounds
@@ -121,7 +121,7 @@ module ExternalCountConstraint =
                 ]
                 |> Point.toPointMap
 
-            let externals = [ Point.create 2 0, Direction.West] |> Map.ofList
+            let externals = [ Point.create 2 0, Direction.East] |> Map.ofList
 
             let initial = PathWorld.create tileMap externals bounds
 
@@ -145,7 +145,7 @@ module ExternalCountConstraint =
 
                 let expectedExternals =
                     externals
-                    |> Map.add (Point.create 0 2) Direction.South
+                    |> Map.add (Point.create 0 2) Direction.North
 
                 constrained |> Option.isSome |> should equal true
                 constrained.Value.tileMap |> should equal expectedTileMap
@@ -173,8 +173,8 @@ module ExternalCountConstraint =
 
                 let expectedExternals =
                     externals
-                    |> Map.add (Point.create 0 2) Direction.South
-                    |> Map.add (Point.create 1 2) Direction.South
+                    |> Map.add (Point.create 0 2) Direction.North
+                    |> Map.add (Point.create 1 2) Direction.North
 
                 constrained |> Option.isSome |> should equal true
                 constrained.Value.tileMap |> should equal expectedTileMap
@@ -249,7 +249,7 @@ module ExternalCountConstraint =
                 ]
                 |> Point.toPointMap
 
-            let externalMap = [ 3, -1, Direction.North ] |> Point.toPointMap
+            let externalMap = [ 3, -1, Direction.South ] |> Point.toPointMap
 
             let initial = PathWorld.create tileMap externalMap bounds
 
@@ -271,7 +271,7 @@ module ExternalCountConstraint =
 
                     let expectedExternals =
                         externalMap
-                        |> Map.add (Point.create -1 1) Direction.East
+                        |> Map.add (Point.create -1 1) Direction.West
 
                     first |> Option.isSome |> should equal true
                     first.Value.tileMap |> should equal expectedTileMap
@@ -292,8 +292,8 @@ module ExternalCountConstraint =
 
                     let expectedExternals =
                         externalMap
-                        |> Map.add (Point.create -1 1) Direction.East
-                        |> Map.add (Point.create -1 2) Direction.East
+                        |> Map.add (Point.create -1 1) Direction.West
+                        |> Map.add (Point.create -1 2) Direction.West
 
                     second |> Option.isSome |> should equal true
                     second.Value.tileMap |> should equal expectedTileMap
@@ -340,7 +340,7 @@ module ExternalCountConstraint =
 
                     let southExternals =
                         result.Value.externalMap
-                        |> Map.filter (fun p d -> d = Direction.North)
+                        |> Map.filter (fun p d -> d = Direction.South)
                         |> Map.count
 
                     targetCount = southExternals
