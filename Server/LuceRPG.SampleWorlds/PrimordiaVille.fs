@@ -104,7 +104,7 @@ module PrimordiaVille =
             )
 
         let warps =
-            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South) ]
+            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South, 0) ]
             |> List.map (fun (x, y, warpTarget) ->
                 Warp.create warpTarget Warp.Appearance.Mat
                 |> WorldObject.Type.Warp

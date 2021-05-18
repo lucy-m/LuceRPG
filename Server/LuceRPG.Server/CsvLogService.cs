@@ -22,6 +22,8 @@ namespace LuceRPG.Server
         void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result);
 
         void Flush();
+
+        void AddIntentionQueue(IndexedIntentionModule.Model iIntention);
     }
 
     public class CsvLogService : ICsvLogService
@@ -85,6 +87,13 @@ namespace LuceRPG.Server
             AddServerLogs(logLines);
         }
 
+        public void AddIntentionQueue(IndexedIntentionModule.Model iIntention)
+        {
+            var logLine = ToLogString.intentionQueue(_timestampProvider.Now, iIntention);
+
+            AddServerLogs(logLine);
+        }
+
         private void AddServerLogs(params string[] logs)
         {
             foreach (var log in logs)
@@ -140,6 +149,10 @@ namespace LuceRPG.Server
         }
 
         public void AddClientLogs(string clientId, IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+        {
+        }
+
+        public void AddIntentionQueue(IndexedIntentionModule.Model iIntention)
         {
         }
 

@@ -180,7 +180,7 @@ module WorldGenerator =
                 |> Map.toSeq
                 |> Seq.choose (fun (p, (objId, target)) ->
                     match target with
-                    | Warp.Dynamic (seed, inDir) ->
+                    | Warp.Dynamic (seed, inDir, index) ->
                         Option.Some (seed, inDir)
                     | _ -> Option.None
                 )

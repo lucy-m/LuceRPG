@@ -549,7 +549,7 @@ namespace LuceRPG.Server.Test
                 var seed = 1234;
                 var direction = DirectionModule.Model.South;
 
-                var warpData = WarpModule.Target.NewDynamic(seed, direction);
+                var warpData = WarpModule.Target.NewDynamic(seed, direction, 0);
                 var t = IntentionModule.Type.NewWarp(warpData, playerId1);
                 var payload = IntentionModule.makePayload(client1, t);
                 var intention = WithId.create(payload);
@@ -567,7 +567,7 @@ namespace LuceRPG.Server.Test
                 var generatedWorldMap = worldStorer.ServerSideData.generatedWorldMap;
                 Assert.That(generatedWorldMap.ContainsKey(seed), Is.True);
                 Assert.That(worldStorer.AllWorlds.Count(), Is.EqualTo(3));
-                var generatedId = generatedWorldMap[seed].Item1;
+                var generatedId = generatedWorldMap[seed];
                 Assert.That(worldStorer.WorldMap.ContainsKey(generatedId), Is.True);
 
                 // The player is not moved immediately

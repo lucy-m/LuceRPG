@@ -181,17 +181,11 @@ module WorldEventsStore =
 
             let world = WorldGenerator.generate parameters seed
 
-            let spawnPoint =
-                world.value.dynamicWarps
-                |> Map.toSeq
-                |> Seq.filter (fun (p, d) -> d = outDirection)
-                |> Seq.tryHead
-                |> Option.map (fun (p, d) -> Direction.movePoint inDirection 1 p)
-                |> Option.defaultValue Point.zero
-
             let worldMap = state.worldMap |> Map.add world.id world
             let generatedWorldMap =
-                state.serverSideData.generatedWorldMap |> Map.add seed (world.id, spawnPoint)
+                state.serverSideData.generatedWorldMap
+                |> Map.add seed world.id
+
             let serverSideData =
                 {
                     state.serverSideData

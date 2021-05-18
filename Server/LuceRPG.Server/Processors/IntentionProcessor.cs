@@ -4,6 +4,7 @@ using LuceRPG.Utility;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LuceRPG.Server.Processors
@@ -84,9 +85,12 @@ namespace LuceRPG.Server.Processors
                 foreach (var t in worldGenerationRequests)
                 {
                     var (request, e) = t;
-
+                    var sw = new Stopwatch();
+                    sw.Start();
                     _logger.LogDebug($"Generating world {request.Item1}");
                     _store.Generate(request.Item1, e.world, request.Item2);
+                    sw.Stop();
+                    _logger.LogDebug($"Generated world {request.Item1} in {sw.ElapsedMilliseconds} ms");
                 }
             }
         }

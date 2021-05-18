@@ -142,10 +142,16 @@ module WorldGenerator =
                     |> Map.filter (fun p warpDir -> warpDir = outDir)
                     |> Map.toSeq
                     |> Seq.map fst
+                    |> Seq.sortBy (fun p ->
+                        match outDir with
+                        | Direction.North | Direction.South -> p.x
+                        | Direction.East | Direction.West -> p.y
+                    )
+                    |> Seq.indexed
 
                 warpLocations
-                |> Seq.map (fun p ->
-                    Warp.Dynamic (seed, outDir)
+                |> Seq.map (fun (i,p) ->
+                    Warp.Dynamic (seed, outDir, i)
                     |> fun t -> Warp.create t Warp.Mat
                     |> WorldObject.Type.Warp
                     |> fun t -> WorldObject.create t p outDir

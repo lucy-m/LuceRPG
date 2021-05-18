@@ -59,3 +59,12 @@ module ToLogString =
 
             FormatFields.format payload subType eventType timestamp
         )
+
+    let intentionQueue
+            (timestamp: int64)
+            (iIntention: IndexedIntention)
+            : string =
+
+        let payload = IntentionFields.create iIntention
+
+        FormatFields.format payload "Intention queued" "Intention queued" timestamp
