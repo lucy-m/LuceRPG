@@ -24,4 +24,4 @@ module WorldEventFields =
         let resultOf = sprintf "Result of %s" e.resultOf
         let index = sprintf "Index %i" e.index
 
-        seq { "Event"; resultOf; index; worldEventType }
+        seq { resultOf; index; worldEventType }

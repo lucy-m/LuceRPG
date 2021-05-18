@@ -71,10 +71,10 @@ namespace LuceRPG.Server.Test
                 initialWorld.id,
                 new List<WithId.Model<WorldModule.Payload>>() { initialWorld, secondWorld });
 
-            worldStorer = new WorldEventsStorer(worldCollection, timestampProvider);
-            intentionQueue = new IntentionQueue(timestampProvider);
-            pingStorer = new LastPingStorer();
             var logService = new TestCsvLogService();
+            worldStorer = new WorldEventsStorer(worldCollection, timestampProvider);
+            intentionQueue = new IntentionQueue(timestampProvider, logService);
+            pingStorer = new LastPingStorer();
 
             intentionProcessor = new IntentionProcessor(new NullLogger<IntentionProcessor>(), worldStorer, intentionQueue, logService, timestampProvider);
             staleClientProcessor = new StaleClientProcessor(new NullLogger<StaleClientProcessor>(), intentionQueue, pingStorer, timestampProvider);

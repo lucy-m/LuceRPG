@@ -75,7 +75,7 @@ namespace LuceRPG.Server.Test
 
             behaviourMapStorer = new BehaviourMapStorer(worldCollection);
             worldStorer = new WorldEventsStorer(worldCollection, timestampProvider);
-            intentionQueue = new IntentionQueue(timestampProvider);
+            intentionQueue = new IntentionQueue(timestampProvider, logService);
             intentionProcessor = new IntentionProcessor(
                 new NullLogger<IntentionProcessor>(),
                 worldStorer,

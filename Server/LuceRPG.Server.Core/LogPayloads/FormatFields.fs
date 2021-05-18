@@ -9,8 +9,13 @@ module FormatFields =
             (timestamp: int64)
             : string =
         let formattedTimestamp = System.TimeSpan.FromTicks(timestamp).ToString("c")
-        let timestampStr = sprintf "%i" timestamp
-        let payloadStr = fields |> String.concat ","
+        let payloadStr =
+            Seq.append fields ["-";"-";"-";"-";"-"]
+            |> Seq.take 5
+            |> String.concat ","
 
         seq { formattedTimestamp; eventType; subType; payloadStr }
         |> String.concat ","
+
+    let headers: string seq =
+        seq { "Timestamp,Type,SubType,Field1,Field2,Field3,Field4,Field5" }

@@ -23,7 +23,7 @@ module ToLogString =
 
         let logs =
             result.logs
-            |> Seq.map (fun l -> Seq.singleton l, "Log")
+            |> Seq.map (fun l -> Seq.singleton (l.Replace(',', ';')), "Log")
 
         Seq.concat [ events; delayed; logs ]
         |> Seq.map (fun (fields, subType) ->

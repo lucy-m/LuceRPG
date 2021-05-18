@@ -25,6 +25,6 @@ module IntentionFields =
                 | Warp.Target.Dynamic (seed, dir, index) ->
                     sprintf "Warp dynamic %i %c %i %s" seed (Direction.asLetter dir) index id
                 | Warp.Target.Static (worldId, point) ->
-                    sprintf "Warp static to world %s (%i, %i) %s" worldId point.x point.y id
+                    sprintf "Warp static to world %s (%i; %i) %s" worldId point.x point.y id
 
         seq { id; index; world; clientId; intentionType }
