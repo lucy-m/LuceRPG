@@ -209,7 +209,7 @@ module PrimordiaVille =
             |> World.withDynamicWarps dynamicWarps
             |> WithId.useId MapIds.primordiaVilleOutside
 
-        (world, interactions, Map.empty)
+        (world, interactions, behaviourMap)
 
     let theThreeCocks: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]
