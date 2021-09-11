@@ -16,6 +16,7 @@
     <Compile Include="Behaviours\BehaviourMap.fs" />
     <Compile Include="WorldCollection.fs" />
     <Compile Include="LogPayloads\FormatFields.fs" />
+    <Compile Include="LogPayloads\IntentionFields.fs" />
     <Compile Include="LogPayloads\WorldEventFields.fs" />
     <Compile Include="LogPayloads\WorldDiffFields.fs" />
     <Compile Include="LogPayloads\IndexedIntentionFields.fs" />

@@ -6,8 +6,8 @@ module WorldEventFields =
 
     let create (e: WorldEvent.Model): string seq =
 
-        let worldEventType (t: WorldEvent.Type): string =
-            match t with
+        let worldEventType: string =
+            match e.t with
             | WorldEvent.Type.Moved (id, dir) ->
                 sprintf "Moved %c %s" (Direction.asLetter dir) id
             | WorldEvent.Type.TurnedTowards (id, dir) ->
@@ -23,6 +23,5 @@ module WorldEventFields =
 
         let resultOf = sprintf "Result of %s" e.resultOf
         let index = sprintf "Index %i" e.index
-        let t = worldEventType e.t
 
-        seq { "Event"; resultOf; index; t}
+        seq { resultOf; index; worldEventType }

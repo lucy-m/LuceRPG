@@ -30,7 +30,7 @@ module PlotWorld =
         let point = Point.create 2 1    // Translates to 6, 3 in PlotWorld
         let direction = Direction.North
 
-        let expected = Point.create 7 5, direction
+        let expected = Point.create 7 3, direction
         let actual = PlotWorld.convertExternal (point, direction)
 
         actual |> should equal expected
@@ -59,8 +59,8 @@ module PlotWorld =
 
             let externals =
                 [
-                    -1, 1, Direction.East
-                    3, 0, Direction.West
+                    -1, 1, Direction.West
+                    3, 0, Direction.East
                 ]
                 |> Point.toPointMap
 
@@ -85,8 +85,8 @@ module PlotWorld =
 
             let externals =
                 [
-                    -1, 4, Direction.East
-                    9,  1, Direction.West
+                    -1, 4, Direction.West
+                    9,  1, Direction.East
                 ]
                 |> Point.toPointMap
 

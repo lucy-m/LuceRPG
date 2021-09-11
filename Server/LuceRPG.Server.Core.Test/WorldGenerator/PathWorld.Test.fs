@@ -11,7 +11,7 @@ module PathWorld =
     [<TestFixture>]
     module ``getLinks`` =
         [<Test>]
-        let ``correct for 2x2 world with no warps`` () =
+        let ``correct for 2x2 world with no externals`` () =
             let bounds = Rect.create 0 0 2 2
             let btmLeft = Point.zero
             let btmRight = Point.create 1 0
@@ -51,7 +51,7 @@ module PathWorld =
 
             let external =
                 [
-                    Direction.movePoint Direction.East 1 btmRight, Direction.West
+                    Direction.movePoint Direction.East 1 btmRight, Direction.East
                 ]
                 |> Map.ofList
 
@@ -71,7 +71,7 @@ module PathWorld =
         let ``external tiles without links are active`` () =
             let bounds = Rect.create 0 0 2 2
             let externalPoint = Point.create -1 0
-            let external = [ externalPoint, Direction.East ] |> Map.ofList
+            let external = [ externalPoint, Direction.West ] |> Map.ofList
 
             let model = PathWorld.create Map.empty external bounds
 
@@ -176,7 +176,7 @@ module PathWorld =
 
                 let expectedExternalMap =
                     [
-                        Point.create 1 0, Direction.West
+                        Point.create 1 0, Direction.East
                     ]
                     |> Map.ofList
 
@@ -188,7 +188,7 @@ module PathWorld =
         module ``adding a tile next to an active external link`` =
             let bounds = Rect.create 0 0 1 1
             let tileSet = TileSet.create [ Tile.deadEndE, 1u, set [0] ]
-            let external = [Point.create 1 0, Direction.West] |> Map.ofList
+            let external = [Point.create 1 0, Direction.East] |> Map.ofList
 
             let model = PathWorld.create Map.empty external bounds
             let withLinks = PathWorld.getLinks model
@@ -507,7 +507,7 @@ module PathWorld =
             let tileSet = TileSet.fullUniform
 
             [<Test>]
-            let ``creates external links on all edges`` () =
+            let ``creates filled map`` () =
                 let checkFn (): bool =
                     let random = System.Random()
                     let bounds = Rect.create 0 0 10 10

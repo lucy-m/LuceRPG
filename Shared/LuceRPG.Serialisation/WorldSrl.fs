@@ -29,7 +29,13 @@ module WorldSrl =
                 StringSrl.serialise
                 w.interactions
 
-        Array.concat [name; bounds; spawner; background; objects; interactions]
+        let dynamicWarps =
+            MapSrl.serialise
+                PointSrl.serialise
+                DirectionSrl.serialise
+                w.dynamicWarps
+
+        Array.concat [name; bounds; spawner; background; objects; interactions; dynamicWarps]
 
     let serialise (w: World): byte[] =
         WithIdSrl.serialise serialisePayload w
@@ -41,15 +47,17 @@ module WorldSrl =
         let getBackground = WorldBackgroundSrl.deserialise
         let getObjects = ListSrl.deserialise WorldObjectSrl.deserialise
         let getInteractions = MapSrl.deserialise StringSrl.deserialise StringSrl.deserialise
+        let getDynamicWarps = MapSrl.deserialise PointSrl.deserialise DirectionSrl.deserialise
 
-        DesrlUtil.getSix
+        DesrlUtil.getSeven
             getName
             getBounds
             getSpawner
             getBackground
             getObjects
             getInteractions
-            World.createWithInteractions
+            getDynamicWarps
+            World.createFull
             bytes
 
     let deserialise (bytes: byte[]): World DesrlResult =

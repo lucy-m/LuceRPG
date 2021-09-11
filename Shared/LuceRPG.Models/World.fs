@@ -17,6 +17,8 @@ module World =
             warps: Map<Point, Id.WorldObject * Warp.Target>
             playerSpawner: Point
             background: WorldBackground
+            /// Direction points from the map outwards
+            dynamicWarps: Map<Point, Direction>
         }
 
     let objectList (world: Payload): WorldObject List =
@@ -61,6 +63,13 @@ module World =
             warps = Map.empty
             playerSpawner = playerSpawner
             background = background
+            dynamicWarps = Map.empty
+        }
+
+    let withDynamicWarps (warps: Map<Point, Direction>) (model: Payload): Payload =
+        {
+            model with
+                dynamicWarps = warps
         }
 
     let pointBlocked (p: Point) (world: Payload): bool =
@@ -298,6 +307,19 @@ module World =
         let emptyWorld = empty name bounds spawn background
         let withObjects = addObjects objs emptyWorld
         setInteractions interactions withObjects
+
+    let createFull
+            (name: string)
+            (bounds: Rect seq)
+            (spawn: Point)
+            (background: WorldBackground)
+            (objs: WorldObject seq)
+            (interactions: Map<Id.WorldObject, Id.Interaction>)
+            (dynamicWarps: Map<Point, Direction>)
+            : Payload =
+
+        createWithInteractions name bounds spawn background objs interactions
+        |> withDynamicWarps dynamicWarps
 
     type Model = Payload WithId
     type Map = Map<Id.World, Model>

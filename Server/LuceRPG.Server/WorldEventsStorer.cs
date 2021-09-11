@@ -86,9 +86,9 @@ namespace LuceRPG.Server
             _store = WorldEventsStoreModule.cull(timestamp, _store);
         }
 
-        public void Generate(int seed, DirectionModule.Model direction)
+        public void Generate(int seed, string fromWorldId, DirectionModule.Model inDirection)
         {
-            _store = WorldEventsStoreModule.generate(seed, direction, _store);
+            _store = WorldEventsStoreModule.generate(seed, fromWorldId, inDirection, _store);
         }
     }
 }

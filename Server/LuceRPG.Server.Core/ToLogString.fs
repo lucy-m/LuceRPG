@@ -23,7 +23,7 @@ module ToLogString =
 
         let logs =
             result.logs
-            |> Seq.map (fun l -> Seq.singleton l, "Log")
+            |> Seq.map (fun l -> Seq.singleton (l.Replace(',', ';')), "Log")
 
         Seq.concat [ events; delayed; logs ]
         |> Seq.map (fun (fields, subType) ->
@@ -59,3 +59,12 @@ module ToLogString =
 
             FormatFields.format payload subType eventType timestamp
         )
+
+    let intentionQueue
+            (timestamp: int64)
+            (iIntention: IndexedIntention)
+            : string =
+
+        let payload = IntentionFields.create iIntention
+
+        FormatFields.format payload "Intention queued" "Intention queued" timestamp

@@ -22,6 +22,8 @@ namespace LuceRPG.Server
         void AddBehaviourUpdateResult(BehaviourMapModule.UpdateResult result);
 
         void Flush();
+
+        void AddIntentionQueue(IndexedIntentionModule.Model iIntention);
     }
 
     public class CsvLogService : ICsvLogService
@@ -31,11 +33,11 @@ namespace LuceRPG.Server
         private const string ServerLogName = "server.csv";
 
         private readonly Dictionary<string, string> _clientFileMap
-            = new Dictionary<string, string>();
+            = new();
 
         private readonly ITimestampProvider _timestampProvider;
         private readonly ILogger<CsvLogService> _logger;
-        private readonly Queue<string> _toWrite = new Queue<string>();
+        private readonly Queue<string> _toWrite = new();
 
         public CsvLogService(
             ITimestampProvider timestampProvider,
@@ -51,7 +53,7 @@ namespace LuceRPG.Server
             _logger.LogInformation($"Logging to {Directory}");
 
             System.IO.Directory.CreateDirectory(Directory);
-            System.IO.File.Create(ServerLogPath).Close();
+            System.IO.File.WriteAllLines(ServerLogPath, FormatFields.headers);
         }
 
         public void EstablishLog(string clientId, string username)
@@ -59,7 +61,7 @@ namespace LuceRPG.Server
             var fileName = $"client-{username}-{clientId}.csv";
             var filePath = Directory + fileName;
 
-            System.IO.File.Create(filePath).Close();
+            System.IO.File.WriteAllLines(filePath, FormatFields.headers);
             AddServerLogs(ToLogString.clientJoined(_timestampProvider.Now, clientId, username));
 
             _clientFileMap[clientId] = fileName;
@@ -83,6 +85,13 @@ namespace LuceRPG.Server
                 .ToArray();
 
             AddServerLogs(logLines);
+        }
+
+        public void AddIntentionQueue(IndexedIntentionModule.Model iIntention)
+        {
+            var logLine = ToLogString.intentionQueue(_timestampProvider.Now, iIntention);
+
+            AddServerLogs(logLine);
         }
 
         private void AddServerLogs(params string[] logs)
@@ -140,6 +149,10 @@ namespace LuceRPG.Server
         }
 
         public void AddClientLogs(string clientId, IEnumerable<WithTimestamp.Model<ClientLogEntryModule.Payload>> logs)
+        {
+        }
+
+        public void AddIntentionQueue(IndexedIntentionModule.Model iIntention)
         {
         }
 

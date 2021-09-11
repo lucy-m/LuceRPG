@@ -571,47 +571,112 @@ module IntentionProcessing =
                     }
                 | _ -> thisUnchanged (sprintf "Unknown world %s or object %s" fromWorldId objectId)
 
-            | Warp.Dynamic (toSeed, direction) ->
+            | Warp.Dynamic (toSeed, outDirection, index) ->
                 serverSideData.generatedWorldMap
                 |> Map.tryFind toSeed
-                |> Option.map (fun (worldId, point) ->
-                    // This seed has already been generated, convert
-                    //   to a static warp
-                    let staticWarp = Warp.createTarget worldId point
+                |> Option.map (fun worldId ->
+                    worldMap
+                    |> Map.tryFind worldId
+                    |> Option.map (fun toWorld ->
+                        // This would has already been generated, convert
+                        //   to a static warp
+                        let inDirection = Direction.inverse outDirection
 
-                    let warpIntention =
-                        Intention.Warp (staticWarp, objectId)
-                        |> Intention.makePayload clientId
-                        |> WithId.create
-                        |> WithTimestamp.create timestamp
-                        |> IndexedIntention.useIndex (iIntention.index + 1) iIntention.worldId
+                        // Find all valid target points
+                        let targetPoints =
+                            toWorld.value.dynamicWarps
+                            |> Map.toSeq
+                            |> Seq.filter (fun (p,d) -> d = inDirection)
+                            |> Seq.map (fun (p,d) ->
+                                Direction.movePoint outDirection 2 p
+                            )
 
-                    let log =
-                        sprintf "Converted dynamic warp %i to static warp %s (%i, %i)"
-                            toSeed
-                            worldId
-                            point.x
-                            point.y
-                        |> Option.Some
+                        // Index by position along x or y axis
+                        let indexed =
+                            targetPoints
+                            |> Seq.sortBy (fun p ->
+                                match outDirection with
+                                | Direction.North | Direction.South -> p.x
+                                | Direction.East | Direction.West -> p.y
+                            )
+                            |> Seq.indexed
 
-                    {
-                        events = []
-                        delayed = [warpIntention]
-                        worldMap = worldMap
-                        objectBusyMap = objectBusyMap
-                        serverSideData = serverSideData
-                        log = log
-                    }
+                        // Find point with matching index, or first, or the spawn
+                        let point =
+                            indexed
+                            |> Seq.tryFind (fun (i, p) -> i = index)
+                            |> Option.map snd
+                            |> Option.defaultWith (fun () ->
+                                indexed
+                                |> Seq.tryHead
+                                |> Option.map snd
+                                |> Option.defaultValue toWorld.value.playerSpawner
+                            )
+
+                        let staticWarp = Warp.createTarget worldId point
+
+                        let warpIntention =
+                            Intention.Warp (staticWarp, objectId)
+                            |> Intention.makePayload clientId
+                            |> WithId.create
+                            |> WithTimestamp.create timestamp
+                            |> IndexedIntention.useIndex (iIntention.index + 1) iIntention.worldId
+
+                        let log =
+                            sprintf "Converted dynamic warp %i index %i to static warp %s (%i, %i)"
+                                toSeed
+                                index
+                                worldId
+                                point.x
+                                point.y
+                            |> Option.Some
+
+                        {
+                            events = []
+                            delayed = [warpIntention]
+                            worldMap = worldMap
+                            objectBusyMap = objectBusyMap
+                            serverSideData = serverSideData
+                            log = log
+                        }
+                    )
+                    |> Option.defaultWith(fun () ->
+                        // The generated world map entry doesn't point to a valid
+                        //   map, remove the entry and try again
+                        let generatedWorldMap =
+                            serverSideData.generatedWorldMap
+                            |> Map.remove toSeed
+
+                        let serverSideData =
+                            {
+                                serverSideData with generatedWorldMap = generatedWorldMap
+                            }
+
+                        let log =
+                            sprintf "Invalid entry in generated world map %i - %s"
+                                toSeed
+                                worldId
+                            |> Option.Some
+
+                        {
+                            events = []
+                            delayed = [iIntention]
+                            worldMap = worldMap
+                            objectBusyMap = objectBusyMap
+                            serverSideData = serverSideData
+                            log = log
+                        }
+                    )
                 )
                 |> Option.defaultWith (fun () ->
                     // This world needs to be generated
                     let event =
-                        WorldEvent.WorldGenerateRequest (toSeed, direction)
+                        WorldEvent.WorldGenerateRequest (toSeed, outDirection)
                         |> WorldEvent.asResult intention.id iIntention.worldId iIntention.index
                     let log =
                         sprintf "Requesting generation of %i in direction %c"
                             toSeed
-                            (Direction.asLetter direction)
+                            (Direction.asLetter outDirection)
                         |> Option.Some
 
                     {

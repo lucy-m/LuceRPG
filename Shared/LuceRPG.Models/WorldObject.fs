@@ -106,7 +106,7 @@ module WorldObject =
     /// Time taken by the object to move one square
     let travelTime (obj: Payload): int64 =
         match obj.t with
-        | Type.Player _ -> System.TimeSpan.FromMilliseconds(float(250)).Ticks
+        | Type.Player _ -> System.TimeSpan.FromMilliseconds(float(150)).Ticks
         | Type.NPC _ -> System.TimeSpan.FromMilliseconds(float(280)).Ticks
         | _ -> 0L
 

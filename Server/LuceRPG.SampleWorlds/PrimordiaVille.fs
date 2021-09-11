@@ -104,13 +104,15 @@ module PrimordiaVille =
             )
 
         let warps =
-            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South) ]
+            [ 25, 0, Warp.Dynamic (random.Next(), Direction.South, 0) ]
             |> List.map (fun (x, y, warpTarget) ->
                 Warp.create warpTarget Warp.Appearance.Mat
                 |> WorldObject.Type.Warp
                 |> fun t -> WorldObject.create t (Point.create x y) Direction.South
                 |> WithId.create
             )
+
+        let dynamicWarps = [25, 0, Direction.South] |> Point.toPointMap
 
         let npcs =
             [
@@ -204,9 +206,10 @@ module PrimordiaVille =
                 WorldBackground.GreenGrass
                 allObjects
                 interactionMap
+            |> World.withDynamicWarps dynamicWarps
             |> WithId.useId MapIds.primordiaVilleOutside
 
-        (world, interactions, Map.empty)
+        (world, interactions, behaviourMap)
 
     let theThreeCocks: (World * Interactions * BehaviourMap) =
         let bounds = [ Rect.create 0 0 8 8; Rect.create 5 -1 2 1 ]

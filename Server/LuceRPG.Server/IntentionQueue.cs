@@ -8,6 +8,7 @@ namespace LuceRPG.Server
     public class IntentionQueue
     {
         private readonly ITimestampProvider _timestampProvider;
+        private readonly ICsvLogService logService;
 
         private readonly Queue<(
             IndexedIntentionModule.Model Intention,
@@ -19,13 +20,16 @@ namespace LuceRPG.Server
             Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
         )> Queue => _queue;
 
-        public IntentionQueue(ITimestampProvider timestampProvider)
+        public IntentionQueue(
+            ITimestampProvider timestampProvider,
+            ICsvLogService logService)
         {
             _queue = new Queue<(
                 IndexedIntentionModule.Model Intention,
                 Action<IEnumerable<WorldEventModule.Model>>? OnProcessed
             )>();
             _timestampProvider = timestampProvider;
+            this.logService = logService;
         }
 
         public void Enqueue(
@@ -35,6 +39,7 @@ namespace LuceRPG.Server
         {
             lock (_queue)
             {
+                logService.AddIntentionQueue(intention);
                 _queue.Enqueue((Intention: intention, OnProcessed: onProcessed));
             }
         }
@@ -50,6 +55,8 @@ namespace LuceRPG.Server
                 var timestamped = WithTimestamp.create(_timestampProvider.Now, intention);
                 var indexed = IndexedIntentionModule.create.Invoke(worldId).Invoke(timestamped);
 
+                logService.AddIntentionQueue(indexed);
+
                 _queue.Enqueue((Intention: indexed, OnProcessed: onProcessed));
             }
         }
@@ -62,6 +69,7 @@ namespace LuceRPG.Server
             {
                 foreach (var i in intentions)
                 {
+                    logService.AddIntentionQueue(i);
                     _queue.Enqueue((Intention: i, OnProcessed: null));
                 }
             }

@@ -34,3 +34,19 @@ module Direction =
         Direction.fromInt -2 |> should equal Direction.South
         Direction.fromInt -3 |> should equal Direction.East
         Direction.fromInt -4 |> should equal Direction.North
+
+    [<Test>]
+    let ``sort correct`` () =
+        let sample = [ 0,0; 2,1; 1,6; 5,-1 ] |> Point.toPointSet
+
+        let north = [ 5,-1; 0,0; 2,1; 1,6 ] |> Point.toPointSeq
+        let south = north |> Seq.rev
+
+        let east = [ 0,0; 1,6; 2,1; 5,-1 ] |> Point.toPointSeq
+        let west = east |> Seq.rev
+
+        Direction.sortPoints Direction.North sample |> should equal north
+        Direction.sortPoints Direction.South sample |> should equal south
+        Direction.sortPoints Direction.East sample |> should equal east
+        Direction.sortPoints Direction.West sample |> should equal west
+
