@@ -2,3 +2,7 @@
 Game/Assets/LuceRPG/DLLs/LuceRPG.Models.dll
 Server/LuceRPG.Server/credentials.json
 Game/config.json
+
+log-browser
+LogServer
+Game/.ionide/symbolCache.db
