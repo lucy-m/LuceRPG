@@ -35,5 +35,11 @@ public class CursorOverlord : MonoBehaviour
                 CursorStore.CursorOverObject = null;
             }
         }
+
+        var mouseX = InputProvider.GetMouseX();
+        var mouseY = InputProvider.GetMouseY();
+        var mouseMoved = Mathf.Abs(mouseX) + Mathf.Abs(mouseY) > 0.01;
+
+        CursorStore.MouseMoved = mouseMoved;
     }
 }

@@ -60,8 +60,9 @@ namespace LuceRPG.Game.Overlords
 
                 var playerModel = WorldStore.GetObject(Id);
                 var mousePosition = CursorStore.Position;
+                var mouseMoved = CursorStore.MouseMoved;
 
-                if (playerModel.HasValue() && mousePosition != null)
+                if (playerModel.HasValue() && mousePosition != null && mouseMoved)
                 {
                     var lookDirection = GetLookDirection(mousePosition, playerModel.Value.value);
 

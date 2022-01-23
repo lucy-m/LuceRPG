@@ -13,6 +13,9 @@ namespace LuceRPG.Game.Providers
 
         public float GetHorzIn();
 
+        public float GetMouseX();
+        public float GetMouseY();
+
         public Vector3? GetMousePosition(Camera camera);
     }
 
@@ -26,6 +29,16 @@ namespace LuceRPG.Game.Providers
         public float GetVertIn()
         {
             return Input.GetAxis("Vertical");
+        }
+
+        public float GetMouseX()
+        {
+            return Input.GetAxis("Mouse X");
+        }
+
+        public float GetMouseY()
+        {
+            return Input.GetAxis("Mouse Y");
         }
 
         public Vector3? GetMousePosition(Camera camera)
@@ -46,6 +59,8 @@ namespace LuceRPG.Game.Providers
     {
         public float HorzIn = 0;
         public float VertIn = 0;
+        public float MouseX = 0;
+        public float MouseY = 0;
         public Vector3 MousePosition = Vector3.zero;
 
         public float GetHorzIn()
@@ -56,6 +71,16 @@ namespace LuceRPG.Game.Providers
         public float GetVertIn()
         {
             return VertIn;
+        }
+
+        public float GetMouseX()
+        {
+            return MouseX;
+        }
+
+        public float GetMouseY()
+        {
+            return MouseY;
         }
 
         public Vector3? GetMousePosition(Camera camera)

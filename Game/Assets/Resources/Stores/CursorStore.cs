@@ -6,5 +6,6 @@ namespace LuceRPG.Game.Stores
     {
         public PointModule.Model Position { get; set; }
         public WithId.Model<WorldObjectModule.Payload> CursorOverObject { get; set; }
+        public bool MouseMoved { get; set; }
     }
 }
