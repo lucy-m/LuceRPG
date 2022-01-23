@@ -31,6 +31,8 @@ namespace LuceRPG.Game.Overlords
         public GameObject TreeRoot = null;
         public GameObject PathRoot = null;
 
+        public bool UseOptimisticProcessing = false;
+
         private void Start()
         {
             FlowerRoot = new GameObject("FlowerRoot");
@@ -179,8 +181,13 @@ namespace LuceRPG.Game.Overlords
 
         private void OnWorldEvent(WorldEventModule.Model worldEvent, UpdateSource source)
         {
-            if (source == UpdateSource.Server &&
-                Registry.Processors.Intentions.DidProcess(worldEvent.resultOf))
+            var ignoreEvent =
+                UseOptimisticProcessing
+                ? (source == UpdateSource.Server &&
+                    Registry.Processors.Intentions.DidProcess(worldEvent.resultOf))
+                : (source == UpdateSource.Game);
+
+            if (ignoreEvent)
             {
                 var log = ClientLogEntryModule.Payload.NewUpdateIgnored(worldEvent);
                 Registry.Processors.Logs.AddLog(log);
